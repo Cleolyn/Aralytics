@@ -1,0 +1,1373 @@
+[
+  {
+    "intervention_id": "intv-smp-01",
+    "status": "RECOMMENDED",
+    "updated_at": "2026-10-02 07:45:43",
+    "student": {
+      "id": "usr-student-005",
+      "name": "Jose Rizal",
+      "email": "jose.rizal@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-001",
+      "quarter": "Q1",
+      "topic_title": "Konsepto ng Kontemporaryong Isyu",
+      "ilaw_category": "INTENTIONS"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-04",
+      "score": 6,
+      "total_points": 10,
+      "percentage": 60,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-ki-01",
+      "title": "Remedial Reviewer: Mapanuring Pagsusuri sa Kontemporaryong Isyu.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/ki_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-ki-01",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Remedial Reviewer: Mapanuring Pagsusuri sa Kontemporaryong Isyu.pdf",
+        "file_path": "/api/materials/download/ki_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-ki-02",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Video-Aralin: Primary vs Secondary Sources.mp4",
+        "file_path": "/api/materials/download/sources_video.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-f7f35a5d-68ff-4ff7-8194-fa3ac46b0703",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:45:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-6375357a-8870-4f09-8569-9d42ace2c7a9",
+    "status": "ASSIGNED",
+    "updated_at": "2026-10-02 07:45:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-post-test-01",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:45:43",
+    "student": {
+      "id": "usr-student-post-test",
+      "name": "Post Student",
+      "email": "post.test@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": null,
+      "score": null,
+      "total_points": null,
+      "percentage": null,
+      "tab_switch_count": 0,
+      "is_proctoring_flagged": false,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-0173048b-1eea-453c-bb38-17d7c3c24507",
+    "status": "RECOMMENDED",
+    "updated_at": "2026-10-02 07:39:45",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-001",
+      "quarter": "Q1",
+      "topic_title": "Konsepto ng Kontemporaryong Isyu",
+      "ilaw_category": "INTENTIONS"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-01",
+      "score": 9,
+      "total_points": 10,
+      "percentage": 90,
+      "tab_switch_count": 0,
+      "is_proctoring_flagged": false,
+      "tier": "MASTERED"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-ki-01",
+      "title": "Remedial Reviewer: Mapanuring Pagsusuri sa Kontemporaryong Isyu.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/ki_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-ki-01",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Remedial Reviewer: Mapanuring Pagsusuri sa Kontemporaryong Isyu.pdf",
+        "file_path": "/api/materials/download/ki_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-ki-02",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Video-Aralin: Primary vs Secondary Sources.mp4",
+        "file_path": "/api/materials/download/sources_video.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-f26e2014-b2a9-4c8a-80dc-153520c5c938",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:35:30",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-smp-06",
+    "status": "RECOMMENDED",
+    "updated_at": "2026-10-02 07:35:29",
+    "student": {
+      "id": "usr-student-006",
+      "name": "Emilio Jacinto",
+      "email": "emilio.jacinto@student.deped.gov.ph",
+      "section": "10-Bonifacio"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-004",
+      "quarter": "Q1",
+      "topic_title": "Disaster Preparedness Action Plan",
+      "ilaw_category": "WAYS_FORWARD"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-24",
+      "score": 6,
+      "total_points": 10,
+      "percentage": 60,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-act-01",
+      "title": "Template at Gabay sa Barangay Disaster Preparedness Plan.docx",
+      "file_type": "DOCX",
+      "file_path": "/api/materials/download/drrm_template.docx"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-act-01",
+        "competency_id": "comp-ap10-q1-004",
+        "title": "Template at Gabay sa Barangay Disaster Preparedness Plan.docx",
+        "file_path": "/api/materials/download/drrm_template.docx",
+        "file_type": "DOCX"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-9ac5c354-5ea8-4057-a471-c1cdd1c01c84",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:24:53",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-02d87a1c-7e8c-42fd-8e44-286e2576d9e4",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:15:32",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-b89ca782-85b3-482e-b863-78617e991806",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:14:17",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-ec3642a0-7f3a-48dd-8f37-1f1862dbc05e",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:13:47",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-1eeec9e0-2991-46fb-9704-476a08091bd8",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:12:54",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-421db7b2-f7bd-48d8-b3f7-cfbf6031eab5",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:12:18",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-d409050f-ef0c-4cb9-a328-53f7ca8ac1a8",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:11:57",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-002",
+      "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+      "file_type": "VIDEO",
+      "file_path": "/api/materials/download/cbdrrm_recovery.mp4"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-cca844c6-3711-450c-89c1-fe3d860dab7b",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 07:11:57",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-smp-03",
+    "status": "RECOMMENDED",
+    "updated_at": "2026-10-02 07:11:45",
+    "student": {
+      "id": "usr-student-004",
+      "name": "Gabriela Silang",
+      "email": "gabriela.silang@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-002",
+      "quarter": "Q1",
+      "topic_title": "Mga Suliraning Pangkapaligiran",
+      "ilaw_category": "LEARNING_EXPERIENCES"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-11",
+      "score": 6,
+      "total_points": 10,
+      "percentage": 60,
+      "tab_switch_count": 0,
+      "is_proctoring_flagged": false,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-env-01",
+      "title": "Intervention Module: Pagtugon sa Suliraning Solid Waste.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/waste_module.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-env-01",
+        "competency_id": "comp-ap10-q1-002",
+        "title": "Intervention Module: Pagtugon sa Suliraning Solid Waste.pdf",
+        "file_path": "/api/materials/download/waste_module.pdf",
+        "file_type": "PDF"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-5a9880ae-c28f-4267-9f95-202c2705fdc9",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-68dcf64a-cd03-4cf7-b442-6699486c2c19",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-eed2b23b-e6a9-44be-9025-6248bd414554",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-9aaafe6e-a969-4d58-a49f-b1c625534594",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-002",
+      "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+      "file_type": "VIDEO",
+      "file_path": "/api/materials/download/cbdrrm_recovery.mp4"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-459272c5-2f4e-4f43-9c97-e0b09d164678",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-002",
+      "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+      "file_type": "VIDEO",
+      "file_path": "/api/materials/download/cbdrrm_recovery.mp4"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-02ef494a-7f32-45cb-ab86-e75c98573c20",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-02062b04-883c-48ae-ace0-388c32a15126",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-9596bf45-905b-4e48-9c9c-a0eb4d4d0761",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-smp-02",
+    "status": "ASSIGNED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-007",
+      "name": "Melchora Aquino",
+      "email": "melchora.aquino@student.deped.gov.ph",
+      "section": "10-Bonifacio"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-001",
+      "quarter": "Q1",
+      "topic_title": "Konsepto ng Kontemporaryong Isyu",
+      "ilaw_category": "INTENTIONS"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-07",
+      "score": 5,
+      "total_points": 10,
+      "percentage": 50,
+      "tab_switch_count": 0,
+      "is_proctoring_flagged": false,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-ki-02",
+      "title": "Video-Aralin: Primary vs Secondary Sources.mp4",
+      "file_type": "VIDEO",
+      "file_path": "/api/materials/download/sources_video.mp4"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-ki-01",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Remedial Reviewer: Mapanuring Pagsusuri sa Kontemporaryong Isyu.pdf",
+        "file_path": "/api/materials/download/ki_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-ki-02",
+        "competency_id": "comp-ap10-q1-001",
+        "title": "Video-Aralin: Primary vs Secondary Sources.mp4",
+        "file_path": "/api/materials/download/sources_video.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-d280b8a8-9db3-4433-ad90-2a1a0ba71a6d",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-6d7df043-7062-4266-9b0e-532e8452658f",
+    "status": "COMPLETED",
+    "updated_at": "2026-10-02 06:58:43",
+    "student": {
+      "id": "usr-student-001",
+      "name": "Juan Dela Cruz",
+      "email": "juan.delacruz@student.deped.gov.ph",
+      "section": "10-Rizal"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-8b820638-f6d6-4d2e-b310-fae2c3d212eb",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 3,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-smp-04",
+    "status": "OVERRIDDEN",
+    "updated_at": "2026-10-02 06:44:35",
+    "student": {
+      "id": "usr-student-003",
+      "name": "Andres Bonifacio",
+      "email": "andres.bonifacio@student.deped.gov.ph",
+      "section": "10-Bonifacio"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-002",
+      "quarter": "Q1",
+      "topic_title": "Mga Suliraning Pangkapaligiran",
+      "ilaw_category": "LEARNING_EXPERIENCES"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-13",
+      "score": 5,
+      "total_points": 10,
+      "percentage": 50,
+      "tab_switch_count": 4,
+      "is_proctoring_flagged": true,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-env-01",
+      "title": "Intervention Module: Pagtugon sa Suliraning Solid Waste.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/waste_module.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-env-01",
+        "competency_id": "comp-ap10-q1-002",
+        "title": "Intervention Module: Pagtugon sa Suliraning Solid Waste.pdf",
+        "file_path": "/api/materials/download/waste_module.pdf",
+        "file_type": "PDF"
+      }
+    ]
+  },
+  {
+    "intervention_id": "intv-smp-05",
+    "status": "ASSIGNED",
+    "updated_at": "2026-10-02 06:44:35",
+    "student": {
+      "id": "usr-student-007",
+      "name": "Melchora Aquino",
+      "email": "melchora.aquino@student.deped.gov.ph",
+      "section": "10-Bonifacio"
+    },
+    "competency": {
+      "id": "comp-ap10-q1-003",
+      "quarter": "Q1",
+      "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+      "ilaw_category": "ASSESSMENT"
+    },
+    "assessment_performance": {
+      "attempt_id": "att-smp-19",
+      "score": 2,
+      "total_points": 5,
+      "percentage": 40,
+      "tab_switch_count": 1,
+      "is_proctoring_flagged": false,
+      "tier": "NEEDS_INTERVENTION"
+    },
+    "assigned_remedial_material": {
+      "id": "mat-rem-001",
+      "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+      "file_type": "PDF",
+      "file_path": "/api/materials/download/cbdrrm_remedial.pdf"
+    },
+    "available_competency_remedials": [
+      {
+        "id": "mat-rem-001",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "CBDRRM Remedial Reviewer & Study Guide.pdf",
+        "file_path": "/api/materials/download/cbdrrm_remedial.pdf",
+        "file_type": "PDF"
+      },
+      {
+        "id": "mat-rem-002",
+        "competency_id": "comp-ap10-q1-003",
+        "title": "Lektyur: Pagbawi sa Kahinaan sa CBDRRM.mp4",
+        "file_path": "/api/materials/download/cbdrrm_recovery.mp4",
+        "file_type": "VIDEO"
+      }
+    ]
+  }
+]

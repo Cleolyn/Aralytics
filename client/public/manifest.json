@@ -1,0 +1,16 @@
+{
+  "short_name": "Aralytics",
+  "name": "Aralytics (Ponce AP10 Learning Hub)",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#090d16",
+  "theme_color": "#1e3a8a",
+  "display": "standalone",
+  "orientation": "portrait"
+}

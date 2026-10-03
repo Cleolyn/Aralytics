@@ -1,0 +1,850 @@
+[
+  {
+    "competency_id": "comp-ap10-q1-001",
+    "quarter": "Q1",
+    "topic_title": "Konsepto ng Kontemporaryong Isyu",
+    "ilaw_category": "INTENTIONS",
+    "description": "Nasusuri ang kahalagahan ng pag-aaral ng Kontemporaryong Isyu upang mapaunlad ang kasanayan sa mapanuring pag-iisip.",
+    "total_assessed": 9,
+    "cohort_average_percentage": 71.11,
+    "mastery_distribution": {
+      "mastered": {
+        "count": 4,
+        "percentage": 44.4
+      },
+      "developing": {
+        "count": 2,
+        "percentage": 22.2
+      },
+      "needs_intervention": {
+        "count": 3,
+        "percentage": 33.3
+      }
+    },
+    "student_breakdown": [
+      {
+        "student_id": "usr-student-008",
+        "student_name": "Apolinario Mabini",
+        "section_id": "10-Bonifacio",
+        "score": 10,
+        "total_points": 10,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 09:05:00"
+      },
+      {
+        "student_id": "usr-student-007",
+        "student_name": "Melchora Aquino",
+        "section_id": "10-Bonifacio",
+        "score": 5,
+        "total_points": 10,
+        "percentage": 50,
+        "tab_switch_count": 0,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 09:00:00"
+      },
+      {
+        "student_id": "usr-student-006",
+        "student_name": "Emilio Jacinto",
+        "section_id": "10-Bonifacio",
+        "score": 7,
+        "total_points": 10,
+        "percentage": 70,
+        "tab_switch_count": 2,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 08:55:00"
+      },
+      {
+        "student_id": "usr-student-003",
+        "student_name": "Andres Bonifacio",
+        "section_id": "10-Bonifacio",
+        "score": 9,
+        "total_points": 10,
+        "percentage": 90,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 08:50:00"
+      },
+      {
+        "student_id": "usr-student-005",
+        "student_name": "Jose Rizal",
+        "section_id": "10-Rizal",
+        "score": 6,
+        "total_points": 10,
+        "percentage": 60,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 08:45:00"
+      },
+      {
+        "student_id": "usr-student-004",
+        "student_name": "Gabriela Silang",
+        "section_id": "10-Rizal",
+        "score": 8,
+        "total_points": 10,
+        "percentage": 80,
+        "tab_switch_count": 1,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 08:40:00"
+      },
+      {
+        "student_id": "usr-student-002",
+        "student_name": "Maria Clara",
+        "section_id": "10-Rizal",
+        "score": 10,
+        "total_points": 10,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 08:35:00"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 9,
+        "total_points": 10,
+        "percentage": 90,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 08:30:00"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 0,
+        "total_points": 10,
+        "percentage": 0,
+        "tab_switch_count": 0,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:39:45"
+      }
+    ]
+  },
+  {
+    "competency_id": "comp-ap10-q1-002",
+    "quarter": "Q1",
+    "topic_title": "Mga Suliraning Pangkapaligiran",
+    "ilaw_category": "LEARNING_EXPERIENCES",
+    "description": "Natutukoy ang mga suliraning pangkapaligiran na nararanasan sa sariling pamayanan at sa buong bansa.",
+    "total_assessed": 6,
+    "cohort_average_percentage": 76.67,
+    "mastery_distribution": {
+      "mastered": {
+        "count": 2,
+        "percentage": 33.3
+      },
+      "developing": {
+        "count": 2,
+        "percentage": 33.3
+      },
+      "needs_intervention": {
+        "count": 2,
+        "percentage": 33.3
+      }
+    },
+    "student_breakdown": [
+      {
+        "student_id": "usr-student-006",
+        "student_name": "Emilio Jacinto",
+        "section_id": "10-Bonifacio",
+        "score": 8,
+        "total_points": 10,
+        "percentage": 80,
+        "tab_switch_count": 1,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 09:55:00"
+      },
+      {
+        "student_id": "usr-student-003",
+        "student_name": "Andres Bonifacio",
+        "section_id": "10-Bonifacio",
+        "score": 5,
+        "total_points": 10,
+        "percentage": 50,
+        "tab_switch_count": 4,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 09:50:00"
+      },
+      {
+        "student_id": "usr-student-005",
+        "student_name": "Jose Rizal",
+        "section_id": "10-Rizal",
+        "score": 10,
+        "total_points": 10,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 09:45:00"
+      },
+      {
+        "student_id": "usr-student-004",
+        "student_name": "Gabriela Silang",
+        "section_id": "10-Rizal",
+        "score": 6,
+        "total_points": 10,
+        "percentage": 60,
+        "tab_switch_count": 0,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 09:40:00"
+      },
+      {
+        "student_id": "usr-student-002",
+        "student_name": "Maria Clara",
+        "section_id": "10-Rizal",
+        "score": 9,
+        "total_points": 10,
+        "percentage": 90,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 09:35:00"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 8,
+        "total_points": 10,
+        "percentage": 80,
+        "tab_switch_count": 0,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 09:30:00"
+      }
+    ]
+  },
+  {
+    "competency_id": "comp-ap10-q1-003",
+    "quarter": "Q1",
+    "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+    "ilaw_category": "ASSESSMENT",
+    "description": "Naipaliliwanag ang mga hakbang at katangian ng Community-Based Disaster Risk Reduction and Management Approach.",
+    "total_assessed": 49,
+    "cohort_average_percentage": 71.02,
+    "mastery_distribution": {
+      "mastered": {
+        "count": 24,
+        "percentage": 49
+      },
+      "developing": {
+        "count": 2,
+        "percentage": 4.1
+      },
+      "needs_intervention": {
+        "count": 23,
+        "percentage": 46.9
+      }
+    },
+    "student_breakdown": [
+      {
+        "student_id": "usr-student-008",
+        "student_name": "Apolinario Mabini",
+        "section_id": "10-Bonifacio",
+        "score": 4,
+        "total_points": 5,
+        "percentage": 80,
+        "tab_switch_count": 0,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 10:35:00"
+      },
+      {
+        "student_id": "usr-student-007",
+        "student_name": "Melchora Aquino",
+        "section_id": "10-Bonifacio",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 1,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 10:30:00"
+      },
+      {
+        "student_id": "usr-student-006",
+        "student_name": "Emilio Jacinto",
+        "section_id": "10-Bonifacio",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 10:25:00"
+      },
+      {
+        "student_id": "usr-student-005",
+        "student_name": "Jose Rizal",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 10:20:00"
+      },
+      {
+        "student_id": "usr-student-004",
+        "student_name": "Gabriela Silang",
+        "section_id": "10-Rizal",
+        "score": 4,
+        "total_points": 5,
+        "percentage": 80,
+        "tab_switch_count": 0,
+        "mastery_tier": "DEVELOPING",
+        "submitted_at": "2026-10-02 10:15:00"
+      },
+      {
+        "student_id": "usr-student-002",
+        "student_name": "Maria Clara",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 10:10:00"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:45:43"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:45:43"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:35:30"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:35:30"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:24:53"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:24:53"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:15:32"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:15:32"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:14:17"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:14:17"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:13:47"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:13:47"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:12:54"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:12:54"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:12:18"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:12:18"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:11:57"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 07:11:57"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 07:09:06"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:58:43"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:58:43"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:54:27"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:54:27"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:45:10"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:45:10"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:39:52"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:39:52"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:39:05"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:39:05"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:38:49"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:38:49"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:38:34"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:38:34"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 06:28:33"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 06:28:33"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 02:53:21"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 02:53:21"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 02:49:37"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 02:49:37"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 02:49:12"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 02:49:12"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 5,
+        "total_points": 5,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 02:48:55"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 2,
+        "total_points": 5,
+        "percentage": 40,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 02:48:55"
+      }
+    ]
+  },
+  {
+    "competency_id": "comp-ap10-q1-004",
+    "quarter": "Q1",
+    "topic_title": "Disaster Preparedness Action Plan",
+    "ilaw_category": "WAYS_FORWARD",
+    "description": "Naisasagawa ang mga angkop na hakbang ng kahandaan at pagtugon sa kalamidad bilang aktibong mamamayan.",
+    "total_assessed": 4,
+    "cohort_average_percentage": 85,
+    "mastery_distribution": {
+      "mastered": {
+        "count": 3,
+        "percentage": 75
+      },
+      "developing": {
+        "count": 0,
+        "percentage": 0
+      },
+      "needs_intervention": {
+        "count": 1,
+        "percentage": 25
+      }
+    },
+    "student_breakdown": [
+      {
+        "student_id": "usr-student-006",
+        "student_name": "Emilio Jacinto",
+        "section_id": "10-Bonifacio",
+        "score": 6,
+        "total_points": 10,
+        "percentage": 60,
+        "tab_switch_count": 3,
+        "mastery_tier": "NEEDS_INTERVENTION",
+        "submitted_at": "2026-10-02 11:15:00"
+      },
+      {
+        "student_id": "usr-student-003",
+        "student_name": "Andres Bonifacio",
+        "section_id": "10-Bonifacio",
+        "score": 10,
+        "total_points": 10,
+        "percentage": 100,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 11:10:00"
+      },
+      {
+        "student_id": "usr-student-002",
+        "student_name": "Maria Clara",
+        "section_id": "10-Rizal",
+        "score": 9,
+        "total_points": 10,
+        "percentage": 90,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 11:05:00"
+      },
+      {
+        "student_id": "usr-student-001",
+        "student_name": "Juan Dela Cruz",
+        "section_id": "10-Rizal",
+        "score": 9,
+        "total_points": 10,
+        "percentage": 90,
+        "tab_switch_count": 0,
+        "mastery_tier": "MASTERED",
+        "submitted_at": "2026-10-02 11:00:00"
+      }
+    ]
+  }
+]

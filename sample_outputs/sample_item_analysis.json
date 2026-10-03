@@ -1,0 +1,451 @@
+{
+  "quiz": {
+    "id": "quiz-ap10-cbdrrm-01",
+    "title": "Pagsusuri sa CBDRRM Approach at Kahandaan sa Kalamidad",
+    "quarter": "Q1",
+    "topic_title": "Disaster Risk Reduction and Management (CBDRRM Approach)",
+    "ilaw_category": "ASSESSMENT",
+    "total_points": 5,
+    "passing_score": 4
+  },
+  "summary": {
+    "total_items": 9,
+    "total_examinees": 8,
+    "upper_group_size": 4,
+    "lower_group_size": 4,
+    "average_difficulty_p": 0.639,
+    "average_discrimination_d": 0.167
+  },
+  "items": [
+    {
+      "item_number": 1,
+      "question_id": "q-cbdrrm-01",
+      "question_text": "Ano ang pangunahing katangian ng Community-Based Disaster Risk Reduction and Management (CBDRRM) Approach?",
+      "question_type": "MULTIPLE_CHOICE",
+      "correct_answer": "B",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 5,
+        "upper_group_size": 4,
+        "upper_group_correct": 3,
+        "lower_group_size": 4,
+        "lower_group_correct": 2,
+        "difficulty_index_p": 0.625,
+        "difficulty_interpretation": "KATAMTAMAN (IDEAL DIFFICULTY)",
+        "difficulty_action": "Retain (Standard Quality Item)",
+        "discrimination_index_d": 0.25,
+        "discrimination_interpretation": "KATAMTAMAN (MARGINAL ITEM)",
+        "discrimination_action": "Revise item distractors / question clarity"
+      },
+      "distractors": [
+        {
+          "id": "A",
+          "text": "Ang pamahalaan lamang ang may pananagutan sa pagpaplano.",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 1,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "B",
+          "text": "Aktibong pakikilahok ng mga mamamayan sa pagtukoy at pagtugon sa mga panganib.",
+          "is_key": true,
+          "total_chosen": 5,
+          "upper_chosen": 3,
+          "lower_chosen": 2,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "C",
+          "text": "Pagtutok lamang sa pamamahagi ng relief goods pagkatapos ng bagyo.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 0,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "D",
+          "text": "Paghintay sa tulong mula sa mga dayuhang organisasyon.",
+          "is_key": false,
+          "total_chosen": 0,
+          "upper_chosen": 0,
+          "lower_chosen": 0,
+          "efficiency": "NON-FUNCTIONAL (NEVER CHOSEN)"
+        }
+      ]
+    },
+    {
+      "item_number": 2,
+      "question_id": "q-cbdrrm-02",
+      "question_text": "Alin sa mga sumusunod ang tamang pagkakaiba ng Top-Down Approach at Bottom-Up Approach?",
+      "question_type": "MULTIPLE_CHOICE",
+      "correct_answer": "C",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 4,
+        "upper_group_size": 4,
+        "upper_group_correct": 2,
+        "lower_group_size": 4,
+        "lower_group_correct": 2,
+        "difficulty_index_p": 0.5,
+        "difficulty_interpretation": "KATAMTAMAN (IDEAL DIFFICULTY)",
+        "difficulty_action": "Retain (Standard Quality Item)",
+        "discrimination_index_d": 0,
+        "discrimination_interpretation": "MAHINA (POOR / DEFECTIVE ITEM)",
+        "discrimination_action": "Discard or major rewrite"
+      },
+      "distractors": [
+        {
+          "id": "A",
+          "text": "Ang Top-Down ay umaasa sa mamamayan; ang Bottom-Up ay puro pamahalaan.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 1,
+          "lower_chosen": 0,
+          "efficiency": "ATTRACTS HIGHER PERFORMERS (REVISE DISTRACTOR)"
+        },
+        {
+          "id": "B",
+          "text": "Walang pagkakaiba ang dalawang pamamaraan.",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 0,
+          "lower_chosen": 2,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "C",
+          "text": "Sa Top-Down, lahat ng desisyon ay nagmumula sa mataas na opisyal; sa Bottom-Up, nagsisimula sa lokal na komunidad.",
+          "is_key": true,
+          "total_chosen": 4,
+          "upper_chosen": 2,
+          "lower_chosen": 2,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "D",
+          "text": "Ang Bottom-Up ay hindi epektibo sa Pilipinas.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 1,
+          "lower_chosen": 0,
+          "efficiency": "ATTRACTS HIGHER PERFORMERS (REVISE DISTRACTOR)"
+        }
+      ]
+    },
+    {
+      "item_number": 3,
+      "question_id": "q-cbdrrm-03",
+      "question_text": "Ang Hazard Assessment ay tumutukoy sa pagsusuri sa lawak, sakop, at pinsala na maaaring idulot ng isang kalamidad.",
+      "question_type": "TRUE_FALSE",
+      "correct_answer": "TRUE",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 6,
+        "upper_group_size": 4,
+        "upper_group_correct": 4,
+        "lower_group_size": 4,
+        "lower_group_correct": 2,
+        "difficulty_index_p": 0.75,
+        "difficulty_interpretation": "MADALI (EASY)",
+        "difficulty_action": "Retain / Good for introductory reinforcement",
+        "discrimination_index_d": 0.5,
+        "discrimination_interpretation": "NAPAKAGANDA (VERY GOOD ITEM)",
+        "discrimination_action": "Retain item unconditionally"
+      },
+      "distractors": [
+        {
+          "id": "TRUE",
+          "text": "Tama (True)",
+          "is_key": true,
+          "total_chosen": 5,
+          "upper_chosen": 3,
+          "lower_chosen": 2,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "FALSE",
+          "text": "Mali (False)",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 0,
+          "lower_chosen": 2,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        }
+      ]
+    },
+    {
+      "item_number": 4,
+      "question_id": "q-cbdrrm-04",
+      "question_text": "Ano ang tawag sa kahinaan ng isang komunidad na nagdudulot ng mataas na tsansa ng pinsala mula sa kalamidad?",
+      "question_type": "MULTIPLE_CHOICE",
+      "correct_answer": "B",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 4,
+        "upper_group_size": 4,
+        "upper_group_correct": 1,
+        "lower_group_size": 4,
+        "lower_group_correct": 3,
+        "difficulty_index_p": 0.5,
+        "difficulty_interpretation": "KATAMTAMAN (IDEAL DIFFICULTY)",
+        "difficulty_action": "Retain (Standard Quality Item)",
+        "discrimination_index_d": -0.5,
+        "discrimination_interpretation": "MAHINA (POOR / DEFECTIVE ITEM)",
+        "discrimination_action": "Discard or major rewrite"
+      },
+      "distractors": [
+        {
+          "id": "A",
+          "text": "Resilience",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 2,
+          "lower_chosen": 0,
+          "efficiency": "ATTRACTS HIGHER PERFORMERS (REVISE DISTRACTOR)"
+        },
+        {
+          "id": "B",
+          "text": "Vulnerability",
+          "is_key": true,
+          "total_chosen": 4,
+          "upper_chosen": 1,
+          "lower_chosen": 3,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "C",
+          "text": "Mitigation",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 1,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "D",
+          "text": "Adaptation",
+          "is_key": false,
+          "total_chosen": 0,
+          "upper_chosen": 0,
+          "lower_chosen": 0,
+          "efficiency": "NON-FUNCTIONAL (NEVER CHOSEN)"
+        }
+      ]
+    },
+    {
+      "item_number": 5,
+      "question_id": "q-cbdrrm-05",
+      "question_text": "Ang CBDRRM plan ay binubuo ng Disaster Prevention and Mitigation, Preparedness, Response, at Rehabilitation/Recovery.",
+      "question_type": "TRUE_FALSE",
+      "correct_answer": "TRUE",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 6,
+        "upper_group_size": 4,
+        "upper_group_correct": 3,
+        "lower_group_size": 4,
+        "lower_group_correct": 3,
+        "difficulty_index_p": 0.75,
+        "difficulty_interpretation": "MADALI (EASY)",
+        "difficulty_action": "Retain / Good for introductory reinforcement",
+        "discrimination_index_d": 0,
+        "discrimination_interpretation": "MAHINA (POOR / DEFECTIVE ITEM)",
+        "discrimination_action": "Discard or major rewrite"
+      },
+      "distractors": [
+        {
+          "id": "TRUE",
+          "text": "Tama (True)",
+          "is_key": true,
+          "total_chosen": 6,
+          "upper_chosen": 3,
+          "lower_chosen": 3,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "FALSE",
+          "text": "Mali (False)",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 1,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        }
+      ]
+    },
+    {
+      "item_number": 6,
+      "question_id": "q-cbdrrm-06",
+      "question_text": "Ano ang tawag sa pandaigdigang kasunduan sa ilalim ng UNFCCC na naglalayong limitahan ang pagtaas ng global average temperature sa 1.5 degrees Celsius?",
+      "question_type": "IDENTIFICATION",
+      "correct_answer": "Paris Agreement|Kasunduang Paris|Paris Accord",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 5,
+        "upper_group_size": 4,
+        "upper_group_correct": 3,
+        "lower_group_size": 4,
+        "lower_group_correct": 2,
+        "difficulty_index_p": 0.625,
+        "difficulty_interpretation": "KATAMTAMAN (IDEAL DIFFICULTY)",
+        "difficulty_action": "Retain (Standard Quality Item)",
+        "discrimination_index_d": 0.25,
+        "discrimination_interpretation": "KATAMTAMAN (MARGINAL ITEM)",
+        "discrimination_action": "Revise item distractors / question clarity"
+      },
+      "distractors": []
+    },
+    {
+      "item_number": 7,
+      "question_id": "q-cbdrrm-07",
+      "question_text": "Pagtambalin ang bawat yugto ng CBDRRM sa tamang pangunahing layunin at gawain nito.",
+      "question_type": "MATCHING",
+      "correct_answer": "{\"p1\":\"r1\",\"p2\":\"r2\",\"p3\":\"r3\",\"p4\":\"r4\"}",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 6,
+        "upper_group_size": 4,
+        "upper_group_correct": 3,
+        "lower_group_size": 4,
+        "lower_group_correct": 3,
+        "difficulty_index_p": 0.75,
+        "difficulty_interpretation": "MADALI (EASY)",
+        "difficulty_action": "Retain / Good for introductory reinforcement",
+        "discrimination_index_d": 0,
+        "discrimination_interpretation": "MAHINA (POOR / DEFECTIVE ITEM)",
+        "discrimination_action": "Discard or major rewrite"
+      },
+      "distractors": []
+    },
+    {
+      "item_number": 8,
+      "question_id": "q-cbdrrm-08",
+      "question_text": "Sitwasyon: Isang malakas na storm surge warning ang ibinaba sa inyong coastal purok, subalit maraming mangingisda ang tumatangging lumikas dahil sa kanilang mga bangka. Batay sa participatory disaster governance, ano ang pinaka-epektibong hakbang ng barangay lider?",
+      "question_type": "SITUATIONAL",
+      "correct_answer": "B",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 4,
+        "upper_group_size": 4,
+        "upper_group_correct": 3,
+        "lower_group_size": 4,
+        "lower_group_correct": 1,
+        "difficulty_index_p": 0.5,
+        "difficulty_interpretation": "KATAMTAMAN (IDEAL DIFFICULTY)",
+        "difficulty_action": "Retain (Standard Quality Item)",
+        "discrimination_index_d": 0.5,
+        "discrimination_interpretation": "NAPAKAGANDA (VERY GOOD ITEM)",
+        "discrimination_action": "Retain item unconditionally"
+      },
+      "distractors": [
+        {
+          "id": "A",
+          "text": "Hayaan sila at balikan na lamang pagkatapos ng bagyo.",
+          "is_key": false,
+          "total_chosen": 2,
+          "upper_chosen": 0,
+          "lower_chosen": 2,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "B",
+          "text": "Magpatupad ng maagap na paglikas kasabay ng pagtatatag ng ligtas na secured boat harbor na pinangangasiwaan ng barangay task force.",
+          "is_key": true,
+          "total_chosen": 4,
+          "upper_chosen": 3,
+          "lower_chosen": 1,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "C",
+          "text": "Ipagbawal ang pamamahagi ng relief goods sa mga ayaw lumikas.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 0,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "D",
+          "text": "Ipaubaya ang desisyon sa bawat pamilya nang walang interbensyon.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 1,
+          "lower_chosen": 0,
+          "efficiency": "ATTRACTS HIGHER PERFORMERS (REVISE DISTRACTOR)"
+        }
+      ]
+    },
+    {
+      "item_number": 9,
+      "question_id": "q-cbdrrm-09",
+      "question_text": "Pagsusuri ng Datos (PISA-Style Scientific & Critical Literacy): Ipinapakita sa ulat ng NDRRMC na ang mga komunidad na may 100% community-level hazard mapping ay nagtala ng 85% mas mababang casualty rate sa panahon ng bagyo kumpara sa mga komunidad na umasa lamang sa pambansang direktiba. Batay sa datos at sa konsepto ng CBDRRM, aling pangungusap ang nagpapaliwanag ng ugnayang ito?",
+      "question_type": "PISA_LIKE",
+      "correct_answer": "B",
+      "points": 1,
+      "metrics": {
+        "total_examinees": 8,
+        "total_correct": 6,
+        "upper_group_size": 4,
+        "upper_group_correct": 4,
+        "lower_group_size": 4,
+        "lower_group_correct": 2,
+        "difficulty_index_p": 0.75,
+        "difficulty_interpretation": "MADALI (EASY)",
+        "difficulty_action": "Retain / Good for introductory reinforcement",
+        "discrimination_index_d": 0.5,
+        "discrimination_interpretation": "NAPAKAGANDA (VERY GOOD ITEM)",
+        "discrimination_action": "Retain item unconditionally"
+      },
+      "distractors": [
+        {
+          "id": "A",
+          "text": "Ang mga pambansang ahensya ay walang kagamitan para sa pagtugon sa bagyo.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 0,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        },
+        {
+          "id": "B",
+          "text": "Ang lokal na kaalaman at aktibong partisipasyon ay nagpapabilis sa agaran at angkop na pagtugon ng mga residente sa hazard zones.",
+          "is_key": true,
+          "total_chosen": 6,
+          "upper_chosen": 4,
+          "lower_chosen": 2,
+          "efficiency": "KEY (CORRECT ANSWER)"
+        },
+        {
+          "id": "C",
+          "text": "Ang hazard map ay pisikal na humaharang sa pagdating ng mga bagyo.",
+          "is_key": false,
+          "total_chosen": 0,
+          "upper_chosen": 0,
+          "lower_chosen": 0,
+          "efficiency": "NON-FUNCTIONAL (NEVER CHOSEN)"
+        },
+        {
+          "id": "D",
+          "text": "Hindi na kailangan ng pondo mula sa gobyerno kung may hazard map.",
+          "is_key": false,
+          "total_chosen": 1,
+          "upper_chosen": 0,
+          "lower_chosen": 1,
+          "efficiency": "EFFECTIVE DISTRACTOR"
+        }
+      ]
+    }
+  ]
+}

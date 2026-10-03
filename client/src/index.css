@@ -1,0 +1,455 @@
+:root {
+  /* =====================================================================
+     ZAPIER DESIGN SYSTEM TOKENS
+     Warm-cream canvas (#fffefb) + Deep coffee-ink (#201515) + Saturated Orange (#ff4f00)
+     ===================================================================== */
+
+  /* Brand Accent */
+  --colors-primary: #ff4f00;
+  --colors-primary-hover: #e54700;
+  --colors-on-primary: #fffefb;
+  --accent-gold: #ff4f00;
+  --accent-gold-light: #fff5ee;
+  --accent-gold-glow: rgba(255, 79, 0, 0.18);
+
+  /* Surface */
+  --colors-canvas: #fffefb;
+  --colors-canvas-soft: #f8f4f0;
+  --bg-primary: #fffefb;
+  --bg-secondary: #f8f4f0;
+  --bg-card: #ffffff;
+  --bg-card-soft: #f8f4f0;
+  --bg-card-hover: #f3eee8;
+  --bg-glass: rgba(255, 254, 251, 0.92);
+
+  /* Typography / Ink Neutrals */
+  --colors-ink: #201515;
+  --colors-ink-soft: #2f2a26;
+  --colors-ink-mid: #36342e;
+  --colors-body: #605d52;
+  --colors-body-mid: #939084;
+  --colors-mute: #c5c0b1;
+
+  --text-main: #201515;
+  --text-muted: #605d52;
+  --text-sub: #939084;
+
+  /* Borders & Dividers */
+  --border-hairline: 1px solid #201515;
+  --border-glass: rgba(32, 21, 21, 0.12);
+  --border-subtle: #e8e3dc;
+  --border-focus: #ff4f00;
+
+  /* Secondary Accent (Deep Coffee Ink) */
+  --accent-blue: #201515;
+  --accent-blue-dark: #120b0b;
+  --accent-blue-glow: rgba(32, 21, 21, 0.15);
+
+  /* Semantic Statuses (Warm Tinted) */
+  --status-mastered: #15803d;
+  --status-mastered-bg: #f0fdf4;
+  --status-reinforce: #b45309;
+  --status-reinforce-bg: #fffbeb;
+  --status-critical: #b91c1c;
+  --status-critical-bg: #fef2f2;
+
+  /* Typography Families */
+  --font-display: 'Degular Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Shapes & Radii (Canonical Zapier Middle Radius = 12px) */
+  --rounded-none: 0px;
+  --rounded-sm: 6px;
+  --rounded-md: 12px;
+  --rounded-pill: 9999px;
+  --rounded-full: 9999px;
+
+  /* Shadows (Subtle, warm, unflashy) */
+  --shadow-sm: 0 1px 3px rgba(32, 21, 21, 0.05);
+  --shadow-md: 0 4px 16px rgba(32, 21, 21, 0.08);
+  --shadow-glow: 0 0 20px rgba(255, 79, 0, 0.15);
+}
+
+/* =====================================================================
+   GLOBAL RESET & BASE
+   ===================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--colors-canvas);
+  color: var(--colors-body);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: radial-gradient(at 100% 0%, rgba(248, 244, 240, 0.8) 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, rgba(248, 244, 240, 0.8) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--colors-ink);
+  letter-spacing: -0.01em;
+  text-transform: none; /* Sentence-case headlines */
+}
+
+a {
+  color: var(--colors-ink);
+  text-decoration: none;
+}
+
+/* =====================================================================
+   SURFACES & CARDS (Rounded 12px)
+   ===================================================================== */
+.glass-panel,
+.card-content {
+  background-color: #ffffff;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--rounded-md);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.glass-panel:hover,
+.card-content:hover {
+  border-color: rgba(32, 21, 21, 0.2);
+}
+
+.card-feature-cream {
+  background-color: var(--colors-canvas-soft);
+  color: var(--colors-ink);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--rounded-md);
+  padding: 24px;
+}
+
+.card-feature-dark {
+  background-color: var(--colors-ink);
+  color: var(--colors-on-primary);
+  border-radius: var(--rounded-md);
+  padding: 24px;
+}
+
+/* =====================================================================
+   BUTTONS (12px Rounded Rectangles - Not Pills, Not Square)
+   ===================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--rounded-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* button-primary: The signature Zapier orange CTA */
+.btn-primary {
+  background-color: var(--colors-primary);
+  color: var(--colors-on-primary);
+  box-shadow: 0 2px 6px rgba(255, 79, 0, 0.25);
+}
+
+.btn-primary:hover {
+  background-color: var(--colors-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 79, 0, 0.35);
+}
+
+/* button-secondary: Deep coffee ink CTA */
+.btn-secondary {
+  background-color: var(--colors-ink);
+  color: var(--colors-on-primary);
+  border: 1px solid var(--colors-ink);
+}
+
+.btn-secondary:hover {
+  background-color: var(--colors-ink-soft);
+  transform: translateY(-1px);
+}
+
+/* button-tertiary: Outline CTA */
+.btn-tertiary,
+.btn-outline {
+  background-color: var(--colors-canvas);
+  color: var(--colors-ink);
+  border: 1px solid var(--colors-ink);
+}
+
+.btn-tertiary:hover,
+.btn-outline:hover {
+  background-color: var(--colors-canvas-soft);
+}
+
+.btn-accent {
+  background-color: var(--colors-ink);
+  color: var(--colors-on-primary);
+}
+
+.btn-accent:hover {
+  background-color: var(--colors-ink-soft);
+}
+
+.btn-danger {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.btn-danger:hover {
+  background-color: #fee2e2;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: var(--rounded-md);
+}
+
+/* =====================================================================
+   INPUTS & FORM CONTROLS (6px Radius)
+   ===================================================================== */
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--colors-canvas);
+  border: 1px solid var(--colors-mute);
+  border-radius: var(--rounded-sm);
+  color: var(--colors-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--colors-primary);
+  box-shadow: 0 0 0 3px rgba(255, 79, 0, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--colors-body-mid);
+}
+
+/* =====================================================================
+   BADGES & PILLS (Pill Radius = 9999px)
+   ===================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--rounded-pill);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--colors-canvas-soft);
+  color: var(--colors-ink);
+  border: 1px solid var(--colors-mute);
+}
+
+/* ILAW Framework Badges */
+.badge-ilaw-intentions {
+  background-color: #f5f3ff;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+
+.badge-ilaw-learning {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-ilaw-assessment {
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.badge-ilaw-ways-forward {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* Mastery Badges */
+.badge-mastered {
+  background-color: var(--status-mastered-bg);
+  color: var(--status-mastered);
+  border: 1px solid #bbf7d0;
+}
+
+.badge-reinforce {
+  background-color: var(--status-reinforce-bg);
+  color: var(--status-reinforce);
+  border: 1px solid #fde68a;
+}
+
+.badge-critical {
+  background-color: var(--status-critical-bg);
+  color: var(--status-critical);
+  border: 1px solid #fecaca;
+}
+
+.badge-flagged {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #f87171;
+  animation: pulseFlag 2s infinite;
+}
+
+@keyframes pulseFlag {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* =====================================================================
+   DATA TABLES (Clean Coffee Ink Borders)
+   ===================================================================== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--rounded-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #ffffff;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.data-table th {
+  background-color: var(--colors-canvas-soft);
+  color: var(--colors-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--colors-ink);
+  text-align: left;
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px;
+  color: var(--colors-ink);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background-color: var(--colors-canvas-soft);
+}
+
+/* =====================================================================
+   PROCTORING & ALERTS
+   ===================================================================== */
+.proctor-banner {
+  background-color: #fef2f2;
+  border: 1px solid #f87171;
+  color: #991b1b;
+  padding: 14px 20px;
+  border-radius: var(--rounded-md);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  animation: shakeWarning 0.5s ease;
+}
+
+@keyframes shakeWarning {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+/* =====================================================================
+   TYPOGRAPHY LADDER UTILITIES
+   ===================================================================== */
+.display-xl {
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 56px;
+  letter-spacing: 0;
+  color: var(--colors-ink);
+}
+
+.display-lg {
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 48px;
+  letter-spacing: 0;
+  color: var(--colors-ink);
+}
+
+.display-md {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 36px;
+  letter-spacing: 1px;
+  color: var(--colors-ink);
+}
+
+.eyebrow-uppercase {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--colors-ink);
+}
+
+/* =====================================================================
+   LAYOUT HELPERS
+   ===================================================================== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.grid-cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
