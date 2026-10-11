@@ -1,4 +1,6 @@
-const crypto = require('crypto');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const materialRoot = path.resolve(__dirname, '../../resources/materials');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 
@@ -33,6 +35,13 @@ async function getAllMaterials(req, res, next) {
 
     const { rows: materials } = await db.query(query, params);
 
+    for (const material of materials) {
+      if (material.storage_url?.startsWith('/api/materials/download/')) {
+        const filename = material.storage_url.split('/').pop();
+        try { if (filename !== path.basename(filename)) throw new Error('Invalid name'); await fs.access(path.join(materialRoot, filename)); material.resource_available = true; }
+        catch { material.resource_available = false; }
+      }
+    }
     res.json({
       success: true,
       count: materials.length,
@@ -106,33 +115,14 @@ async function createMaterial(req, res, next) {
 }
 
 // Download/Content Stream endpoint providing deterministic sample payloads with ETags
-function streamMaterialFile(req, res) {
+async function streamMaterialFile(req, res, next) {
   const { filename } = req.params;
-  const etag = crypto.createHash('md5').update(filename).digest('hex');
-
-  res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
-  res.setHeader('ETag', `"${etag}"`);
-
-  if (req.headers['if-none-match'] === `"${etag}"`) {
-    return res.status(304).end();
-  }
-
-  if (filename.endsWith('.pdf')) {
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    return res.send(`%PDF-1.4\n1 0 obj\n<< /Title (Aralytics AP10 Module) /Author (Cleo Ponce) >>\nendobj\n%%EOF`);
-  } else if (filename.endsWith('.pptx')) {
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    return res.send(Buffer.from('ARALYTICS_POWERPOINT_RESOURCE_STREAM'));
-  } else if (filename.endsWith('.mp4')) {
-    res.setHeader('Content-Type', 'video/mp4');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    return res.send(Buffer.from('ARALYTICS_MP4_VIDEO_STREAM'));
-  }
-
-  res.setHeader('Content-Type', 'application/octet-stream');
-  return res.send(Buffer.from('ARALYTICS_GENERIC_LEARNING_RESOURCE'));
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename) || filename.includes('..')) return res.status(400).json({ success: false, message: 'Invalid resource name.' });
+  const file = path.join(materialRoot, filename);
+  try { await fs.access(file); }
+  catch { return res.status(404).json({ success: false, message: 'This lesson file has not been provided yet. Ask your teacher for a working resource link.' }); }
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.sendFile(file, error => { if (error) next(error); });
 }
 
 /**
