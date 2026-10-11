@@ -139,3 +139,6 @@ textarea.form-input { min-height: 112px; resize: vertical; }
 @media (max-width: 900px) { .split-content[style] { grid-template-columns: 1fr !important; } }
 
 @media (max-width: 420px) { .tabs { flex-wrap: wrap; gap: 8px 20px; } .page-heading, .section-heading { flex-wrap: wrap; } .workspace-label { font-size: 14px; } }
+.split-content > *, .reading-layout > *, .quiz-layout > *, .continue-lesson > *, .form-grid > * { min-width: 0; }
+.table-responsive { max-width: 100%; }
+@media (max-width: 640px) { .action-row { display: grid; grid-template-columns: 24px minmax(0, 1fr); } .action-row > .text-action { grid-column: 2; justify-self: start; } }
