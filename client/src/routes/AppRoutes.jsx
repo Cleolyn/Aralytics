@@ -10,6 +10,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import StudentDashboard from '../pages/StudentDashboard';
 import TeacherDashboard from '../pages/TeacherDashboard';
 import MaterialsHub from '../pages/MaterialsHub';
+import LessonPage from '../pages/LessonPage';
 import QuizRunner from '../pages/QuizRunner';
 import QuizManager from '../pages/QuizManager';
 import RemedialCenter from '../pages/RemedialCenter';
@@ -261,6 +262,8 @@ export default function AppRoutes() {
 
       <Route path="/student/activities" element={<ProtectedRoute role="STUDENT"><StudentLayout><ActivitiesPage /></StudentLayout></ProtectedRoute>} />
       <Route path="/student/progress" element={<ProtectedRoute role="STUDENT"><StudentLayout><ProgressPage /></StudentLayout></ProtectedRoute>} />
+      <Route path="/student/materials/:id" element={<ProtectedRoute role="STUDENT"><StudentLayout><LessonPage /></StudentLayout></ProtectedRoute>} />
+      <Route path="/teacher/materials/:id" element={<ProtectedRoute role="TEACHER"><TeacherLayout><LessonPage /></TeacherLayout></ProtectedRoute>} />
       {/* Wildcard Fallback */}
       <Route
         path="*"
