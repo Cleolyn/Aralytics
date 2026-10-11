@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const { gradeAnswers } = require('../services/gradeAnswers');
 
 /**
  * POST /api/assessment/submit
@@ -29,8 +30,14 @@ async function submitAssessment(req, res, next) {
       });
     }
 
-    const numericScore = Number(score);
-    const numericTotal = Number(total_points);
+    if (req.user?.role === 'STUDENT' && (student_id !== req.user.id || !Array.isArray(req.body.answers))) {
+      return res.status(400).json({ success: false, message: 'Submit your own assessment answers.' });
+    }
+    let numericScore = Number(score);
+    let numericTotal = Number(total_points);
+    if (!Number.isFinite(numericScore) || !Number.isFinite(numericTotal)) {
+      return res.status(400).json({ success: false, message: 'Assessment points must be valid numbers.' });
+    }
 
     if (numericTotal <= 0) {
       return res.status(400).json({
@@ -63,6 +70,20 @@ async function submitAssessment(req, res, next) {
     }
 
     const quiz = quizRows[0];
+    let graded = null;
+    if (Array.isArray(req.body.answers)) {
+      const { rows: questions } = await db.query(`SELECT id, question_type, correct_answer, points FROM quiz_questions WHERE quiz_id = ?`, [quiz_id]);
+      try { graded = gradeAnswers(questions, req.body.answers); }
+      catch (err) { return res.status(400).json({ success: false, message: err.message }); }
+      numericScore = graded.score;
+      numericTotal = graded.total;
+      if (!numericTotal) return res.status(400).json({ success: false, message: 'This quiz has no questions.' });
+    }
+    if (req.user?.role === 'STUDENT') {
+      if (!quiz.is_published) return res.status(404).json({ success: false, message: 'This quiz is not published.' });
+      const { rows: existing } = await db.query(`SELECT id FROM quiz_submissions WHERE quiz_id = ? AND student_id = ? AND status = 'SUBMITTED'`, [quiz_id, student_id]);
+      if (existing.length) return res.status(409).json({ success: false, message: 'This quiz has already been submitted. View your result in My Progress.' });
+    }
     const isPassed = (quiz.passing_score && numericTotal === quiz.total_points)
       ? numericScore >= quiz.passing_score
       : (numericScore / numericTotal) >= 0.75;
@@ -110,64 +131,11 @@ async function submitAssessment(req, res, next) {
         ]
       );
 
-      if (Array.isArray(req.body.answers) && req.body.answers.length > 0) {
-        const { rows: questions } = await tx.query(
-          `SELECT id, question_type, correct_answer, points FROM quiz_questions WHERE quiz_id = ?`,
-          [quiz_id]
-        );
-        const qMap = new Map();
-        questions.forEach(q => qMap.set(q.id, q));
-
-        for (const ans of req.body.answers) {
-          const q = qMap.get(ans.question_id);
-          if (!q) continue;
-
-          const sRaw = String(ans.selected_answer || '').trim();
-          const cRaw = String(q.correct_answer || '').trim();
-          let isCorrect = false;
-
-          if (q.question_type === 'IDENTIFICATION') {
-            const norm = sRaw.toLowerCase().replace(/['".,]/g, '').trim();
-            const aliases = cRaw.split('|').map(s => s.toLowerCase().replace(/['".,]/g, '').trim());
-            isCorrect = aliases.includes(norm);
-          } else if (q.question_type === 'MATCHING') {
-            try {
-              const sObj = typeof ans.selected_answer === 'object' ? ans.selected_answer : JSON.parse(sRaw);
-              const cObj = JSON.parse(cRaw);
-              let allMatch = true;
-              for (const k of Object.keys(cObj)) {
-                if (String(sObj[k] || '').trim().toLowerCase() !== String(cObj[k] || '').trim().toLowerCase()) {
-                  allMatch = false;
-                  break;
-                }
-              }
-              isCorrect = allMatch;
-            } catch (e) {
-              isCorrect = sRaw.toLowerCase() === cRaw.toLowerCase();
-            }
-          } else if (q.question_type === 'TRUE_FALSE') {
-            const sNorm = sRaw.toUpperCase();
-            const cNorm = cRaw.toUpperCase();
-            const isTrueEquiv = (v) => v === 'TRUE' || v === 'TAMA' || v === 'T' || v === '1';
-            const isFalseEquiv = (v) => v === 'FALSE' || v === 'MALI' || v === 'F' || v === '0';
-            isCorrect = (isTrueEquiv(sNorm) && isTrueEquiv(cNorm)) || (isFalseEquiv(sNorm) && isFalseEquiv(cNorm));
-          } else {
-            isCorrect = sRaw.toLowerCase() === cRaw.toLowerCase();
-          }
-
-          const ansId = `qsa-${uuidv4()}`;
+      if (graded) {
+        for (const answer of graded.records) {
           await tx.query(
-            `INSERT INTO quiz_submission_answers 
-             (id, submission_id, question_id, selected_answer, is_correct, points_awarded)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [
-              ansId,
-              subId,
-              q.id,
-              typeof ans.selected_answer === 'object' ? JSON.stringify(ans.selected_answer) : sRaw,
-              isCorrect ? 1 : 0,
-              isCorrect ? q.points : 0
-            ]
+            `INSERT INTO quiz_submission_answers (id, submission_id, question_id, selected_answer, is_correct, points_awarded) VALUES (?, ?, ?, ?, ?, ?)`,
+            [`qsa-${uuidv4()}`, subId, answer.question_id, typeof answer.selected_answer === 'object' ? JSON.stringify(answer.selected_answer) : String(answer.selected_answer), answer.is_correct ? 1 : 0, answer.is_correct ? answer.points : 0]
           );
         }
       }
@@ -178,6 +146,7 @@ async function submitAssessment(req, res, next) {
         for (const evt of security_events) {
           const logId = `sec-${uuidv4()}`;
           const eventType = evt.event_type === 'WINDOW_BLUR' ? 'WINDOW_BLUR' : 'TAB_SWITCH';
+          await tx.query(`INSERT INTO quiz_proctoring_logs (id, submission_id, event_type) VALUES (?, ?, ?)`, [`proc-${uuidv4()}`, subId, eventType === 'TAB_SWITCH' ? 'TAB_HIDDEN' : eventType]);
           await tx.query(
             `INSERT INTO security_logs (id, attempt_id, event_type, timestamp)
              VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,

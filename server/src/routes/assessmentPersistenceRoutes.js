@@ -4,7 +4,7 @@ const controller = require('../controllers/assessmentPersistenceController');
 const { verifyToken, requireRole } = require('../middleware/auth');
 
 // POST /api/assessment/submit - Saves attempt, logs security flags, triggers remediation
-router.post('/assessment/submit', verifyToken, controller.submitAssessment);
+router.post('/assessment/submit', verifyToken, requireRole('STUDENT'), controller.submitAssessment);
 
 // GET /api/interventions/flagged - Retrieves flagged students with recommended remediation sets
 router.get('/interventions/flagged', verifyToken, requireRole('TEACHER'), controller.getFlaggedInterventions);
