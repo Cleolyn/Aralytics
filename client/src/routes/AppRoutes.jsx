@@ -3,6 +3,9 @@ import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 're
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import LoginPage from '../pages/LoginPage';
+import LandingPage from '../pages/LandingPage';
+import RegisterPage from '../pages/RegisterPage';
+import HelpPage from '../pages/HelpPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import StudentDashboard from '../pages/StudentDashboard';
 import TeacherDashboard from '../pages/TeacherDashboard';
@@ -115,6 +118,8 @@ export default function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/register" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <RegisterPage />} />
+      <Route path="/help" element={<HelpPage />} />
       {/* Public Login Route */}
       <Route
         path="/login"
@@ -130,22 +135,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Root Path Redirect */}
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to={
-              !user
-                ? '/login'
-                : user.role === 'TEACHER'
-                ? '/teacher/dashboard'
-                : '/student/dashboard'
-            }
-            replace
-          />
-        }
-      />
+      <Route path="/" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <LandingPage />} />
 
       {/* ====================================================================
           STRICT TEACHER ROUTE TREE (/teacher/*)

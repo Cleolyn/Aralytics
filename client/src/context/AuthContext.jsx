@@ -47,6 +47,12 @@ export function AuthProvider({ children }) {
     return res;
   };
 
+  const register = async (payload) => {
+    const res = await api.register(payload);
+    if (res.success) { setToken(res.token); setUser(res.user); }
+    return res;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -59,6 +65,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         logout,
+        register,
         isTeacher: user?.role === 'TEACHER',
         isStudent: user?.role === 'STUDENT'
       }}
