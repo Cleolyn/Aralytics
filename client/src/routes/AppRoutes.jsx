@@ -12,6 +12,8 @@ import TeacherDashboard from '../pages/TeacherDashboard';
 import TeacherOverview from '../pages/TeacherOverview';
 import ClassesPage from '../pages/ClassesPage';
 import AssessmentsPage from '../pages/AssessmentsPage';
+import ReportsPage from '../pages/ReportsPage';
+import TeacherSupportPage from '../pages/TeacherSupportPage';
 import MaterialsHub from '../pages/MaterialsHub';
 import LessonPage from '../pages/LessonPage';
 import QuizRunner from '../pages/QuizRunner';
@@ -199,7 +201,7 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute role="TEACHER">
             <TeacherLayout currentTab="remedial">
-              <RemedialCenter onNavigateToMaterials={() => navigate('/teacher/materials')} />
+              <TeacherSupportPage />
             </TeacherLayout>
           </ProtectedRoute>
         }
@@ -266,6 +268,7 @@ export default function AppRoutes() {
       <Route path="/teacher/materials/:id" element={<ProtectedRoute role="TEACHER"><TeacherLayout><LessonPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/teacher/classes" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ClassesPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/teacher/assessments" element={<ProtectedRoute role="TEACHER"><TeacherLayout><AssessmentsPage /></TeacherLayout></ProtectedRoute>} />
+      <Route path="/teacher/reports" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ReportsPage /></TeacherLayout></ProtectedRoute>} />
       {/* Wildcard Fallback */}
       <Route
         path="*"
