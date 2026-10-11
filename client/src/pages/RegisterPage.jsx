@@ -19,7 +19,7 @@ export default function RegisterPage() {
     catch (err) { setError(err.message); } finally { setBusy(false); }
   }
   return <PublicLayout simple><div className="auth-layout">
-    <section className="auth-story"><span className="eyebrow">Araling Panlipunan</span><h1 style={{ marginTop: 20 }}>Your learning journey starts here.</h1><p>Para sa mas malawak na pag-unawa at mas magandang komunidad.</p><img src="/images/community-learning.png" alt="" width="1774" height="887" /></section>
+    <section className="auth-story"><span className="eyebrow">Araling Panlipunan</span><h1 style={{ marginTop: 20 }}>Your learning journey starts here.</h1><p>Para sa mas malawak na pag-unawa at mas magandang komunidad.</p><img src="/images/community-learning.jpg" alt="" width="1774" height="887" /></section>
     <section className="auth-form"><h1>Create your account</h1><p>Join your school’s learning workspace.</p><Notice error>{error}</Notice><form onSubmit={submit}>
       <div className="form-grid">{[['first_name','First name'],['last_name','Last name']].map(([key,label]) => <div className="field" key={key}><label htmlFor={key}>{label}</label><input id={key} name={key} className="form-input" value={form[key]} onChange={change} required maxLength={80} autoComplete={key === 'first_name' ? 'given-name' : 'family-name'} /></div>)}</div>
       <div className="field"><label htmlFor="email">Email</label><input id="email" name="email" type="email" className="form-input" value={form.email} onChange={change} required autoComplete="email" /></div>

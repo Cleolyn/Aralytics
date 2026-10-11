@@ -7,7 +7,7 @@ export default function LandingPage() {
   return <PublicLayout>
     <section className="hero">
       <div><span className="eyebrow">People · Places · Society</span><h1 style={{ marginTop: 16 }}>Understand our world. Shape our community.</h1><p>Your learning space for Araling Panlipunan. Learn, practice, and grow—isang aralin sa bawat hakbang.</p><div className="hero-actions"><Link to="/register" className="btn btn-primary">Start learning <ArrowRight size={17} /></Link><Link to="/login" className="btn btn-secondary">I am a teacher</Link></div></div>
-      <img className="hero-image" src="/images/community-learning.png" alt="" width="1774" height="887" fetchPriority="high" />
+      <img className="hero-image" src="/images/community-learning.jpg" alt="" width="1774" height="887" fetchPriority="high" />
     </section>
     <section id="how-it-works" className="feature-strip" aria-label="How Aralytics works">
       {[[BookOpen,'Learn with purpose','Explore lessons connected to the people, places, and issues around you.'],[Globe2,'Practice what matters','Apply what you learn through quizzes and meaningful community activities.'],[ChartNoAxesColumn,'See your progress','Find your scores, teacher feedback, and a clear next step.']].map(([Icon,title,copy]) => <div key={title} className="feature"><Icon size={28} strokeWidth={1.5} aria-hidden="true" /><h2>{title}</h2><p>{copy}</p></div>)}

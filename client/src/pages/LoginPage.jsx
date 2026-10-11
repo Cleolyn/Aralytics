@@ -23,7 +23,7 @@ export default function LoginPage() {
     } catch (err) { setError(err.message); } finally { setLoading(false); }
   }
   return <PublicLayout simple><div className="auth-layout">
-    <section className="auth-story"><span className="eyebrow">Your learning journey</span><h1 style={{ marginTop: 20 }}>Welcome back.</h1><p>Tuloy ang pagkatuto. Explore our world, one lesson at a time.</p><img src="/images/community-learning.png" alt="" width="1774" height="887" /></section>
+    <section className="auth-story"><span className="eyebrow">Your learning journey</span><h1 style={{ marginTop: 20 }}>Welcome back.</h1><p>Tuloy ang pagkatuto. Explore our world, one lesson at a time.</p><img src="/images/community-learning.jpg" alt="" width="1774" height="887" /></section>
     <section className="auth-form"><h1>Log in to Aralytics</h1><p>Use your school account to continue.</p><Notice error>{error}</Notice>
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="identifier">Email or school ID</label><input id="identifier" className="form-input" value={identifier} onChange={e => setIdentifier(e.target.value)} required autoComplete="username" placeholder="Email, LRN, or employee ID" /></div>
