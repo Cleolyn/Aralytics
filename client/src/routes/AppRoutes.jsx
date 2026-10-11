@@ -13,6 +13,8 @@ import MaterialsHub from '../pages/MaterialsHub';
 import QuizRunner from '../pages/QuizRunner';
 import QuizManager from '../pages/QuizManager';
 import RemedialCenter from '../pages/RemedialCenter';
+import ActivitiesPage from '../pages/ActivitiesPage';
+import ProgressPage from '../pages/ProgressPage';
 
 export { ProtectedRoute };
 
@@ -257,6 +259,8 @@ export default function AppRoutes() {
         }
       />
 
+      <Route path="/student/activities" element={<ProtectedRoute role="STUDENT"><StudentLayout><ActivitiesPage /></StudentLayout></ProtectedRoute>} />
+      <Route path="/student/progress" element={<ProtectedRoute role="STUDENT"><StudentLayout><ProgressPage /></StudentLayout></ProtectedRoute>} />
       {/* Wildcard Fallback */}
       <Route
         path="*"
