@@ -1,5 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const fs = require('fs/promises');
+const path = require('path');
+const uploadRoot = path.resolve(__dirname, '../../uploads/performance-tasks');
 
 /**
  * GET /api/performance-tasks
@@ -172,7 +175,7 @@ async function submitTask(req, res, next) {
   try {
     const { id } = req.params;
     const studentId = req.user.id;
-    const { file_name, file_url, file_size_bytes, notes } = req.body;
+    const { file_name, file_url, file_size_bytes, notes, file_content_base64 } = req.body;
 
     if (!file_name) {
       return res.status(400).json({
@@ -188,8 +191,25 @@ async function submitTask(req, res, next) {
     }
 
     const subId = `pts-${uuidv4().slice(0, 8)}`;
-    const effectiveFileUrl = file_url || `/api/performance-tasks/files/${encodeURIComponent(file_name)}`;
-    const effectiveSize = Number(file_size_bytes) || 1024 * 500; // default 500KB
+    let effectiveFileUrl = file_url || `/api/performance-tasks/files/${encodeURIComponent(file_name)}`;
+    let effectiveSize = Number(file_size_bytes) || 1024 * 500;
+    if (file_content_base64 !== undefined) {
+      const extension = path.extname(file_name).toLowerCase();
+      if (!['.pdf', '.docx'].includes(extension) || typeof file_content_base64 !== 'string' ||
+          file_content_base64.length > 7 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(file_content_base64)) {
+        return res.status(400).json({ success: false, message: 'Choose a PDF or DOCX file up to 5 MB.' });
+      }
+      const content = Buffer.from(file_content_base64, 'base64');
+      const validHeader = extension === '.pdf' ? content.subarray(0, 5).toString() === '%PDF-' : content.subarray(0, 2).toString() === 'PK';
+      if (!content.length || content.length > 5 * 1024 * 1024 || !validHeader) {
+        return res.status(400).json({ success: false, message: 'The file is invalid or larger than 5 MB.' });
+      }
+      const storedName = `${uuidv4()}${extension}`;
+      await fs.mkdir(uploadRoot, { recursive: true });
+      await fs.writeFile(path.join(uploadRoot, storedName), content, { flag: 'wx' });
+      effectiveFileUrl = `/api/performance-tasks/files/${storedName}`;
+      effectiveSize = content.length;
+    }
 
     // Upsert submission
     const { rows: existing } = await db.query(
@@ -201,7 +221,7 @@ async function submitTask(req, res, next) {
       await db.query(
         `UPDATE performance_task_submissions 
          SET file_name = ?, file_url = ?, file_size_bytes = ?, notes = ?, 
-             status = 'SUBMITTED', submitted_at = CURRENT_TIMESTAMP
+             status = 'SUBMITTED', score = NULL, feedback = NULL, graded_at = NULL, submitted_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
         [file_name, effectiveFileUrl, effectiveSize, notes || null, existing[0].id]
       );
@@ -288,6 +308,10 @@ async function gradeSubmission(req, res, next) {
       return res.status(404).json({ success: false, message: 'Performance task submission not found.' });
     }
 
+    if (numericScore > sub[0].total_points) {
+      return res.status(400).json({ success: false, message: `Score cannot exceed ${sub[0].total_points}.` });
+    }
+
     await db.query(
       `UPDATE performance_task_submissions
        SET score = ?, feedback = ?, status = 'GRADED', graded_at = CURRENT_TIMESTAMP
@@ -312,14 +336,27 @@ async function gradeSubmission(req, res, next) {
 
 /**
  * GET /api/performance-tasks/files/:filename
- * Mock file streamer for submitted documents
+ * Authenticated download of actual submitted documents
  */
-function downloadFile(req, res) {
-  const { filename } = req.params;
-  const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-  res.setHeader('Content-Disposition', `inline; filename="${safeFilename}"`);
-  res.setHeader('Content-Type', 'application/pdf');
-  res.send(Buffer.from(`[ARALYTICS PERFORMANCE TASK ARTIFACT: ${safeFilename}] - DepEd AP10 Output Submission`));
+async function downloadFile(req, res, next) {
+  try {
+    const { filename } = req.params;
+    if (!/^[a-zA-Z0-9._-]+$/.test(filename) || filename.includes('..')) {
+      return res.status(400).json({ success: false, message: 'Invalid file name.' });
+    }
+    const { rows } = await db.query(
+      `SELECT student_id, file_name FROM performance_task_submissions WHERE file_url = ? LIMIT 1`,
+      [`/api/performance-tasks/files/${filename}`]
+    );
+    if (!rows.length || (req.user.role !== 'TEACHER' && rows[0].student_id !== req.user.id)) {
+      return res.status(404).json({ success: false, message: 'Submission file not found.' });
+    }
+    try { await fs.access(path.join(uploadRoot, filename)); }
+    catch { return res.status(404).json({ success: false, message: 'This older submission has no uploaded file. Please submit the actual document.' }); }
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.download(path.join(uploadRoot, filename), path.basename(rows[0].file_name));
+  } catch (err) { next(err); }
 }
 
 module.exports = {

@@ -4,7 +4,7 @@ const controller = require('../controllers/performanceTaskController');
 const { verifyToken, requireRole } = require('../middleware/auth');
 
 // Public/authenticated file stream
-router.get('/files/:filename', controller.downloadFile);
+router.get('/files/:filename', verifyToken, controller.downloadFile);
 
 // List performance tasks (accessible to both STUDENT and TEACHER)
 router.get('/', verifyToken, controller.getAllTasks);

@@ -24,7 +24,7 @@ export async function request(endpoint, options = {}) {
   }
 
   // Pre-check offline status for strictly online routes
-  const isOnlineOnly = /\/(quizzes|proctoring|submissions|export)/.test(endpoint);
+  const isOnlineOnly = /\/(quizzes|proctoring|submissions|export|performance-tasks)/.test(endpoint);
   if (!navigator.onLine && isOnlineOnly) {
     throw new Error('OFFLINE_BOUNDARY_REJECT: This action strictly requires an active internet connection.');
   }
@@ -184,6 +184,11 @@ export const api = {
     body: JSON.stringify({ logs })
   }),
   getReadLogs: () => request('/materials/read-logs'),
+
+  getSubmissionFileUrl: (url) => {
+    if (!url?.startsWith('/api/performance-tasks/files/')) return null;
+    return `${url}?token=${encodeURIComponent(getToken() || '')}`;
+  },
 
   // Export URLs
   getXlsxExportUrl: (params = {}) => {
