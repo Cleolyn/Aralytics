@@ -65,6 +65,7 @@ export const api = {
   }),
   getCurrentUser: () => request('/auth/me'),
 
+  getClasses: () => request('/teacher/classes'),
   getPersonalScores: () => request('/student/scores'),
   getOwnSubmission: (id) => request(`/student/submissions/${id}`),
 

@@ -9,6 +9,8 @@ import HelpPage from '../pages/HelpPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import StudentDashboard from '../pages/StudentDashboard';
 import TeacherDashboard from '../pages/TeacherDashboard';
+import TeacherOverview from '../pages/TeacherOverview';
+import ClassesPage from '../pages/ClassesPage';
 import MaterialsHub from '../pages/MaterialsHub';
 import LessonPage from '../pages/LessonPage';
 import QuizRunner from '../pages/QuizRunner';
@@ -149,10 +151,7 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute role="TEACHER">
             <TeacherLayout currentTab="dashboard">
-              <TeacherDashboard
-                onNavigateToCreator={() => navigate('/teacher/quizzes/create')}
-                onNavigateToRemedial={() => navigate('/teacher/remediation')}
-              />
+              <TeacherOverview />
             </TeacherLayout>
           </ProtectedRoute>
         }
@@ -264,6 +263,7 @@ export default function AppRoutes() {
       <Route path="/student/progress" element={<ProtectedRoute role="STUDENT"><StudentLayout><ProgressPage /></StudentLayout></ProtectedRoute>} />
       <Route path="/student/materials/:id" element={<ProtectedRoute role="STUDENT"><StudentLayout><LessonPage /></StudentLayout></ProtectedRoute>} />
       <Route path="/teacher/materials/:id" element={<ProtectedRoute role="TEACHER"><TeacherLayout><LessonPage /></TeacherLayout></ProtectedRoute>} />
+      <Route path="/teacher/classes" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ClassesPage /></TeacherLayout></ProtectedRoute>} />
       {/* Wildcard Fallback */}
       <Route
         path="*"

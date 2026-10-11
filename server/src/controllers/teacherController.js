@@ -42,7 +42,29 @@ async function getDashboardOverview(req, res, next) {
   }
 }
 
+async function getClasses(req, res, next) {
+  try {
+    const { rows: learners } = await db.query(`
+      SELECT u.id, u.first_name, u.last_name, u.lrn_or_id,
+             COALESCE(u.section_id, u.section, 'Unassigned') as section,
+             (SELECT COUNT(*) FROM quiz_submissions s WHERE s.student_id = u.id AND s.status = 'SUBMITTED') as quiz_submissions,
+             (SELECT COUNT(*) FROM performance_task_submissions p WHERE p.student_id = u.id) as task_submissions
+      FROM users u WHERE u.role = 'STUDENT'
+      ORDER BY section, u.last_name, u.first_name
+    `);
+    const sections = new Map();
+    for (const learner of learners) {
+      if (!sections.has(learner.section)) sections.set(learner.section, { section: learner.section, learners: 0, learners_with_quiz_submissions: 0 });
+      const item = sections.get(learner.section);
+      item.learners++;
+      if (learner.quiz_submissions > 0) item.learners_with_quiz_submissions++;
+    }
+    res.json({ success: true, classes: [...sections.values()], learners });
+  } catch (err) { next(err); }
+}
+
 module.exports = {
+  getClasses,
   getDashboardOverview,
   getGradebook: submissionController.getGradebookData,
   getProficiencyProfiling: async (req, res, next) => {

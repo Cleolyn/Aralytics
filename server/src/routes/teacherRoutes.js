@@ -8,6 +8,7 @@ router.use(verifyToken, requireTeacher);
 
 // 1. Dashboard Overview & Real-Time Monitoring Feed (FR-05, FR-07)
 router.get('/dashboard', teacherController.getDashboardOverview);
+router.get('/classes', teacherController.getClasses);
 
 // 2. Gradebook (FR-27..30)
 router.get('/gradebook', teacherController.getGradebook);
