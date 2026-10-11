@@ -1,358 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import { Plus, Trash2, Award, Clock, ShieldAlert, CheckSquare } from 'lucide-react';
+import useRemoteData from '../hooks/useRemoteData';
+import { Loading, Notice } from '../components/ui/Feedback';
+
+const questionTypes = { MULTIPLE_CHOICE: 'Multiple choice', TRUE_FALSE: 'True or false', IDENTIFICATION: 'Identification', SITUATIONAL: 'Situational', PISA_LIKE: 'Application / PISA-like', MATCHING: 'Matching' };
+const newQuestion = () => ({ key: crypto.randomUUID(), question_text: '', question_type: 'MULTIPLE_CHOICE', points: 1, options: ['A','B','C','D'].map(id => ({ id,text: '' })), correct_answer: 'A', matching_options: '{"premises":[],"responses":[]}' });
 
 export default function QuizManager({ onQuizCreated }) {
-  const { user, isTeacher } = useAuth();
-
-  const [competencies, setCompetencies] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Form State
-  const [competencyId, setCompetencyId] = useState('');
-  const [title, setTitle] = useState('');
-  const [instructions, setInstructions] = useState('');
-  const [timeLimit, setTimeLimit] = useState(15);
-  const [passingScore, setPassingScore] = useState(4);
-  const [maxBlurLimit, setMaxBlurLimit] = useState(3);
-
-  // Questions
-  const [questions, setQuestions] = useState([
-    {
-      question_text: '',
-      question_type: 'MULTIPLE_CHOICE',
-      points: 1,
-      options: [
-        { id: 'A', text: '' },
-        { id: 'B', text: '' },
-        { id: 'C', text: '' },
-        { id: 'D', text: '' }
-      ],
-      correct_answer: 'A'
-    }
-  ]);
-
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!isTeacher || user?.role !== 'TEACHER') return;
-    async function loadComps() {
-      try {
-        const res = await api.getTaxonomy();
-        if (res.success && res.flatCompetencies.length > 0) {
-          setCompetencies(res.flatCompetencies);
-          setCompetencyId(res.flatCompetencies[0].id);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadComps();
-  }, [isTeacher, user?.role]);
-
-  // STRICT RBAC DEFENSE: Non-teachers cannot create or configure assessments
-  if (!isTeacher || user?.role !== 'TEACHER') {
-    return (
-      <div className="container" style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <div style={{
-          maxWidth: '520px',
-          margin: '0 auto',
-          background: 'var(--status-critical-bg)',
-          border: '1px solid var(--status-critical)',
-          borderRadius: 'var(--rounded-md)',
-          padding: '36px 28px',
-        }}>
-          <ShieldAlert size={52} color="#ef4444" style={{ marginBottom: '16px' }} />
-          <h2 style={{ color: 'var(--status-critical)', fontSize: '1.4rem', fontWeight: 800, marginBottom: '10px' }}>
-            Hindi Awtorisadong Pag-access (Access Denied)
-          </h2>
-          <p style={{ color: 'var(--colors-body)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '24px' }}>
-            Ang paggawa at pagbago ng mga pagsusulit ay para lamang sa mga opisyal na guro ng Araling Panlipunan 10.
-          </p>
-        </div>
-      </div>
-    );
+  const { user } = useAuth();
+  const draftKey = `aralytics:quiz-draft:${user.id}`;
+  const [form,setForm] = useState(() => { try { const saved = JSON.parse(localStorage.getItem(draftKey)); if (saved?.questions?.length) return saved; } catch {} return { competency_id: '', title: '', instructions: '', time_limit_minutes: 20, passing_score: 1, max_blur_limit: 3, questions: [newQuestion()] }; });
+  const { data, loading, error } = useRemoteData(api.getTaxonomy);
+  const [busy,setBusy] = useState(false);
+  const [message,setMessage] = useState('');
+  const [actionError,setActionError] = useState('');
+  const total = form.questions.reduce((n,q) => n + Number(q.points || 0),0);
+  const change = e => setForm({ ...form,[e.target.name]: e.target.value });
+  const update = (key,patch) => setForm(f => ({ ...f,questions: f.questions.map(q => q.key === key ? { ...q,...patch } : q) }));
+  async function publish(e) {
+    e.preventDefault(); setActionError(''); setMessage('');
+    if (Number(form.passing_score) > total) { setActionError(`Passing score cannot exceed the ${total} available points.`); return; }
+    let questions;
+    try { questions = form.questions.map(({ key, matching_options,...q }) => {
+      if (!q.question_text.trim()) throw new Error('Add text to every question.');
+      if (q.question_type === 'MATCHING') { const options = JSON.parse(matching_options); const answer = JSON.parse(q.correct_answer); if (!options.premises?.length || !options.responses?.length || !Object.keys(answer).length) throw new Error('Matching questions need premises, responses, and an answer map.'); return { ...q, options, points: Number(q.points) }; }
+      if (!q.correct_answer.trim()) throw new Error('Set the correct answer for each question.');
+      return { ...q, options: q.question_type === 'IDENTIFICATION' ? [] : q.question_type === 'TRUE_FALSE' ? [{ id: 'TRUE',text: 'True / Tama' },{ id: 'FALSE',text: 'False / Mali' }] : q.options, points: Number(q.points) };
+    }); } catch (err) { setActionError(err.message); return; }
+    setBusy(true);
+    try { const res = await api.createQuiz({ ...form, questions,time_limit_minutes: Number(form.time_limit_minutes),passing_score: Number(form.passing_score),max_blur_limit: Number(form.max_blur_limit) }); if (!res.success) throw new Error(res.message); localStorage.removeItem(draftKey); onQuizCreated?.(); }
+    catch (err) { setActionError(err.message); } finally { setBusy(false); }
   }
-
-  const handleAddQuestion = () => {
-    setQuestions((prev) => [
-      ...prev,
-      {
-        question_text: '',
-        question_type: 'MULTIPLE_CHOICE',
-        points: 1,
-        options: [
-          { id: 'A', text: '' },
-          { id: 'B', text: '' },
-          { id: 'C', text: '' },
-          { id: 'D', text: '' }
-        ],
-        correct_answer: 'A'
-      }
-    ]);
-  };
-
-  const handleRemoveQuestion = (index) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleQuestionChange = (index, field, value) => {
-    setQuestions((prev) => {
-      const copy = [...prev];
-      copy[index][field] = value;
-      return copy;
-    });
-  };
-
-  const handleOptionChange = (qIndex, optIndex, text) => {
-    setQuestions((prev) => {
-      const copy = [...prev];
-      copy[qIndex].options[optIndex].text = text;
-      return copy;
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !competencyId) return;
-
-    // Validate that questions have text
-    for (const q of questions) {
-      if (!q.question_text.trim()) {
-        alert('Mangyaring punan ang teksto ng bawat tanong bago mag-save.');
-        return;
-      }
-    }
-
-    setSaving(true);
-    try {
-      const res = await api.createQuiz({
-        competency_id: competencyId,
-        title,
-        instructions,
-        time_limit_minutes: Number(timeLimit),
-        passing_score: Number(passingScore),
-        max_blur_limit: Number(maxBlurLimit),
-        questions
-      });
-
-      if (res.success) {
-        alert('Pagsusulit tagumpay na nalikha at na-publish sa mga mag-aaral!');
-        if (onQuizCreated) onQuizCreated();
-      }
-    } catch (err) {
-      alert(err.message || 'Error saving quiz');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="container" style={{ maxWidth: '880px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '6px' }}>
-          Lumikha ng Bagong AP10 Assessment
-        </h1>
-        <p style={{ color: 'var(--colors-body)', fontSize: '0.88rem' }}>
-          I-tag ang pagsusulit sa opisyal na DepEd MELC competency at itakda ang proctoring watchdog parameters.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        {/* General Assessment Settings */}
-        <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '16px' }}>
-            Pangunahing Impormasyon ng Pagtatasa
-          </h2>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--colors-body)', marginBottom: '6px' }}>
-              DepEd Learning Competency & MELC Tag (ILAW Framework)
-            </label>
-            <select
-              className="form-input"
-              value={competencyId}
-              onChange={(e) => setCompetencyId(e.target.value)}
-              required
-            >
-              {competencies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  [{c.melc_code}] - {c.description.substring(0, 75)}... ({c.ilaw_tag})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--colors-body)', marginBottom: '6px' }}>
-              Pamagat ng Pagsusulit
-            </label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Hal: Unang Lagumang Pagsusulit sa Disaster Management"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          <div style={{ marginBottom: '18px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--colors-body)', marginBottom: '6px' }}>
-              Mga Panuto sa Mag-aaral
-            </label>
-            <textarea
-              className="form-input"
-              rows={3}
-              placeholder="Basahin at unawain ang bawat katanungan bago pumili ng sagot..."
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--colors-body)', marginBottom: '6px' }}>
-                <Clock size={13} style={{ display: 'inline', marginRight: '4px' }} /> Oras (Minuto)
-              </label>
-              <input
-                type="number"
-                className="form-input"
-                min="1"
-                max="120"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--colors-body)', marginBottom: '6px' }}>
-                <Award size={13} style={{ display: 'inline', marginRight: '4px' }} /> Passing Score
-              </label>
-              <input
-                type="number"
-                className="form-input"
-                min="1"
-                value={passingScore}
-                onChange={(e) => setPassingScore(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--status-critical)', marginBottom: '6px' }}>
-                <ShieldAlert size={13} style={{ display: 'inline', marginRight: '4px' }} /> Max Blur Limit
-              </label>
-              <input
-                type="number"
-                className="form-input"
-                min="1"
-                max="10"
-                value={maxBlurLimit}
-                onChange={(e) => setMaxBlurLimit(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Questions Builder */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-              Mga Tanong ({questions.length})
-            </h2>
-            <button
-              type="button"
-              onClick={handleAddQuestion}
-              className="btn btn-secondary btn-sm"
-            >
-              <Plus size={15} /> Magdagdag ng Tanong
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {questions.map((q, qIndex) => (
-              <div key={qIndex} className="glass-panel" style={{ padding: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--colors-primary)' }}>
-                    Tanong #{qIndex + 1}
-                  </span>
-                  {questions.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveQuestion(qIndex)}
-                      className="btn btn-danger btn-sm"
-                      style={{ padding: '2px 8px' }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  )}
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Ilagay ang teksto ng tanong..."
-                    value={q.question_text}
-                    onChange={(e) => handleQuestionChange(qIndex, 'question_text', e.target.value)}
-                    required
-                  />
-                </div>
-
-                {/* Choices */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-                  {q.options.map((opt, optIndex) => (
-                    <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontWeight: 700, width: '20px', color: 'var(--colors-body-mid)' }}>
-                        {opt.id}.
-                      </span>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder={`Pagpipilian ${opt.id}...`}
-                        value={opt.text}
-                        onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
-                        required
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Correct Answer Selection */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#34d399' }}>
-                    Tamang Sagot:
-                  </span>
-                  <select
-                    className="form-input"
-                    style={{ width: 'auto', padding: '6px 12px' }}
-                    value={q.correct_answer}
-                    onChange={(e) => handleQuestionChange(qIndex, 'correct_answer', e.target.value)}
-                  >
-                    <option value="A">Pagpipilian A</option>
-                    <option value="B">Pagpipilian B</option>
-                    <option value="C">Pagpipilian C</option>
-                    <option value="D">Pagpipilian D</option>
-                  </select>
-                </div>
-
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary"
-          style={{ width: '100%', padding: '14px', fontSize: '1rem' }}
-          disabled={saving}
-        >
-          <CheckSquare size={18} /> {saving ? 'I-pinapublish...' : 'I-publish ang Assessment sa Hub'}
-        </button>
-      </form>
-    </div>
-  );
+  return <div className="container" style={{ maxWidth: 1000 }}><Link className="text-action" to="/teacher/assessments">← Back to assessments</Link><div className="page-heading" style={{ marginTop: 16 }}><div><h1>Create a quiz</h1><p>Connect your questions to a learning goal, then publish when ready.</p></div></div><Notice error>{error || actionError}</Notice><Notice success>{message}</Notice>
+    {loading ? <Loading>Loading learning goals…</Loading> : <form onSubmit={publish}><section><h2 style={{ marginBottom: 24 }}>Quiz details</h2><div className="field"><label htmlFor="quiz-title">Title</label><input id="quiz-title" name="title" className="form-input" value={form.title} onChange={change} required /></div><div className="field"><label htmlFor="quiz-goal">Learning goal</label><select id="quiz-goal" name="competency_id" className="form-input" value={form.competency_id} onChange={change} required><option value="">Choose a learning goal</option>{data?.flatCompetencies.map(c => <option key={c.id} value={c.id}>{c.melc_code} · {c.description}</option>)}</select></div><div className="field"><label htmlFor="quiz-instructions">Instructions for learners</label><textarea id="quiz-instructions" name="instructions" className="form-input" value={form.instructions} onChange={change} /></div>
+      <div className="form-grid"><div className="field"><label htmlFor="quiz-time">Time limit (minutes)</label><input id="quiz-time" className="form-input" type="number" name="time_limit_minutes" min={1} max={120} value={form.time_limit_minutes} onChange={change} required /></div><div className="field"><label htmlFor="quiz-pass">Passing score (out of {total})</label><input id="quiz-pass" className="form-input" type="number" name="passing_score" min={1} max={total} value={form.passing_score} onChange={change} required /></div></div>
+      <details className="section" style={{ paddingTop: 16 }}><summary>Assessment monitoring settings</summary><div className="field" style={{ marginTop: 16 }}><label htmlFor="quiz-focus">Focus changes before teacher review</label><input id="quiz-focus" className="form-input" type="number" name="max_blur_limit" min={1} max={10} value={form.max_blur_limit} onChange={change} required /><small className="field-help">Focus changes are recorded during the quiz.</small></div></details></section>
+      <section className="section"><div className="section-heading"><h2>Questions ({form.questions.length})</h2><button className="btn btn-secondary" type="button" onClick={() => setForm(f => ({ ...f,questions: [...f.questions,newQuestion()] }))}><Plus size={17} />Add question</button></div>
+      {form.questions.map((q,i) => <section className="section" key={q.key}><div className="section-heading"><h3>Question {i + 1}</h3>{form.questions.length > 1 && <button type="button" className="icon-button" aria-label={`Remove question ${i + 1}`} onClick={() => setForm(f => ({ ...f,questions: f.questions.filter(item => item.key !== q.key) }))}><Trash2 size={18} /></button>}</div><div className="form-grid"><div className="field"><label htmlFor={`${q.key}-type`}>Question type</label><select id={`${q.key}-type`} className="form-input" value={q.question_type} onChange={e => update(q.key,{ question_type: e.target.value,correct_answer: e.target.value === 'TRUE_FALSE' ? 'TRUE' : e.target.value === 'MATCHING' ? '{}' : e.target.value === 'IDENTIFICATION' ? '' : 'A' })}>{Object.entries(questionTypes).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></div><div className="field"><label htmlFor={`${q.key}-points`}>Points</label><input id={`${q.key}-points`} className="form-input" type="number" min={1} max={100} value={q.points} onChange={e => update(q.key,{ points: e.target.value })} required /></div></div>
+        <div className="field"><label htmlFor={`${q.key}-text`}>Question text</label><textarea id={`${q.key}-text`} className="form-input" value={q.question_text} onChange={e => update(q.key,{ question_text: e.target.value })} required /></div>
+        {['MULTIPLE_CHOICE','SITUATIONAL','PISA_LIKE'].includes(q.question_type) && <><div className="form-grid">{q.options.map(o => <div className="field" key={o.id}><label htmlFor={`${q.key}-${o.id}`}>Option {o.id}</label><input id={`${q.key}-${o.id}`} className="form-input" value={o.text} required onChange={e => update(q.key,{ options: q.options.map(item => item.id === o.id ? { ...item,text: e.target.value } : item) })} /></div>)}</div><div className="field"><label htmlFor={`${q.key}-answer`}>Correct answer</label><select id={`${q.key}-answer`} className="form-input" value={q.correct_answer} onChange={e => update(q.key,{ correct_answer: e.target.value })}>{q.options.map(o => <option key={o.id} value={o.id}>Option {o.id}</option>)}</select></div></>}
+        {q.question_type === 'TRUE_FALSE' && <div className="field"><label htmlFor={`${q.key}-answer`}>Correct answer</label><select id={`${q.key}-answer`} className="form-input" value={q.correct_answer} onChange={e => update(q.key,{ correct_answer: e.target.value })}><option value="TRUE">True / Tama</option><option value="FALSE">False / Mali</option></select></div>}
+        {['IDENTIFICATION','MATCHING'].includes(q.question_type) && <>{q.question_type === 'MATCHING' && <div className="field"><label htmlFor={`${q.key}-options`}>Matching pairs (JSON)</label><textarea id={`${q.key}-options`} className="form-input" value={q.matching_options} onChange={e => update(q.key,{ matching_options: e.target.value })} required /><small className="field-help">Premises and responses are arrays of objects with id and text.</small></div>}<div className="field"><label htmlFor={`${q.key}-answer`}>{q.question_type === 'MATCHING' ? 'Correct mapping (JSON)' : 'Accepted answers'}</label><input id={`${q.key}-answer`} className="form-input" value={q.correct_answer} onChange={e => update(q.key,{ correct_answer: e.target.value })} required /><small className="field-help">{q.question_type === 'MATCHING' ? 'Example: {"1":"A","2":"B"}' : 'Separate alternative answers with |.'}</small></div></>}
+      </section>)}</section><div className="section"><p className="muted" style={{ marginBottom: 20 }}>Publishing makes this quiz available to learners. You can save a draft on this device before publishing.</p><div className="hero-actions"><button className="btn btn-primary" disabled={busy}>{busy ? 'Publishing…' : 'Publish quiz'}<ArrowRight size={17} /></button><button className="btn btn-secondary" type="button" disabled={busy} onClick={() => { try { localStorage.setItem(draftKey,JSON.stringify(form)); setMessage('Draft saved on this device.'); } catch { setActionError('Could not save a draft on this device.'); } }}>Save local draft</button></div></div>
+    </form>}
+  </div>;
 }
