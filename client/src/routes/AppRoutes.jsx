@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import Brand from '../components/Brand';
+import OfflineStatus from '../components/OfflineStatus';
 import LoginPage from '../pages/LoginPage';
 import LandingPage from '../pages/LandingPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -81,6 +83,7 @@ function QuizRunnerRoute() {
 
   return (
     <QuizRunner
+      key={id}
       quizId={id}
       onBackToDashboard={() => navigate('/student/dashboard')}
       onNavigateToRemedial={() => navigate('/student/interventions')}
@@ -255,9 +258,7 @@ export default function AppRoutes() {
         path="/student/quizzes/:id"
         element={
           <ProtectedRoute role="STUDENT">
-            <StudentLayout currentTab="student_home">
-              <QuizRunnerRoute />
-            </StudentLayout>
+            <div><header className="workspace-header"><Brand to="/student/dashboard" /><OfflineStatus /></header><main id="main-content"><QuizRunnerRoute /></main></div>
           </ProtectedRoute>
         }
       />
