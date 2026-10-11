@@ -26,7 +26,7 @@ export async function request(endpoint, options = {}) {
   // Pre-check offline status for strictly online routes
   const isOnlineOnly = /\/(quizzes|proctoring|submissions|export|performance-tasks)/.test(endpoint);
   if (!navigator.onLine && isOnlineOnly) {
-    throw new Error('OFFLINE_BOUNDARY_REJECT: This action strictly requires an active internet connection.');
+    throw new Error('Connect to the internet to complete this action.');
   }
 
   try {

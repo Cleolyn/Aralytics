@@ -40,7 +40,7 @@ export default function QuizRunner({ quizId, onBackToDashboard, onNavigateToReme
   const question = questions[index];
   const remaining = Math.max(0,Math.ceil((deadline - now) / 1000));
   const count = questions.filter(q => answered(q,answers[q.id])).length;
-  useEffect(() => { if (quiz && !submitted && !deadline) setDeadline(Date.now() + (quiz.time_limit_minutes || 20) * 60000); }, [quiz,submitted,deadline]);
+  useEffect(() => { if (quiz && !submitted && !deadline) { const started = Date.now(); setNow(started); setDeadline(started + (quiz.time_limit_minutes || 20) * 60000); } }, [quiz,submitted,deadline]);
   useEffect(() => {
     const update = () => { setOnline(navigator.onLine); if (navigator.onLine) autoAttempt.current = false; };
     window.addEventListener('online',update); window.addEventListener('offline',update);
