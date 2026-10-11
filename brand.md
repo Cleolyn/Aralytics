@@ -56,3 +56,14 @@ Quizzes and submissions require internet. Only actually downloaded material is l
 ## Approved references
 
 The eleven separate mockups are in `output/design-reference-v1/`. They establish visual direction; implementation standardizes brand marks, navigation, copy, dates, and spacing across screens. The sources informing the design are Nielsen Norman Group's progressive disclosure guidance, CAST UDL guidelines, and W3C WCAG 2.2 navigation, contrast, target-size, and reflow guidance.
+
+## Implemented screen conventions
+
+- Landing and account screens use the shared book mark and original contemporary Philippine learning illustration.
+- Overview surfaces the next lesson, actual deadlines, review queues, and class records. Activities and Lessons use open tables with local filters.
+- Lesson readers show the learning goal and actual resource availability. Seeded placeholder names must never be presented as downloaded curriculum files.
+- Quiz taking uses a focused header, timer, question navigation, answer flags, and review before submission. Scores are calculated on the server; focus records support teacher review and do not establish misconduct by themselves.
+- Document submission clearly states PDF/DOCX and the 5 MB limit. Saved notes are identified as local notes, not a saved attachment.
+- Gradebook, Reports, and Learner support use separate pages. Practice completion is a teacher decision; opening a document does not imply mastery.
+- Mobile navigation hides closed links from keyboard focus. Dialogs trap focus, close with Escape, and restore the opening control. Tables scroll inside labeled regions.
+- Offline availability is earned by an explicit download. Private APIs never use the service worker cache. Reading queues, quiz drafts, and the offline profile are tied to the current learner.
