@@ -13,7 +13,8 @@ export default function StudentDashboard() {
   if (loading) return <div className="container"><Loading /></div>;
   const readIds = new Set(data?.logs.map(l => l.material_id) || []);
   const materials = data?.materials || [];
-  const next = materials.find(m => !readIds.has(m.id)) || materials[0];
+  const available = materials.filter(m => m.resource_available !== false);
+  const next = available.find(m => !readIds.has(m.id)) || available[0];
   const readCount = materials.filter(m => readIds.has(m.id)).length;
   const upcoming = data?.activities.filter(a => !completedActivity(a)).slice(0,4) || [];
   const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED','EXEMPTED','EXEMPT','OVERRIDDEN'].includes(i.status)) || [];
