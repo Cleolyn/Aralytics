@@ -2,32 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export default function OfflineStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
+  const [online, setOnline] = useState(navigator.onLine);
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); };
   }, []);
-
-  if (isOnline) {
-    return (
-      <span className="badge" style={{ background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontSize: '0.72rem' }}>
-        <Wifi size={13} /> Online Sync Active
-      </span>
-    );
-  }
-
-  return (
-    <span className="badge" style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fecaca', fontSize: '0.72rem' }}>
-      <WifiOff size={13} /> Offline Mode (Materials Only)
-    </span>
-  );
+  const Icon = online ? Wifi : WifiOff;
+  return <span className={`connection ${online ? '' : 'offline'}`} role="status" title={online ? 'Connected to the internet' : 'Offline. Open previously downloaded lessons; quizzes require internet.'}><Icon size={16} aria-hidden="true" /><span>{online ? 'Online' : 'Offline · lessons only'}</span></span>;
 }

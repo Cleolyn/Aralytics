@@ -20,7 +20,7 @@ function TeacherLayout({ children, currentTab }) {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-shell">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={(tab) => {
@@ -31,7 +31,7 @@ function TeacherLayout({ children, currentTab }) {
           else if (tab === 'remedial') navigate('/teacher/remediation');
         }}
       />
-      <main style={{ flex: 1, paddingBottom: '60px' }}>
+      <main id="main-content" tabIndex={-1}>
         {children}
       </main>
     </div>
@@ -45,7 +45,7 @@ function StudentLayout({ children, currentTab }) {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-shell">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={(tab) => {
@@ -54,7 +54,7 @@ function StudentLayout({ children, currentTab }) {
           else if (tab === 'remedial') navigate('/student/interventions');
         }}
       />
-      <main style={{ flex: 1, paddingBottom: '60px' }}>
+      <main id="main-content" tabIndex={-1}>
         {children}
       </main>
     </div>

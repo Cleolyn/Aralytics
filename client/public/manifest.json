@@ -1,6 +1,6 @@
 {
   "short_name": "Aralytics",
-  "name": "Aralytics (Ponce AP10 Learning Hub)",
+  "name": "Aralytics \u2014 Araling Panlipunan",
   "icons": [
     {
       "src": "/logo.svg",
@@ -9,8 +9,8 @@
     }
   ],
   "start_url": "/",
-  "background_color": "#090d16",
-  "theme_color": "#1e3a8a",
+  "background_color": "#FAF7F2",
+  "theme_color": "#5A3827",
   "display": "standalone",
   "orientation": "portrait"
 }
