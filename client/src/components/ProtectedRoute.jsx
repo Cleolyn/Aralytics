@@ -14,34 +14,7 @@ export function ProtectedRoute({ role, children }) {
   const location = useLocation();
 
   // 1. Session verification in progress
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--colors-canvas)',
-        color: 'var(--colors-body)',
-        fontFamily: 'var(--font-body)'
-      }}>
-        <div style={{
-          width: '36px',
-          height: '36px',
-          border: '3px solid rgba(255, 79, 0, 0.2)',
-          borderTopColor: 'var(--colors-primary)',
-          borderRadius: '50%',
-          animation: 'aralytics-spin 1s linear infinite',
-          marginBottom: '16px'
-        }} />
-        <style>{`@keyframes aralytics-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-        <span style={{ fontSize: '0.92rem', fontWeight: 500, color: 'var(--colors-ink)' }}>
-          Sinusuri ang awtorisasyon at sesyon...
-        </span>
-      </div>
-    );
-  }
+  if (loading) return <div className="container" role="status">Checking your session…</div>;
 
   // 2. Unauthenticated: Redirect immediately to /login with state preservation
   if (!user) {
@@ -54,7 +27,7 @@ export function ProtectedRoute({ role, children }) {
       <Navigate
         to="/student/dashboard"
         state={{
-          unauthorizedNotice: 'Hindi Awtorisadong Pag-access (Unauthorized Access): Ang pahinang hiniling ay para lamang sa mga guro ng Araling Panlipunan 10.'
+          unauthorizedNotice: 'This page is for teachers. You can continue from your learner overview.'
         }}
         replace
       />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -26,53 +26,11 @@ import ProgressPage from '../pages/ProgressPage';
 
 export { ProtectedRoute };
 
-/**
- * Teacher Workspace Layout (Dynamic Navigation Isolation)
- */
-function TeacherLayout({ children, currentTab }) {
-  const navigate = useNavigate();
-
-  return (
-    <div className="app-shell">
-      <Navbar
-        currentTab={currentTab}
-        setCurrentTab={(tab) => {
-          if (tab === 'dashboard') navigate('/teacher/dashboard');
-          else if (tab === 'gradebook') navigate('/teacher/gradebook');
-          else if (tab === 'quiz_creator') navigate('/teacher/quizzes/create');
-          else if (tab === 'materials') navigate('/teacher/materials');
-          else if (tab === 'remedial') navigate('/teacher/remediation');
-        }}
-      />
-      <main id="main-content" tabIndex={-1}>
-        {children}
-      </main>
-    </div>
-  );
+function WorkspaceLayout({ children }) {
+  return <div className="app-shell"><Navbar /><main id="main-content" tabIndex={-1}>{children}</main></div>;
 }
-
-/**
- * Student Workspace Layout (Dynamic Navigation Isolation)
- */
-function StudentLayout({ children, currentTab }) {
-  const navigate = useNavigate();
-
-  return (
-    <div className="app-shell">
-      <Navbar
-        currentTab={currentTab}
-        setCurrentTab={(tab) => {
-          if (tab === 'student_home') navigate('/student/dashboard');
-          else if (tab === 'materials') navigate('/student/materials');
-          else if (tab === 'remedial') navigate('/student/interventions');
-        }}
-      />
-      <main id="main-content" tabIndex={-1}>
-        {children}
-      </main>
-    </div>
-  );
-}
+const TeacherLayout = WorkspaceLayout;
+const StudentLayout = WorkspaceLayout;
 
 /**
  * Quiz Runner Wrapper extracting quiz ID from URL params
@@ -96,36 +54,16 @@ function QuizRunnerRoute() {
  */
 export default function AppRoutes() {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  useEffect(() => {
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Assessments', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Learner support', interventions: 'Suggested practice', login: 'Log in', register: 'Create account', help: 'Help' };
+    const segments = location.pathname.split('/');
+    document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Assessment' : 'Araling Panlipunan')} · Aralytics`;
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const navigate = useNavigate();
 
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--colors-canvas)',
-        color: 'var(--colors-body)',
-        fontFamily: 'var(--font-body)'
-      }}>
-        <div style={{
-          width: '36px',
-          height: '36px',
-          border: '3px solid rgba(255, 79, 0, 0.2)',
-          borderTopColor: 'var(--colors-primary)',
-          borderRadius: '50%',
-          animation: 'aralytics-spin 1s linear infinite',
-          marginBottom: '16px'
-        }} />
-        <style>{`@keyframes aralytics-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-        <span style={{ fontSize: '0.92rem', fontWeight: 500, color: 'var(--colors-ink)' }}>
-          Inihahanda ang Aralytics Platform...
-        </span>
-      </div>
-    );
-  }
+  if (loading) return <div className="container" role="status">Preparing Aralytics…</div>;
 
   return (
     <Routes>
