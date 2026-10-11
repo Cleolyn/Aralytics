@@ -125,6 +125,7 @@ export const api = {
   }),
 
   // Remedial Interventions (Ways Forward)
+  getPractice: () => request('/student/practice'),
   getInterventions: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return request(`/interventions${query ? `?${query}` : ''}`);

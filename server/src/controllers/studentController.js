@@ -195,3 +195,15 @@ module.exports = {
   // Offline sync (binds studentId from req.user.id)
   syncOfflineReadLogs: materialsController.syncReadLogs
 };
+
+// Practice uses the same recommendations that teachers review.
+module.exports.getPractice = async (req, res, next) => {
+  try {
+    const result = await db.query(`SELECT i.id, i.status, i.updated_at, c.topic_title AS competency_desc,
+      m.title AS remedial_material_title, m.file_path AS remedial_storage_url
+      FROM interventions i JOIN competencies c ON c.id = i.competency_id
+      LEFT JOIN materials m ON m.id = i.recommended_material_id
+      WHERE i.student_id = ? ORDER BY i.updated_at DESC`, [req.user.id]);
+    res.json({ success: true, interventions: result.rows });
+  } catch (err) { next(err); }
+};

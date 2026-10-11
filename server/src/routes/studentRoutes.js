@@ -21,6 +21,7 @@ router.post('/quizzes/start', studentController.startQuiz);
 router.post('/quizzes/submit', studentController.submitQuiz);
 
 // 5. Assigned Remedial Interventions (Ways Forward) (FR-36, FR-37)
+router.get('/practice', studentController.getPractice);
 router.get('/interventions', studentController.getAssignedInterventions);
 
 // 6. Performance Task Submission Dropzone (FR-43)

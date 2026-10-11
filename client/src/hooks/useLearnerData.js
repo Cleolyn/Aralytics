@@ -7,7 +7,7 @@ import { loadMaterials, loadReadingLogs } from '../utils/offlineLearning';
 export default function useLearnerData() {
   const { user } = useAuth();
   return useRemoteData(async () => {
-    const requests = [ ['quizzes',api.getQuizzes], ['tasks',api.getPerformanceTasks], ['materials',async () => ({ success: true, materials: await loadMaterials(user.id) })], ['logs',async () => ({ success: true, logs: await loadReadingLogs(user.id) })], ['interventions',api.getInterventions] ];
+    const requests = [ ['quizzes',api.getQuizzes], ['tasks',api.getPerformanceTasks], ['materials',async () => ({ success: true, materials: await loadMaterials(user.id) })], ['logs',async () => ({ success: true, logs: await loadReadingLogs(user.id) })], ['interventions',api.getPractice] ];
     const results = await Promise.allSettled(requests.map(([,load]) => load()));
     const data = { quizzes: [], tasks: [], materials: [], logs: [], interventions: [], warnings: [] };
     results.forEach((result,i) => {
