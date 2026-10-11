@@ -16,7 +16,7 @@ export default function StudentDashboard() {
   const next = materials.find(m => !readIds.has(m.id)) || materials[0];
   const readCount = materials.filter(m => readIds.has(m.id)).length;
   const upcoming = data?.activities.filter(a => !completedActivity(a)).slice(0,4) || [];
-  const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED'].includes(i.status)) || [];
+  const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED','EXEMPTED','EXEMPT','OVERRIDDEN'].includes(i.status)) || [];
   return <div className="container">
     <div className="page-heading"><div><h1>Mabuhay, {user?.first_name || 'learner'}.</h1><p>Ready for your next lesson?</p><div className="breadcrumb" style={{ marginTop: 14, marginBottom: 0 }}>{user?.section || 'Your class'} <span>/</span> Araling Panlipunan 10 <span>/</span> Contemporary Issues</div></div></div>
     <Notice error>{error || data?.warnings.join(' ')}</Notice>{(error || data?.warnings.length > 0) && <button className="text-action" onClick={refresh}>Retry loading</button>}

@@ -22,7 +22,7 @@ export default function ProgressPage() {
   const total = data?.materials.length || 0;
   const count = data?.materials.filter(m => readIds.has(m.id)).length || 0;
   const tasks = data?.tasks.filter(t => t.my_submission) || [];
-  const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED'].includes(i.status)) || [];
+  const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED','EXEMPTED','EXEMPT','OVERRIDDEN'].includes(i.status)) || [];
   return <div className="container"><div className="page-heading"><div><h1>My Progress</h1><p>See what you have learned and what to practice next.</p></div><span className="muted">{user.section} · Araling Panlipunan</span></div>
     <Notice error>{error || scores.error || data?.warnings.join(' ') || detailError}</Notice>{(error || scores.error || data?.warnings.length > 0) && <button className="text-action" onClick={() => { refresh(); scores.refresh(); }}>Retry loading</button>}
     {loading || scores.loading ? <Loading>Loading your learning records…</Loading> : <div className="split-content"><div><section><div className="section-heading"><h2>Materials read</h2><strong>{count} of {total}</strong></div><div className="progress-track" role="progressbar" aria-label="Materials read" aria-valuemin={0} aria-valuemax={total || 1} aria-valuenow={count}><span style={{ width: `${total ? count / total * 100 : 0}%` }} /></div><small className="muted">Progress is based on materials you have marked as read.</small></section>

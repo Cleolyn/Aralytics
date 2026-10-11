@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node test/analytics_engine.test.js && node test/persistence_module.test.js && node test/verification_gate.test.js && node test/srs_compliance.test.js && node test/rbac_security.test.js && node test/auth_multi_user.test.js",
-    "test:redesign": "node test/redesign_flow.test.js"
+    "test:redesign": "node test/redesign_flow.test.js && node test/offline_policy.test.js"
   },
   "keywords": [],
   "author": "",
