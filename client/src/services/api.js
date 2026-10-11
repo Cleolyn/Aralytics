@@ -65,6 +65,9 @@ export const api = {
   }),
   getCurrentUser: () => request('/auth/me'),
 
+  getPersonalScores: () => request('/student/scores'),
+  getOwnSubmission: (id) => request(`/student/submissions/${id}`),
+
   // Curriculum & ILAW
   getTaxonomy: () => request('/curriculum/taxonomy'),
   getByIlaw: (tag) => request(`/curriculum/ilaw/${tag}`),
