@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const { getAuth } = require('@clerk/express');
 const db = require('../config/database');
-const { verifyToken, invalidateUserCache, clerkClient } = require('../middleware/authMiddleware');
+const { verifyToken, invalidateUserCache, clerkClient, JWT_SECRET } = require('../middleware/authMiddleware');
 
 const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s'-]+$/;
 const NUMERIC_ID_REGEX = /^[0-9]+$/;
@@ -45,17 +46,32 @@ async function syncUserToDatabase(userPayload, role) {
   );
 
   if (existing.length > 0) {
+    let safeLrn = null;
+    if (userPayload.lrn_or_id) {
+      const { rows: lrnConflict } = await db.query(
+        `SELECT id FROM users WHERE lrn_or_id = ? AND id != ? LIMIT 1`,
+        [userPayload.lrn_or_id, existing[0].id]
+      );
+      if (lrnConflict.length === 0) {
+        safeLrn = userPayload.lrn_or_id;
+      }
+    }
     await db.query(
       `UPDATE users
        SET lrn_or_id = COALESCE(?, lrn_or_id), first_name = ?, last_name = ?, full_name = ?, role = ?, section = ?, section_id = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [userPayload.lrn_or_id || null, firstName, lastName, fullName, role, section, section, existing[0].id]
+      [safeLrn, firstName, lastName, fullName, role, section, section, existing[0].id]
     );
   } else {
+    const { rows: lrnConflict } = await db.query(
+      `SELECT id FROM users WHERE lrn_or_id = ? LIMIT 1`,
+      [lrnOrId]
+    );
+    const finalLrn = lrnConflict.length === 0 ? lrnOrId : numericFallback;
     await db.query(
       `INSERT INTO users (id, lrn_or_id, first_name, last_name, full_name, email, password_hash, role, section, section_id)
        VALUES (?, ?, ?, ?, ?, ?, 'CLERK_MANAGED_AUTH', ?, ?, ?)`,
-      [userId, lrnOrId, firstName, lastName, fullName, email, role, section, section]
+      [userId, finalLrn, firstName, lastName, fullName, email, role, section, section]
     );
   }
 }
@@ -119,11 +135,15 @@ router.post('/sync', verifyToken, async (req, res) => {
     const cleanLast = last_name ? String(last_name).trim() : (req.user.last_name || dbRecord?.last_name);
     const cleanSection = finalRole === 'STUDENT' ? (section || req.user.section || dbRecord?.section || '10-Rizal') : null;
 
-    // Ensure Clerk publicMetadata matches the authoritative role & validated profile
+    // Ensure Clerk profile & publicMetadata match the authoritative role & validated profile
     if (req.user.role !== finalRole || lrn_or_id || first_name || last_name || section) {
-      await clerkClient.users.updateUser(userId, {
-        ...(cleanFirst ? { firstName: cleanFirst } : {}),
-        ...(cleanLast ? { lastName: cleanLast } : {}),
+      if (cleanFirst || cleanLast) {
+        await clerkClient.users.updateUser(userId, {
+          ...(cleanFirst ? { firstName: cleanFirst } : {}),
+          ...(cleanLast ? { lastName: cleanLast } : {})
+        }).catch(() => {});
+      }
+      await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
           role: finalRole,
           ...(cleanLrn ? { lrn_or_id: cleanLrn } : {}),
@@ -151,6 +171,168 @@ router.post('/sync', verifyToken, async (req, res) => {
   } catch (err) {
     console.error('[AUTH] Role sync error:', err.message);
     return res.status(500).json({ success: false, message: 'Could not verify account role.' });
+  }
+});
+
+/**
+ * POST /api/auth/student-login
+ * Direct learner authentication using required Student Number/LRN, Class Section,
+ * First Name, and Last Name (strictly no middle name field).
+ */
+router.post('/student-login', async (req, res) => {
+  try {
+    const { lrn_or_id, section, first_name, last_name } = req.body || {};
+    const cleanLrn = String(lrn_or_id || '').trim();
+    const cleanSection = String(section || '').trim();
+    const cleanFirst = String(first_name || '').trim();
+    const cleanLast = String(last_name || '').trim();
+
+    if (!cleanLrn || !NUMERIC_ID_REGEX.test(cleanLrn)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student Number / LRN is required and must contain numeric digits (0–9) only.'
+      });
+    }
+    if (!cleanSection) {
+      return res.status(400).json({
+        success: false,
+        message: 'Class section is required.'
+      });
+    }
+    if (!cleanFirst || !NAME_REGEX.test(cleanFirst)) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name is required and must contain alphabetical characters only.'
+      });
+    }
+    if (!cleanLast || !NAME_REGEX.test(cleanLast)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Last name is required and must contain alphabetical characters only.'
+      });
+    }
+
+    const fullName = `${cleanFirst} ${cleanLast}`.trim();
+    const { rows: existing } = await db.query(
+      `SELECT * FROM users WHERE lrn_or_id = ? LIMIT 1`,
+      [cleanLrn]
+    );
+
+    if (existing.length > 0 && existing[0].role === 'TEACHER') {
+      return res.status(403).json({
+        success: false,
+        code: 'ROLE_MISMATCH',
+        message: 'Access Denied: This ID belongs to a Teacher account and cannot log in through the Learner portal.'
+      });
+    }
+
+    const targetEmail = existing.length > 0 && existing[0].email
+      ? existing[0].email
+      : `student.${cleanLrn}@student.deped.gov.ph`;
+
+    // 1. Find or create the Student user in Clerk so the session is 100% Clerk-backed
+    let clerkUser = null;
+    let clerkTicket = null;
+    try {
+      const clerkList = await clerkClient.users.getUserList({ emailAddress: [targetEmail] });
+      if (clerkList.data && clerkList.data.length > 0) {
+        clerkUser = await clerkClient.users.updateUser(clerkList.data[0].id, {
+          firstName: cleanFirst,
+          lastName: cleanLast
+        });
+        await clerkClient.users.updateUserMetadata(clerkUser.id, {
+          publicMetadata: {
+            role: 'STUDENT',
+            lrn_or_id: cleanLrn,
+            section: cleanSection,
+            section_id: cleanSection,
+            first_name: cleanFirst,
+            last_name: cleanLast
+          }
+        });
+      } else {
+        clerkUser = await clerkClient.users.createUser({
+          emailAddress: [targetEmail],
+          password: `Aralytics#${cleanLrn}!`,
+          firstName: cleanFirst,
+          lastName: cleanLast,
+          skipPasswordChecks: true,
+          publicMetadata: {
+            role: 'STUDENT',
+            lrn_or_id: cleanLrn,
+            section: cleanSection,
+            section_id: cleanSection,
+            first_name: cleanFirst,
+            last_name: cleanLast
+          }
+        });
+      }
+      invalidateUserCache(clerkUser.id);
+      const tokObj = await clerkClient.signInTokens.createSignInToken({
+        userId: clerkUser.id,
+        expiresInSeconds: 300
+      });
+      clerkTicket = tokObj?.token || null;
+    } catch (clerkErr) {
+      console.warn('[AUTH] Clerk student provisioning warning:', clerkErr.message);
+    }
+
+    let studentRecord = null;
+    if (existing.length > 0) {
+      const found = existing[0];
+      await db.query(
+        `UPDATE users
+         SET first_name = ?, last_name = ?, full_name = ?, section = ?, section_id = ?, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [cleanFirst, cleanLast, fullName, cleanSection, cleanSection, found.id]
+      );
+      studentRecord = {
+        id: clerkUser?.id || found.id,
+        user_id: clerkUser?.id || found.id,
+        lrn_or_id: cleanLrn,
+        first_name: cleanFirst,
+        last_name: cleanLast,
+        full_name: fullName,
+        email: targetEmail,
+        role: 'STUDENT',
+        section: cleanSection,
+        section_id: cleanSection
+      };
+    } else {
+      const newId = clerkUser?.id || `usr-student-${cleanLrn}`;
+      await db.query(
+        `INSERT INTO users (id, lrn_or_id, first_name, last_name, full_name, email, password_hash, role, section, section_id)
+         VALUES (?, ?, ?, ?, ?, ?, 'CLERK_MANAGED_AUTH', 'STUDENT', ?, ?)`,
+        [newId, cleanLrn, cleanFirst, cleanLast, fullName, targetEmail, cleanSection, cleanSection]
+      );
+      studentRecord = {
+        id: newId,
+        user_id: newId,
+        lrn_or_id: cleanLrn,
+        first_name: cleanFirst,
+        last_name: cleanLast,
+        full_name: fullName,
+        email: targetEmail,
+        role: 'STUDENT',
+        section: cleanSection,
+        section_id: cleanSection
+      };
+    }
+
+    const token = jwt.sign(studentRecord, JWT_SECRET, { expiresIn: '12h' });
+    return res.json({
+      success: true,
+      role: 'STUDENT',
+      clerkTicket,
+      token,
+      user: studentRecord
+    });
+  } catch (err) {
+    console.error('[AUTH] Student login error:', err.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Could not complete learner sign-in. Please check your details and try again.'
+    });
   }
 });
 

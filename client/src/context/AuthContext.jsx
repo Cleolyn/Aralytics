@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useCallback, useState } from 'react';
+import React, { createContext, useContext, useEffect, useCallback, useState, useRef } from 'react';
 import { useUser, useAuth as useClerkAuth } from '@clerk/react';
 import { setTokenGetter } from '../services/api';
 
@@ -11,12 +11,6 @@ export const LOGIN_INTENT_KEY = 'aralytics:login-intent';
 /**
  * AuthProvider
  * Enforces strict, immutable role separation between TEACHER and STUDENT accounts.
- *
- * Exposed shape:
- *   { user, loading, logout, isTeacher, isStudent, authError, clearAuthError }
- *
- * user shape:
- *   { id, first_name, last_name, email, role, section }
  */
 export function AuthProvider({ children }) {
   const { user: clerkUser, isLoaded } = useUser();
@@ -24,6 +18,9 @@ export function AuthProvider({ children }) {
   const [syncingRole, setSyncingRole] = useState(true);
   const [verifiedRole, setVerifiedRole] = useState(null);
   const [verifiedProfile, setVerifiedProfile] = useState(null);
+  const [studentSession, setStudentSession] = useState(null);
+  const initialBootHandledRef = useRef(false);
+
   const [authError, setAuthError] = useState(() => {
     if (typeof window === 'undefined') return '';
     return sessionStorage.getItem(AUTH_ERROR_KEY) || '';
@@ -34,20 +31,80 @@ export function AuthProvider({ children }) {
     setAuthError('');
   }, []);
 
-  // Wire Clerk's async getToken into api.js so every request automatically
-  // attaches the current Clerk session JWT as the Bearer token.
+  // Wire either the active Clerk token or the Student JWT into api.js
   useEffect(() => {
-    setTokenGetter(() => getToken());
-  }, [getToken]);
+    setTokenGetter(async () => {
+      try {
+        const clerkTok = await getToken();
+        if (clerkTok) return clerkTok;
+      } catch {
+        // Fallback to studentSession token
+      }
+      return studentSession?.token || null;
+    });
+  }, [getToken, studentSession?.token]);
 
-  // After sign-in, verify the user's immutable role with the server (/api/auth/sync).
-  // If a student attempts to log in through the Teacher portal (or vice-versa),
-  // the server rejects with 403 ROLE_MISMATCH and we immediately sign out the session.
+  // Clerk-connected Student Login using LRN, Class Section, First Name, and Last Name
+  const loginStudent = useCallback(async ({ lrn_or_id, section, first_name, last_name }) => {
+    clearAuthError();
+    sessionStorage.setItem(LOGIN_INTENT_KEY, String(Date.now()));
+    sessionStorage.setItem(PENDING_ROLE_KEY, 'STUDENT');
+    sessionStorage.setItem(
+      PENDING_PROFILE_KEY,
+      JSON.stringify({ lrn_or_id, section, first_name, last_name })
+    );
+
+    const res = await fetch('/api/auth/student-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lrn_or_id, section, first_name, last_name })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      const msg = data.message || 'Could not sign in. Please check your LRN, section, and name.';
+      setAuthError(msg);
+      throw new Error(msg);
+    }
+    setStudentSession({ user: data.user, token: data.token });
+    return data;
+  }, [clearAuthError]);
+
   useEffect(() => {
     if (!isLoaded) return;
+
+    // On initial page load / refresh, clear any stale Clerk session unless a recent login intent exists
+    if (!initialBootHandledRef.current) {
+      initialBootHandledRef.current = true;
+      const isReload =
+        typeof window !== 'undefined' &&
+        window.performance?.getEntriesByType?.('navigation')?.[0]?.type === 'reload';
+      const intentVal = sessionStorage.getItem(LOGIN_INTENT_KEY);
+      const intentTs = Number(intentVal || 0);
+      const hasRecentLoginIntent =
+        !isReload &&
+        (intentVal === 'redirecting' || (intentTs > 0 && Date.now() - intentTs < 60000));
+
+      if (isReload) {
+        sessionStorage.removeItem(LOGIN_INTENT_KEY);
+      }
+
+      if (clerkUser && !hasRecentLoginIntent) {
+        sessionStorage.removeItem(LOGIN_INTENT_KEY);
+        setVerifiedRole(null);
+        setVerifiedProfile(null);
+        setSyncingRole(true);
+        Promise.resolve(signOut())
+          .catch(() => {})
+          .finally(() => {
+            setSyncingRole(false);
+          });
+        return;
+      }
+    }
+
     if (!clerkUser) {
-      sessionStorage.removeItem(LOGIN_INTENT_KEY);
       setVerifiedRole(null);
+      setVerifiedProfile(null);
       setSyncingRole(false);
       return;
     }
@@ -56,30 +113,6 @@ export function AuthProvider({ children }) {
     setSyncingRole(true);
 
     async function verifyAndSyncRole() {
-      const hasLoginIntent = sessionStorage.getItem(LOGIN_INTENT_KEY) === '1';
-      sessionStorage.removeItem(LOGIN_INTENT_KEY);
-
-      // If the website was opened, accessed, or refreshed without an active sign-in
-      // intent from /login or /register, immediately terminate any cached session
-      // so the app strictly defaults to the landing/login page.
-      if (!hasLoginIntent) {
-        sessionStorage.removeItem(PENDING_ROLE_KEY);
-        sessionStorage.removeItem(PENDING_PROFILE_KEY);
-        if (!cancelled) {
-          setVerifiedRole(null);
-        }
-        try {
-          await signOut();
-        } catch {
-          // Ignore signOut errors
-        } finally {
-          if (!cancelled) {
-            setSyncingRole(false);
-          }
-        }
-        return;
-      }
-
       const pendingRole = sessionStorage.getItem(PENDING_ROLE_KEY);
       const requestedRole =
         pendingRole === 'TEACHER' || pendingRole === 'STUDENT' ? pendingRole : null;
@@ -102,17 +135,17 @@ export function AuthProvider({ children }) {
         });
 
         const data = await res.json().catch(() => ({}));
-        sessionStorage.removeItem(PENDING_ROLE_KEY);
-        sessionStorage.removeItem(PENDING_PROFILE_KEY);
 
         if (res.status === 403 && data.code === 'ROLE_MISMATCH') {
           const msg =
             data.message ||
             'Access Denied: You cannot sign in using the wrong account role portal.';
           sessionStorage.setItem(AUTH_ERROR_KEY, msg);
+          sessionStorage.removeItem(LOGIN_INTENT_KEY);
           if (!cancelled) {
             setAuthError(msg);
             setVerifiedRole(null);
+            setVerifiedProfile(null);
             setSyncingRole(false);
           }
           await signOut();
@@ -127,18 +160,24 @@ export function AuthProvider({ children }) {
             setVerifiedProfile(data.user || null);
           }
           if (clerkUser.publicMetadata?.role !== data.role) {
-            await clerkUser.reload();
+            await clerkUser.reload().catch(() => {});
           }
         } else {
+          const errMsg = data.message || 'Could not verify your account role.';
+          sessionStorage.removeItem(LOGIN_INTENT_KEY);
           if (!cancelled) {
+            setAuthError(errMsg);
             setVerifiedRole(null);
+            setVerifiedProfile(null);
           }
           await signOut();
         }
       } catch (err) {
         console.error('[Auth] Failed to verify user role:', err);
+        sessionStorage.removeItem(LOGIN_INTENT_KEY);
         if (!cancelled) {
           setVerifiedRole(null);
+          setVerifiedProfile(null);
         }
         await signOut();
       } finally {
@@ -159,39 +198,45 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem(LOGIN_INTENT_KEY);
     sessionStorage.removeItem(PENDING_ROLE_KEY);
     sessionStorage.removeItem(PENDING_PROFILE_KEY);
+    setStudentSession(null);
     setVerifiedRole(null);
-    return signOut();
-  }, [signOut]);
+    setVerifiedProfile(null);
+    if (clerkUser) {
+      return signOut();
+    }
+    return Promise.resolve();
+  }, [clerkUser, signOut]);
 
   const resolvedRole = verifiedRole;
 
-  // Map Clerk user → app user shape only once the role is verified
-  const user =
-    isLoaded && !syncingRole && clerkUser && resolvedRole
-      ? {
-          id: clerkUser.id,
-          first_name: verifiedProfile?.first_name || clerkUser.firstName || clerkUser.publicMetadata?.first_name,
-          last_name: verifiedProfile?.last_name || clerkUser.lastName || clerkUser.publicMetadata?.last_name,
-          email: clerkUser.primaryEmailAddress?.emailAddress,
-          role: resolvedRole, // 'TEACHER' | 'STUDENT' (immutable)
-          section:
-            verifiedProfile?.section ||
-            clerkUser.publicMetadata?.section ||
-            (resolvedRole === 'STUDENT' ? '10-Rizal' : null),
-          lrn_or_id: verifiedProfile?.lrn_or_id || clerkUser.publicMetadata?.lrn_or_id,
-        }
-      : null;
+  const user = studentSession?.user
+    ? studentSession.user
+    : isLoaded && !syncingRole && clerkUser && resolvedRole
+    ? {
+        id: clerkUser.id,
+        first_name: verifiedProfile?.first_name || clerkUser.firstName || clerkUser.publicMetadata?.first_name,
+        last_name: verifiedProfile?.last_name || clerkUser.lastName || clerkUser.publicMetadata?.last_name,
+        email: clerkUser.primaryEmailAddress?.emailAddress,
+        role: resolvedRole, // 'TEACHER' | 'STUDENT' (immutable)
+        section:
+          verifiedProfile?.section ||
+          clerkUser.publicMetadata?.section ||
+          (resolvedRole === 'STUDENT' ? '10-Rizal' : null),
+        lrn_or_id: verifiedProfile?.lrn_or_id || clerkUser.publicMetadata?.lrn_or_id
+      }
+    : null;
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        loading: !isLoaded || syncingRole,
+        loading: (!isLoaded || syncingRole) && !studentSession?.user,
         logout,
+        loginStudent,
         authError,
         clearAuthError,
         isTeacher: user?.role === 'TEACHER',
-        isStudent: user?.role === 'STUDENT',
+        isStudent: user?.role === 'STUDENT'
       }}
     >
       {children}

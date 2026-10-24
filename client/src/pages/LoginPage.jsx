@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { SignIn } from '@clerk/react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { SignIn, useSignIn } from '@clerk/react';
 import PublicLayout from '../components/PublicLayout';
 import { Notice } from '../components/ui/Feedback';
 import { useAuth, PENDING_ROLE_KEY, PENDING_PROFILE_KEY, LOGIN_INTENT_KEY } from '../context/AuthContext';
@@ -12,23 +12,25 @@ const COMPACT_CLERK_APPEARANCE = {
   elements: {
     rootBox: { width: '100%' },
     cardBox: { width: '100%', boxShadow: 'none', border: '1px solid var(--border-subtle)', borderRadius: '4px' },
-    card: { padding: '12px 16px', gap: '8px', boxShadow: 'none', background: 'transparent' },
+    card: { padding: '8px 12px', gap: '4px', boxShadow: 'none', background: 'transparent' },
     header: { display: 'none' },
-    socialButtonsBlockButton: { minHeight: '32px', padding: '4px 10px', fontSize: '12px' },
+    socialButtonsBlockButton: { minHeight: '28px', height: '28px', padding: '2px 10px', fontSize: '12px' },
     dividerRow: { margin: '2px 0' },
-    form: { gap: '6px' },
-    formFieldRow: { marginBottom: '4px' },
-    formFieldLabel: { fontSize: '12px', marginBottom: '2px' },
-    formFieldInput: { minHeight: '32px', height: '32px', padding: '4px 10px', fontSize: '13px' },
-    formButtonPrimary: { minHeight: '34px', height: '34px', padding: '4px 12px', fontSize: '13px', backgroundColor: 'var(--colors-primary)' },
-    footerAction: { padding: '4px 12px', margin: 0, fontSize: '12px' },
-    footer: { paddingBottom: '4px' }
+    form: { gap: '4px' },
+    formFieldRow: { marginBottom: '2px' },
+    formFieldLabel: { fontSize: '11px', marginBottom: '1px' },
+    formFieldInput: { minHeight: '28px', height: '28px', padding: '2px 8px', fontSize: '12px' },
+    formButtonPrimary: { minHeight: '28px', height: '28px', padding: '2px 12px', fontSize: '12px', backgroundColor: 'var(--colors-primary)' },
+    footerAction: { padding: '2px 10px', margin: 0, fontSize: '11px' },
+    footer: { paddingBottom: '2px' }
   }
 };
 
 export default function LoginPage() {
-  const { authError, clearAuthError } = useAuth();
+  const { authError, clearAuthError, loginStudent } = useAuth();
+  const { isLoaded: signInLoaded, signIn, setActive } = useSignIn();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialRole =
     searchParams.get('role') === 'TEACHER'
@@ -52,6 +54,7 @@ export default function LoginPage() {
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [gateNotice, setGateNotice] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const lrnRef = useRef(null);
   const sectionRef = useRef(null);
@@ -59,7 +62,6 @@ export default function LoginPage() {
   const lastNameRef = useRef(null);
 
   useEffect(() => {
-    sessionStorage.setItem(LOGIN_INTENT_KEY, '1');
     sessionStorage.setItem(PENDING_ROLE_KEY, selectedRole);
   }, [selectedRole]);
 
@@ -73,11 +75,7 @@ export default function LoginPage() {
       /^[0-9]+$/.test(profile.lrn_or_id.trim()) &&
       profile.section.trim().length > 0 &&
       NAME_REGEX.test(profile.first_name.trim()) &&
-      NAME_REGEX.test(profile.last_name.trim()) &&
-      !fieldErrors.lrn_or_id &&
-      !fieldErrors.section &&
-      !fieldErrors.first_name &&
-      !fieldErrors.last_name);
+      NAME_REGEX.test(profile.last_name.trim()));
 
   useEffect(() => {
     if (isStudentProfileComplete && gateNotice) {
@@ -122,23 +120,86 @@ export default function LoginPage() {
     setProfile((prev) => ({ ...prev, [field]: sanitized }));
   };
 
-  const enforceStudentFieldsGate = (e) => {
-    if (selectedRole !== 'STUDENT' || isStudentProfileComplete) return;
-    e.preventDefault();
-    e.stopPropagation();
-
+  const validateRequiredStudentFields = () => {
     const nextErrors = {};
-    if (!profile.lrn_or_id.trim()) nextErrors.lrn_or_id = 'Required';
-    if (!profile.section.trim()) nextErrors.section = 'Required';
-    if (!profile.first_name.trim() || !NAME_REGEX.test(profile.first_name.trim())) nextErrors.first_name = 'Required';
-    if (!profile.last_name.trim() || !NAME_REGEX.test(profile.last_name.trim())) nextErrors.last_name = 'Required';
-    setFieldErrors((prev) => ({ ...prev, ...nextErrors }));
-    setGateNotice('Complete your Student Number / LRN, Class Section, First Name, and Last Name above before signing in.');
+    if (!profile.lrn_or_id.trim() || !/^[0-9]+$/.test(profile.lrn_or_id.trim())) {
+      nextErrors.lrn_or_id = 'Required (0–9)';
+    }
+    if (!profile.section.trim()) {
+      nextErrors.section = 'Required';
+    }
+    if (!profile.first_name.trim() || !NAME_REGEX.test(profile.first_name.trim())) {
+      nextErrors.first_name = 'Required (letters)';
+    }
+    if (!profile.last_name.trim() || !NAME_REGEX.test(profile.last_name.trim())) {
+      nextErrors.last_name = 'Required (letters)';
+    }
+    setFieldErrors(nextErrors);
 
-    if (nextErrors.lrn_or_id) lrnRef.current?.focus();
-    else if (nextErrors.section) sectionRef.current?.focus();
-    else if (nextErrors.first_name) firstNameRef.current?.focus();
-    else if (nextErrors.last_name) lastNameRef.current?.focus();
+    if (Object.keys(nextErrors).length > 0) {
+      setGateNotice('Complete your Student Number / LRN, Class Section, First Name, and Last Name before signing in.');
+      if (nextErrors.lrn_or_id) lrnRef.current?.focus();
+      else if (nextErrors.section) sectionRef.current?.focus();
+      else if (nextErrors.first_name) firstNameRef.current?.focus();
+      else if (nextErrors.last_name) lastNameRef.current?.focus();
+      return false;
+    }
+    return true;
+  };
+
+  const handleClerkTicketStudentLogin = async (e) => {
+    e.preventDefault();
+    clearAuthError?.();
+    setGateNotice('');
+    if (!validateRequiredStudentFields()) return;
+
+    setSubmitting(true);
+    try {
+      const data = await loginStudent({
+        lrn_or_id: profile.lrn_or_id.trim(),
+        section: profile.section.trim(),
+        first_name: profile.first_name.trim(),
+        last_name: profile.last_name.trim()
+      });
+
+      // Establish real Clerk session via Clerk Sign-In Ticket when available
+      if (data.clerkTicket && signInLoaded && signIn && setActive) {
+        try {
+          const attempt = await signIn.create({
+            strategy: 'ticket',
+            ticket: data.clerkTicket
+          });
+          if (attempt.status === 'complete' && attempt.createdSessionId) {
+            await setActive({ session: attempt.createdSessionId });
+          }
+        } catch (ticketErr) {
+          console.warn('[Clerk Ticket Sign-In]', ticketErr.message);
+        }
+      }
+
+      navigate('/student/dashboard', { replace: true });
+    } catch {
+      // authError is displayed via Notice
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClerkInteraction = (e) => {
+    const isInitialLoginStep = location.pathname === '/login' || location.pathname === '/login/';
+    if (selectedRole === 'STUDENT' && isInitialLoginStep && !isStudentProfileComplete) {
+      const clickedButton = e.target.closest?.('button') || e.type === 'submit';
+      if (clickedButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        validateRequiredStudentFields();
+        return;
+      }
+    }
+
+    sessionStorage.setItem(LOGIN_INTENT_KEY, String(Date.now()));
+    sessionStorage.setItem(PENDING_ROLE_KEY, selectedRole);
+    sessionStorage.setItem(PENDING_PROFILE_KEY, JSON.stringify(profile));
   };
 
   return (
@@ -174,7 +235,7 @@ export default function LoginPage() {
           <Notice error>{authError || gateNotice || location.state?.unauthorizedNotice}</Notice>
 
           {selectedRole === 'STUDENT' ? (
-            <div style={{ marginBottom: 6 }}>
+            <form onSubmit={handleClerkTicketStudentLogin} noValidate style={{ marginBottom: 6 }}>
               <div className="form-grid">
                 <div className="field">
                   <label htmlFor="login-school-id">Student Number / LRN *</label>
@@ -186,7 +247,7 @@ export default function LoginPage() {
                     pattern="[0-9]*"
                     required
                     className="form-input"
-                    placeholder="Numbers only (0–9)"
+                    placeholder="e.g. 123456789012"
                     value={profile.lrn_or_id}
                     onChange={handleIdChange}
                     maxLength={16}
@@ -225,7 +286,7 @@ export default function LoginPage() {
                     type="text"
                     required
                     className="form-input"
-                    placeholder="Letters only"
+                    placeholder="e.g. Juan"
                     value={profile.first_name}
                     onChange={handleNameChange('first_name', 'First name')}
                   />
@@ -243,7 +304,7 @@ export default function LoginPage() {
                     type="text"
                     required
                     className="form-input"
-                    placeholder="Letters only"
+                    placeholder="e.g. Dela Cruz"
                     value={profile.last_name}
                     onChange={handleNameChange('last_name', 'Last name')}
                   />
@@ -254,9 +315,17 @@ export default function LoginPage() {
                   )}
                 </div>
               </div>
-            </div>
+              <button
+                type="submit"
+                className="btn btn-primary full-width"
+                style={{ minHeight: 30, height: 30, padding: '2px 12px', fontSize: 12.5, marginTop: 2 }}
+                disabled={submitting}
+              >
+                {submitting ? 'Connecting to Clerk…' : 'Sign in as Learner (Clerk LRN)'}
+              </button>
+            </form>
           ) : (
-            <div className="field" style={{ marginBottom: 8 }}>
+            <div className="field" style={{ marginBottom: 6 }}>
               <label htmlFor="login-teacher-id">Employee ID Number (optional)</label>
               <input
                 id="login-teacher-id"
@@ -278,12 +347,10 @@ export default function LoginPage() {
           )}
 
           <div
-            onClickCapture={enforceStudentFieldsGate}
-            onFocusCapture={enforceStudentFieldsGate}
-            onKeyDownCapture={enforceStudentFieldsGate}
-            onSubmitCapture={enforceStudentFieldsGate}
+            onClickCapture={handleClerkInteraction}
+            onSubmitCapture={handleClerkInteraction}
             style={{
-              opacity: isStudentProfileComplete ? 1 : 0.6,
+              opacity: isStudentProfileComplete ? 1 : 0.65,
               transition: 'opacity 0.15s ease'
             }}
           >
