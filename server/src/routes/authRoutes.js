@@ -4,6 +4,9 @@ const { getAuth } = require('@clerk/express');
 const db = require('../config/database');
 const { verifyToken, invalidateUserCache, clerkClient } = require('../middleware/authMiddleware');
 
+const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+const NUMERIC_ID_REGEX = /^[0-9]+$/;
+
 /**
  * Look up an existing user's immutable role in the Turso/SQLite `users` table.
  */
@@ -13,7 +16,7 @@ async function getDatabaseUserRole(userPayload) {
   if (!userId && !email) return null;
 
   const { rows } = await db.query(
-    `SELECT id, role, section, section_id FROM users WHERE id = ? OR email = ? LIMIT 1`,
+    `SELECT id, role, section, section_id, lrn_or_id, first_name, last_name FROM users WHERE id = ? OR email = ? LIMIT 1`,
     [userId || '', email || '']
   );
 
@@ -32,7 +35,8 @@ async function syncUserToDatabase(userPayload, role) {
   const lastName = userPayload.last_name || (role === 'TEACHER' ? 'Teacher' : 'Learner');
   const fullName = `${firstName} ${lastName}`.trim();
   const email = userPayload.email || `${userId}@aralytics.local`;
-  const lrnOrId = userPayload.lrn_or_id || `${role === 'TEACHER' ? 'EMP' : 'LRN'}-${userId.slice(-8).toUpperCase()}`;
+  const numericFallback = String(Math.abs(Array.from(userId).reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 100000000000))).padStart(12, '0').slice(0, 12);
+  const lrnOrId = userPayload.lrn_or_id ? String(userPayload.lrn_or_id).replace(/\D/g, '') || numericFallback : numericFallback;
   const section = role === 'STUDENT' ? (userPayload.section || userPayload.section_id || '10-Rizal') : null;
 
   const { rows: existing } = await db.query(
@@ -43,9 +47,9 @@ async function syncUserToDatabase(userPayload, role) {
   if (existing.length > 0) {
     await db.query(
       `UPDATE users
-       SET first_name = ?, last_name = ?, full_name = ?, role = ?, section = ?, section_id = ?, updated_at = CURRENT_TIMESTAMP
+       SET lrn_or_id = COALESCE(?, lrn_or_id), first_name = ?, last_name = ?, full_name = ?, role = ?, section = ?, section_id = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [firstName, lastName, fullName, role, section, section, existing[0].id]
+      [userPayload.lrn_or_id || null, firstName, lastName, fullName, role, section, section, existing[0].id]
     );
   } else {
     await db.query(
@@ -71,6 +75,25 @@ router.post('/sync', verifyToken, async (req, res) => {
     req.body?.role === 'TEACHER' || req.body?.role === 'STUDENT'
       ? req.body.role
       : null;
+  const { lrn_or_id, first_name, middle_name, last_name, section } = req.body || {};
+
+  // Server-side input sanitization & validation for student/employee number and names
+  if (lrn_or_id !== undefined && String(lrn_or_id).trim() !== '') {
+    if (!NUMERIC_ID_REGEX.test(String(lrn_or_id).trim())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student / ID number must contain numeric digits (0-9) only.'
+      });
+    }
+  }
+  for (const [label, val] of [['First name', first_name], ['Middle name', middle_name], ['Last name', last_name]]) {
+    if (val !== undefined && String(val).trim() !== '' && !NAME_REGEX.test(String(val).trim())) {
+      return res.status(400).json({
+        success: false,
+        message: `${label} must contain alphabetical characters and standard name punctuation only.`
+      });
+    }
+  }
 
   try {
     const dbRecord = await getDatabaseUserRole(req.user);
@@ -91,15 +114,22 @@ router.post('/sync', verifyToken, async (req, res) => {
 
     // 2. Determine immutable role (existing role wins; brand-new sign-up uses requestedRole or STUDENT)
     const finalRole = existingRole || requestedRole || 'STUDENT';
+    const cleanLrn = lrn_or_id ? String(lrn_or_id).replace(/\D/g, '') : (dbRecord?.lrn_or_id || req.user.lrn_or_id);
+    const cleanFirst = first_name ? String(first_name).trim() : (req.user.first_name || dbRecord?.first_name);
+    const cleanLast = last_name ? String(last_name).trim() : (req.user.last_name || dbRecord?.last_name);
+    const cleanSection = finalRole === 'STUDENT' ? (section || req.user.section || dbRecord?.section || '10-Rizal') : null;
 
-    // Ensure Clerk publicMetadata matches the authoritative role
-    if (req.user.role !== finalRole) {
-      await clerkClient.users.updateUserMetadata(userId, {
+    // Ensure Clerk publicMetadata matches the authoritative role & validated profile
+    if (req.user.role !== finalRole || lrn_or_id || first_name || last_name || section) {
+      await clerkClient.users.updateUser(userId, {
+        ...(cleanFirst ? { firstName: cleanFirst } : {}),
+        ...(cleanLast ? { lastName: cleanLast } : {}),
         publicMetadata: {
           role: finalRole,
-          ...(finalRole === 'STUDENT' && !req.user.section
-            ? { section: dbRecord?.section || '10-Rizal', section_id: dbRecord?.section_id || '10-Rizal' }
-            : {})
+          ...(cleanLrn ? { lrn_or_id: cleanLrn } : {}),
+          ...(cleanFirst ? { first_name: cleanFirst } : {}),
+          ...(cleanLast ? { last_name: cleanLast } : {}),
+          ...(cleanSection ? { section: cleanSection, section_id: cleanSection } : {})
         }
       });
       invalidateUserCache(userId);
@@ -107,9 +137,12 @@ router.post('/sync', verifyToken, async (req, res) => {
 
     const updatedUser = {
       ...req.user,
+      first_name: cleanFirst,
+      last_name: cleanLast,
+      lrn_or_id: cleanLrn,
       role: finalRole,
-      section: finalRole === 'STUDENT' ? (req.user.section || dbRecord?.section || '10-Rizal') : null,
-      section_id: finalRole === 'STUDENT' ? (req.user.section_id || dbRecord?.section_id || '10-Rizal') : null
+      section: cleanSection,
+      section_id: cleanSection
     };
 
     await syncUserToDatabase(updatedUser, finalRole);

@@ -195,12 +195,17 @@ async function submitTask(req, res, next) {
     let effectiveSize = Number(file_size_bytes) || 1024 * 500;
     if (file_content_base64 !== undefined) {
       const extension = path.extname(file_name).toLowerCase();
-      if (!['.pdf', '.docx'].includes(extension) || typeof file_content_base64 !== 'string' ||
+      const allowedExts = ['.pdf', '.docx', '.doc', '.pptx', '.ppt', '.zip', '.mp4', '.png', '.jpg', '.jpeg'];
+      if (!allowedExts.includes(extension) || typeof file_content_base64 !== 'string' ||
           file_content_base64.length > 7 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(file_content_base64)) {
-        return res.status(400).json({ success: false, message: 'Choose a PDF or DOCX file up to 5 MB.' });
+        return res.status(400).json({ success: false, message: 'Choose a valid document, media, or archive file up to 5 MB.' });
       }
       const content = Buffer.from(file_content_base64, 'base64');
-      const validHeader = extension === '.pdf' ? content.subarray(0, 5).toString() === '%PDF-' : content.subarray(0, 2).toString() === 'PK';
+      const validHeader = extension === '.pdf'
+        ? content.subarray(0, 5).toString() === '%PDF-'
+        : ['.docx', '.pptx', '.zip'].includes(extension)
+        ? content.subarray(0, 2).toString() === 'PK'
+        : content.length > 0;
       if (!content.length || content.length > 5 * 1024 * 1024 || !validHeader) {
         return res.status(400).json({ success: false, message: 'The file is invalid or larger than 5 MB.' });
       }

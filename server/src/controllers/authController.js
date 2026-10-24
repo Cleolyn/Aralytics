@@ -155,14 +155,36 @@ async function me(req, res, next) {
 /**
  * 5. User Account Registration Handler (FR-01, SRS Section 5.1)
  */
+const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+const NUMERIC_ID_REGEX = /^[0-9]+$/;
+
 async function register(req, res, next) {
   try {
-    const { lrn_or_id, first_name, last_name, email, password, role, section, section_id } = req.body;
+    const { lrn_or_id, first_name, middle_name, last_name, email, password, role, section, section_id } = req.body;
 
     if (!lrn_or_id || !first_name || !last_name || !email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Lahat ng field (lrn_or_id, first_name, last_name, email, password) ay kailangan.'
+      });
+    }
+
+    const cleanId = String(lrn_or_id).replace(/\D/g, '');
+    if (!NUMERIC_ID_REGEX.test(String(lrn_or_id).trim()) || !cleanId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student Number / ID must contain numeric characters only (0-9).'
+      });
+    }
+
+    if (
+      !NAME_REGEX.test(String(first_name).trim()) ||
+      !NAME_REGEX.test(String(last_name).trim()) ||
+      (middle_name && !NAME_REGEX.test(String(middle_name).trim()))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name fields must contain alphabetical characters and standard name punctuation only.'
       });
     }
 

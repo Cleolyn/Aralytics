@@ -116,6 +116,41 @@ textarea.form-input { min-height: 112px; resize: vertical; }
 .auth-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; padding: 56px 0; align-items: center; min-height: calc(100vh - 100px); }
 .auth-story h1 { font-size: clamp(2.5rem,4vw,4rem); max-width: 13ch; } .auth-story > p { color: var(--colors-body); margin-top: 20px; font-size: 18px; max-width: 45ch; } .auth-story img { width: 100%; margin-top: 32px; aspect-ratio: 1.4; object-fit: cover; }
 .auth-form { max-width: 480px; width: 100%; } .auth-form h1 { font-size: 2.25rem; } .auth-form > p { margin: 12px 0 28px; color: var(--colors-body); }
+.public-container-auth { height: 100dvh; max-height: 100dvh; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.public-container-auth .public-header { min-height: 46px; height: 46px; padding: 0; flex-shrink: 0; }
+.public-container-auth .public-header .brand-name { font-size: 23px; }
+.public-container-auth .public-header .brand-subtitle { margin-top: 2px; font-size: 10px; }
+.public-container-auth #main-content { flex: 1; min-height: 0; display: flex; align-items: center; overflow: hidden; }
+.public-container-auth .auth-layout { width: 100%; min-height: 0; height: 100%; padding: 6px 0; gap: 48px; align-items: center; grid-template-columns: 1.05fr 0.95fr; }
+.public-container-auth .auth-story { pointer-events: none; user-select: none; display: flex; flex-direction: column; justify-content: center; min-height: 0; max-height: 100%; }
+.public-container-auth .auth-story h1 { font-size: clamp(1.65rem, 2.5vw, 2.35rem); margin-top: 6px !important; line-height: 1.12; }
+.public-container-auth .auth-story > p { margin-top: 6px; font-size: 14px; line-height: 1.4; }
+.public-container-auth .auth-story img { width: 100%; height: auto; max-height: calc(100dvh - 230px); margin-top: 12px; aspect-ratio: auto; object-fit: contain; object-position: left center; }
+.public-container-auth .auth-form { max-width: 480px; width: 100%; max-height: 100%; display: flex; flex-direction: column; justify-content: center; justify-self: center; }
+.public-container-auth .tabs { margin-bottom: 8px !important; gap: 20px; }
+.public-container-auth .tabs button { min-height: 30px; padding: 2px 0 5px; font-size: 12.5px; }
+.public-container-auth .field { gap: 2px; margin-bottom: 6px; }
+.public-container-auth .field > label { font-size: 11.5px; font-weight: 600; line-height: 1.2; }
+.public-container-auth .form-input { min-height: 30px; height: 30px; padding: 3px 8px; font-size: 12.5px; }
+.public-container-auth .form-grid { gap: 0 10px; }
+.public-container-auth .field small { font-size: 10.5px; line-height: 1.15; }
+.public-container-auth .notice { padding: 6px 10px; margin-bottom: 6px; font-size: 11.5px; line-height: 1.3; }
+.public-container-auth .clerk-embed .cl-rootBox,
+.public-container-auth .clerk-embed .cl-cardBox { width: 100% !important; max-width: 100% !important; box-shadow: none !important; }
+.public-container-auth .clerk-embed .cl-card { padding: 10px 14px !important; gap: 6px !important; box-shadow: none !important; background: transparent !important; }
+.public-container-auth .clerk-embed .cl-header { display: none !important; }
+.public-container-auth .clerk-embed .cl-main,
+.public-container-auth .clerk-embed .cl-form { gap: 6px !important; }
+.public-container-auth .clerk-embed .cl-formFieldRow { margin-bottom: 2px !important; }
+.public-container-auth .clerk-embed .cl-formFieldLabelRow { margin-bottom: 2px !important; }
+.public-container-auth .clerk-embed .cl-formFieldLabel { font-size: 11.5px !important; }
+.public-container-auth .clerk-embed .cl-formFieldInput { min-height: 30px !important; height: 30px !important; padding: 3px 8px !important; font-size: 12.5px !important; }
+.public-container-auth .clerk-embed .cl-formButtonPrimary,
+.public-container-auth .clerk-embed .cl-socialButtonsBlockButton { min-height: 30px !important; height: 30px !important; padding: 3px 10px !important; font-size: 12.5px !important; }
+.public-container-auth .clerk-embed .cl-dividerRow { margin: 2px 0 !important; }
+.public-container-auth .clerk-embed .cl-footer { padding: 4px 14px 6px !important; margin-top: 0 !important; background: transparent !important; }
+.public-container-auth .clerk-embed .cl-footerAction { padding: 2px 0 !important; margin: 0 !important; font-size: 11.5px !important; }
+.public-container-auth .public-footer { padding: 6px 0; flex-shrink: 0; font-size: 11.5px; }
 .password-field { position: relative; } .password-field input { padding-right: 52px; } .password-field button { position: absolute; top: 1px; right: 1px; }
 .auth-form .full-width { width: 100%; } .auth-foot { padding-top: 24px; margin-top: 24px; border-top: 1px solid var(--border-subtle); font-size: 14px; }
 .continue-lesson { display: grid; grid-template-columns: 1fr 42%; align-items: center; gap: 24px; padding-bottom: 24px; } .continue-lesson h2 { font-size: 2.3rem; margin: 12px 0; } .continue-lesson .btn { margin-top: 24px; } .continue-lesson img { width: 100%; aspect-ratio: 1.45; object-fit: cover; }

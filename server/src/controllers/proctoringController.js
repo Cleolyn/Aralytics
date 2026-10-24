@@ -15,7 +15,7 @@ async function logProctoringEvent(req, res, next) {
       });
     }
 
-    const validEvents = ['WINDOW_BLUR', 'TAB_HIDDEN', 'FULLSCREEN_EXIT', 'DEVTOOLS_OPEN'];
+    const validEvents = ['WINDOW_BLUR', 'WINDOW_MINIMIZE', 'TAB_HIDDEN', 'TAB_SWITCH', 'FULLSCREEN_EXIT', 'DEVTOOLS_OPEN'];
     if (!validEvents.includes(event_type)) {
       return res.status(400).json({
         success: false,

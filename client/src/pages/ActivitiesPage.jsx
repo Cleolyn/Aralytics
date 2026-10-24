@@ -12,31 +12,66 @@ function TaskSubmission({ task, onSubmitted }) {
   const { user } = useAuth();
   const draftKey = `aralytics:notes:${user.id}:${task.id}`;
   const [file, setFile] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [notes, setNotes] = useState(() => { try { return localStorage.getItem(draftKey) || ''; } catch { return ''; } });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const previous = task.my_submission;
-  function choose(e) {
-    const selected = e.target.files[0]; setError(''); setMessage('');
-    if (selected && (!/\.(pdf|docx)$/i.test(selected.name) || selected.size > 5 * 1024 * 1024 || !selected.size)) { setFile(null); e.target.value = ''; setError('Choose a PDF or DOCX file up to 5 MB.'); return; }
+  function selectFile(selected) {
+    setError(''); setMessage(''); setProgress(0);
+    if (selected && (!/\.(pdf|docx|pptx|zip|mp4|png|jpg|jpeg)$/i.test(selected.name) || selected.size > 5 * 1024 * 1024 || !selected.size)) {
+      setFile(null);
+      setError('Choose a valid deliverable (.PDF, .DOCX, .PPTX, .ZIP, .MP4, .PNG, .JPG) up to 5 MB.');
+      return;
+    }
     setFile(selected || null);
   }
+  function choose(e) {
+    const selected = e.target.files?.[0];
+    selectFile(selected);
+    if (!selected) e.target.value = '';
+  }
   async function submit(e) {
-    e.preventDefault(); if (!file || busy) return; setBusy(true); setError('');
+    e.preventDefault(); if (!file || busy) return; setBusy(true); setError(''); setProgress(15);
     try {
-      const encoded = await new Promise((resolve,reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = () => reject(new Error('Could not read the file. Choose it again.')); reader.readAsDataURL(file); });
+      const encoded = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onprogress = ev => { if (ev.lengthComputable) setProgress(Math.min(75, Math.round((ev.loaded / ev.total) * 70))); };
+        reader.onload = () => { setProgress(80); resolve(String(reader.result).split(',')[1]); };
+        reader.onerror = () => reject(new Error('Could not read the file. Choose it again.'));
+        reader.readAsDataURL(file);
+      });
       const res = await api.submitPerformanceTask(task.id, { file_name: file.name, file_size_bytes: file.size, file_content_base64: encoded, notes });
       if (!res.success) throw new Error(res.message || 'Could not submit your work.');
+      setProgress(100);
       localStorage.removeItem(draftKey); onSubmitted('Your work has been submitted. Your teacher can now review the document.');
-    } catch (err) { setError(err.message); } finally { setBusy(false); }
+    } catch (err) { setError(err.message); setProgress(0); } finally { setBusy(false); }
   }
   return <>
     {previous && <section className="section"><h3>Your submission</h3><p style={{ marginTop: 12 }}><Status tone="good">{previous.status === 'GRADED' ? 'Graded' : 'Submitted'}</Status> · {formatDate(previous.submitted_at,'')}</p><a className="text-action" href={api.getSubmissionFileUrl(previous.file_url)} target="_blank" rel="noreferrer">{previous.file_name}</a>{previous.status === 'GRADED' && <><p><strong>{previous.score} / {task.total_points}</strong></p><p>{previous.feedback || 'No written feedback yet.'}</p></>}</section>}
-    <section className="section"><h3>{previous ? 'Replace your submission' : 'Submission'}</h3><p style={{ marginTop: 12 }}>Review your document before sending it to your teacher.{previous?.status === 'GRADED' ? ' Replacing it will clear the previous grade until your teacher reviews it again.' : ''}</p><Notice error>{error}</Notice><Notice success>{message}</Notice>
-      <form onSubmit={submit}><div className="upload-field"><FileUp size={24} aria-hidden="true" /><label htmlFor="activity-file">Choose your document</label><input id="activity-file" type="file" accept=".pdf,.docx" onChange={choose} required disabled={busy} aria-describedby="upload-help" /><small id="upload-help">PDF or DOCX · Up to 5 MB{file ? ` · ${(file.size / 1024).toFixed(0)} KB selected` : ''}</small></div>
+    <section className="section"><h3>{previous ? 'Replace your submission' : 'Submission'}</h3><p style={{ marginTop: 12 }}>Review your deliverable before sending it to your teacher.{previous?.status === 'GRADED' ? ' Replacing it will clear the previous grade until your teacher reviews it again.' : ''}</p><Notice error>{error}</Notice><Notice success>{message}</Notice>
+      <form onSubmit={submit}>
+        <div
+          className="upload-field"
+          onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={e => { e.preventDefault(); setDragActive(false); selectFile(e.dataTransfer.files?.[0]); }}
+          style={{ background: dragActive ? 'var(--colors-canvas-soft)' : 'transparent' }}
+        >
+          <FileUp size={24} aria-hidden="true" />
+          <label htmlFor="activity-file" style={{ display: 'block', fontWeight: 600, marginTop: 6 }}>Drag &amp; drop your deliverable or choose file</label>
+          <input id="activity-file" type="file" accept=".pdf,.docx,.pptx,.zip,.mp4,.png,.jpg,.jpeg" onChange={choose} required={!file} disabled={busy} aria-describedby="upload-help" />
+          <small id="upload-help">PDF, DOCX, PPTX, ZIP, MP4, PNG, JPG · Up to 5 MB{file ? ` · ${file.name} (${(file.size / 1024).toFixed(0)} KB selected)` : ''}</small>
+          {progress > 0 && (
+            <div className="progress-track" role="progressbar" aria-label="Upload progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+              <span style={{ width: `${progress}%` }} />
+            </div>
+          )}
+        </div>
         <div className="field"><label htmlFor="activity-notes">Notes for your teacher (optional)</label><textarea id="activity-notes" className="form-input" value={notes} onChange={e => setNotes(e.target.value)} maxLength={4000} /></div>
-        <button className="btn btn-primary" disabled={busy || !file}>{busy ? 'Submitting…' : 'Submit work'}<ArrowRight size={16} /></button>
+        <button className="btn btn-primary" disabled={busy || !file}>{busy ? `Uploading (${progress}%)…` : 'Submit work'}<ArrowRight size={16} /></button>
         <button type="button" className="text-action" style={{ marginLeft: 20 }} disabled={busy} onClick={() => { try { localStorage.setItem(draftKey,notes); setMessage('Notes saved on this device. Choose your file again when you return.'); } catch { setError('Could not save notes on this device.'); } }}>Save notes</button>
       </form>
     </section>

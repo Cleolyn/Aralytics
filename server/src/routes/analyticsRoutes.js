@@ -9,8 +9,10 @@ router.get('/proficiency', verifyToken, requireRole('TEACHER'), controller.getPr
 // 2. Remediation Routing Queue
 router.get('/remediation-queue', verifyToken, requireRole('TEACHER'), controller.getRemediationQueue);
 
-// 2B. Teacher Decision Actions: Approve, Modify, Override
+// 2B. Teacher Decision Actions: Approve, Modify, Override, Create, Delete
 router.post('/intervention/:id/action', verifyToken, requireRole('TEACHER'), controller.handleInterventionAction);
+router.post('/interventions', verifyToken, requireRole('TEACHER'), controller.createIntervention);
+router.delete('/interventions/:id', verifyToken, requireRole('TEACHER'), controller.deleteIntervention);
 
 // 3. Exporters
 router.get('/export/xlsx', verifyToken, requireRole('TEACHER'), controller.exportGradebookXLSX);

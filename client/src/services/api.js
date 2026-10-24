@@ -99,6 +99,13 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data)
   }),
+  updateMaterial: (id, data) => request(`/materials/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  deleteMaterial: (id) => request(`/materials/${id}`, {
+    method: 'DELETE'
+  }),
 
   // Quizzes (Strictly Online)
   getQuizzes: () => request('/quizzes'),
@@ -162,6 +169,13 @@ export const api = {
   handleInterventionAction: (id, payload) => request(`/analytics/intervention/${id}/action`, {
     method: 'POST',
     body: JSON.stringify(payload)
+  }),
+  createIntervention: (payload) => request('/analytics/interventions', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
+  deleteIntervention: (id) => request(`/analytics/interventions/${id}`, {
+    method: 'DELETE'
   }),
   getAnalyticsXlsxUrl: (params = {}) => {
     const query = new URLSearchParams(params).toString();

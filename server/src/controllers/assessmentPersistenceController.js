@@ -140,23 +140,29 @@ async function submitAssessment(req, res, next) {
         }
       }
 
-      // B. Insert Security Logs (TAB_SWITCH / WINDOW_BLUR)
+      // B. Insert Security Logs (TAB_SWITCH / WINDOW_MINIMIZE / WINDOW_BLUR / FULLSCREEN_EXIT)
 
       if (Array.isArray(security_events) && security_events.length > 0) {
         for (const evt of security_events) {
           const logId = `sec-${uuidv4()}`;
-          const eventType = evt.event_type === 'WINDOW_BLUR' ? 'WINDOW_BLUR' : 'TAB_SWITCH';
-          await tx.query(`INSERT INTO quiz_proctoring_logs (id, submission_id, event_type) VALUES (?, ?, ?)`, [`proc-${uuidv4()}`, subId, eventType === 'TAB_SWITCH' ? 'TAB_HIDDEN' : eventType]);
+          const validTypes = ['WINDOW_BLUR', 'WINDOW_MINIMIZE', 'TAB_SWITCH', 'FULLSCREEN_EXIT'];
+          const eventType = validTypes.includes(evt.event_type) ? evt.event_type : 'TAB_SWITCH';
+          const evtTimestamp = evt.timestamp || new Date().toISOString();
+          await tx.query(
+            `INSERT INTO quiz_proctoring_logs (id, submission_id, event_type, timestamp) VALUES (?, ?, ?, ?)`,
+            [`proc-${uuidv4()}`, subId, eventType === 'TAB_SWITCH' ? 'TAB_HIDDEN' : eventType, evtTimestamp]
+          );
           await tx.query(
             `INSERT INTO security_logs (id, attempt_id, event_type, timestamp)
-             VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
-            [logId, attemptId, eventType]
+             VALUES (?, ?, ?, ?)`,
+            [logId, attemptId, eventType, evtTimestamp]
           );
         }
       }
 
-      // C. Database Hook Logic: Automated Remediation Check (Percentage < 75%)
-      if (ratio < 0.75) {
+      // C. Database Hook Logic: Automated Remediation Check (Percentage < 75% OR Proctoring Violations >= 3)
+      const isProctoringFlagged = Number(tab_switch_count) >= 3 || (Array.isArray(security_events) && security_events.length >= 3);
+      if (ratio < 0.75 || isProctoringFlagged) {
         // Query materials matching competency_id where is_remedial = true
         const { rows: matRows } = await tx.query(
           `SELECT id, title, file_path, file_type 
@@ -379,7 +385,8 @@ async function approveIntervention(req, res, next) {
 async function logSecurityEvent(req, res, next) {
   try {
     const { attempt_id, quiz_id, student_id, event_type, timestamp } = req.body;
-    const resolvedType = event_type === 'WINDOW_BLUR' ? 'WINDOW_BLUR' : 'TAB_SWITCH';
+    const validTypes = ['WINDOW_BLUR', 'WINDOW_MINIMIZE', 'TAB_SWITCH', 'FULLSCREEN_EXIT'];
+    const resolvedType = validTypes.includes(event_type) ? event_type : 'TAB_SWITCH';
     const logId = `sec-${uuidv4()}`;
 
     if (attempt_id) {

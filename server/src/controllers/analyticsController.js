@@ -127,10 +127,40 @@ async function getItemAnalysis(req, res, next) {
   }
 }
 
+async function createIntervention(req, res, next) {
+  try {
+    const { student_id, competency_id, material_id, status } = req.body;
+    if (!student_id || !competency_id) {
+      return res.status(400).json({ success: false, message: 'student_id and competency_id are required.' });
+    }
+    const result = await AnalyticsService.createCustomIntervention({
+      student_id,
+      competency_id,
+      recommended_material_id: material_id,
+      status: status || 'ASSIGNED'
+    });
+    res.status(201).json({ success: true, message: 'Intervention plan created and assigned.', result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deleteIntervention(req, res, next) {
+  try {
+    const { id } = req.params;
+    const result = await AnalyticsService.deleteIntervention(id);
+    res.json({ success: true, message: 'Intervention plan deleted.', result });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getProficiencyAnalytics,
   getRemediationQueue,
   handleInterventionAction,
+  createIntervention,
+  deleteIntervention,
   exportGradebookXLSX,
   exportReportPDF,
   getItemAnalysis

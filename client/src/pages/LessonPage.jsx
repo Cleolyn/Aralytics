@@ -17,6 +17,11 @@ export default function LessonPage() {
     const [materials,logs,cached] = await Promise.all([loadMaterials(user.id),loadReadingLogs(user.id),cachedMaterials()]);
     const material = materials.find(m => m.id === id);
     if (!material) throw new Error('This lesson is not available. Go back to Lessons or reconnect to load it.');
+    // Auto-cache local lesson assets on initial online view so they remain viewable offline
+    const targetUrl = materialUrl(material.storage_url);
+    if (navigator.onLine && targetUrl && !cached.has(targetUrl) && material.resource_available !== false) {
+      downloadMaterial(material).then(() => cached.add(targetUrl)).catch(() => {});
+    }
     return { material, materials, read: logs.some(l => l.material_id === id), cached };
   }, [id,user.id]);
   const base = isTeacher ? '/teacher/materials' : '/student/materials';

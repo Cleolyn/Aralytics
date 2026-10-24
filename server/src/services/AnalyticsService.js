@@ -322,6 +322,22 @@ class AnalyticsService {
     };
   }
 
+  static async createCustomIntervention({ student_id, competency_id, recommended_material_id, status = 'ASSIGNED' }) {
+    const { v4: uuidv4 } = require('uuid');
+    const id = `intv-${uuidv4().slice(0, 8)}`;
+    await db.query(
+      `INSERT INTO interventions (id, student_id, competency_id, recommended_material_id, status, updated_at)
+       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [id, student_id, competency_id, recommended_material_id || null, status]
+    );
+    return { intervention_id: id, student_id, competency_id, recommended_material_id, status };
+  }
+
+  static async deleteIntervention(interventionId) {
+    await db.query(`DELETE FROM interventions WHERE id = ?`, [interventionId]);
+    return { deleted: true, intervention_id: interventionId };
+  }
+
   /**
    * 3. GRADEBOOK DATA EXPORTERS
    * Formats raw queries into clean structures for SheetJS (.xlsx) and PDFKit (.pdf).

@@ -1,5 +1,6 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const materialRoot = path.resolve(__dirname, '../../resources/materials');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
@@ -75,17 +76,42 @@ async function getMaterialById(req, res, next) {
 
 async function createMaterial(req, res, next) {
   try {
-    const { competency_id, title, description, file_type, storage_url, file_size_bytes } = req.body;
+    const { competency_id, title, description, file_type, storage_url, file_size_bytes, file_name, file_content_base64 } = req.body;
 
-    if (!competency_id || !title || !file_type || !storage_url) {
+    if (!competency_id || !title || !file_type) {
       return res.status(400).json({
         success: false,
-        message: 'competency_id, title, file_type, and storage_url are required.'
+        message: 'competency_id, title, and file_type are required.'
+      });
+    }
+
+    let effectiveUrl = storage_url ? storage_url.trim() : '';
+    let effectiveSize = Number(file_size_bytes) || 1024;
+
+    if (file_content_base64 && file_name) {
+      const ext = path.extname(file_name).toLowerCase() || `.${file_type.toLowerCase()}`;
+      const allowedExts = ['.pdf', '.pptx', '.ppt', '.mp4', '.docx', '.doc', '.zip'];
+      if (!allowedExts.includes(ext)) {
+        return res.status(400).json({ success: false, message: 'Unsupported file format.' });
+      }
+      const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
+      const storedFilename = `${safeBase}-${Date.now()}${ext}`;
+      const buffer = Buffer.from(file_content_base64, 'base64');
+      await fs.mkdir(materialRoot, { recursive: true });
+      await fs.writeFile(path.join(materialRoot, storedFilename), buffer);
+      effectiveUrl = `/api/materials/download/${storedFilename}`;
+      effectiveSize = buffer.length;
+    }
+
+    if (!effectiveUrl) {
+      return res.status(400).json({
+        success: false,
+        message: 'Either a resource link (storage_url) or an uploaded file is required.'
       });
     }
 
     const materialId = `mat-${uuidv4()}`;
-    const contentHash = crypto.createHash('sha256').update(title + storage_url).digest('hex');
+    const contentHash = crypto.createHash('sha256').update(title + effectiveUrl).digest('hex');
 
     await db.query(
       `INSERT INTO instructional_materials 
@@ -97,8 +123,8 @@ async function createMaterial(req, res, next) {
         title.trim(),
         description || null,
         file_type.toUpperCase(),
-        storage_url.trim(),
-        Number(file_size_bytes) || 1024,
+        effectiveUrl,
+        effectiveSize,
         contentHash,
         req.user.id
       ]
@@ -107,7 +133,82 @@ async function createMaterial(req, res, next) {
     res.status(201).json({
       success: true,
       message: 'Instructional material uploaded and indexed for offline caching.',
-      materialId
+      materialId,
+      storage_url: effectiveUrl
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateMaterial(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { competency_id, title, description, file_type, storage_url, file_name, file_content_base64 } = req.body;
+
+    const { rows: existing } = await db.query(`SELECT * FROM instructional_materials WHERE id = ? LIMIT 1`, [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ success: false, message: 'Material not found.' });
+    }
+
+    const current = existing[0];
+    let effectiveUrl = storage_url ? storage_url.trim() : current.storage_url;
+    let effectiveSize = current.file_size_bytes;
+
+    if (file_content_base64 && file_name) {
+      const ext = path.extname(file_name).toLowerCase() || `.${(file_type || current.file_type).toLowerCase()}`;
+      const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
+      const storedFilename = `${safeBase}-${Date.now()}${ext}`;
+      const buffer = Buffer.from(file_content_base64, 'base64');
+      await fs.mkdir(materialRoot, { recursive: true });
+      await fs.writeFile(path.join(materialRoot, storedFilename), buffer);
+      effectiveUrl = `/api/materials/download/${storedFilename}`;
+      effectiveSize = buffer.length;
+    }
+
+    const nextTitle = title ? title.trim() : current.title;
+    const nextComp = competency_id || current.competency_id;
+    const nextDesc = description !== undefined ? description : current.description;
+    const nextType = file_type ? file_type.toUpperCase() : current.file_type;
+    const contentHash = crypto.createHash('sha256').update(nextTitle + effectiveUrl).digest('hex');
+
+    await db.query(
+      `UPDATE instructional_materials
+       SET competency_id = ?, title = ?, description = ?, file_type = ?, storage_url = ?, file_size_bytes = ?, content_hash = ?
+       WHERE id = ?`,
+      [nextComp, nextTitle, nextDesc, nextType, effectiveUrl, effectiveSize, contentHash, id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Instructional material updated successfully.',
+      materialId: id
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deleteMaterial(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { rows: existing } = await db.query(`SELECT * FROM instructional_materials WHERE id = ? LIMIT 1`, [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ success: false, message: 'Material not found.' });
+    }
+
+    const current = existing[0];
+    if (current.storage_url && current.storage_url.startsWith('/api/materials/download/')) {
+      const fname = path.basename(current.storage_url);
+      await fs.unlink(path.join(materialRoot, fname)).catch(() => {});
+    }
+
+    await db.query(`DELETE FROM instructional_materials WHERE id = ?`, [id]);
+
+    res.json({
+      success: true,
+      message: 'Instructional material removed successfully.',
+      materialId: id
     });
   } catch (err) {
     next(err);
@@ -225,6 +326,8 @@ module.exports = {
   getAllMaterials,
   getMaterialById,
   createMaterial,
+  updateMaterial,
+  deleteMaterial,
   streamMaterialFile,
   syncReadLogs,
   getReadLogs

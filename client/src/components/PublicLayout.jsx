@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Brand from './Brand';
 
 export default function PublicLayout({ children, simple = false }) {
-  return <div className="public-container">
+  return <div className={`public-container${simple ? ' public-container-auth' : ''}`}>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <header className="public-header"><Brand />
       {simple ? <Link to="/" className="text-action">← Back to home</Link> : <nav className="public-nav" aria-label="Public navigation"><a href="#about" className="optional">About</a><a href="#how-it-works" className="optional">How it works</a><Link to="/login">Log in</Link><Link className="btn btn-primary" to="/register">Get started</Link></nav>}
