@@ -2,11 +2,54 @@ const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const dialect = process.env.DB_DIALECT || 'sqlite';
+const dialect = process.env.DB_DIALECT || (process.env.TURSO_DATABASE_URL ? 'turso' : 'sqlite');
 
 let dbInstance = null;
 
-if (dialect === 'mysql') {
+if (dialect === 'turso' || dialect === 'libsql') {
+  const libsqlClient = require('../../db');
+
+  dbInstance = {
+    dialect: 'turso',
+    client: libsqlClient,
+    async execute(sql, args = []) {
+      return libsqlClient.execute({ sql: sql.trim(), args });
+    },
+    async query(sql, params = []) {
+      const cleanSql = sql.trim();
+      const result = await libsqlClient.execute({ sql: cleanSql, args: params });
+      return {
+        rows: result.rows || [],
+        insertId: result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null,
+        affectedRows: result.rowsAffected || 0
+      };
+    },
+    async transaction(callback) {
+      const tx = await libsqlClient.transaction('write');
+      try {
+        const txDb = {
+          async query(sql, params = []) {
+            const cleanSql = sql.trim();
+            const result = await tx.execute({ sql: cleanSql, args: params });
+            return {
+              rows: result.rows || [],
+              insertId: result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null,
+              affectedRows: result.rowsAffected || 0
+            };
+          }
+        };
+        const result = await callback(txDb);
+        await tx.commit();
+        return result;
+      } catch (err) {
+        await tx.rollback();
+        throw err;
+      } finally {
+        tx.close();
+      }
+    }
+  };
+} else if (dialect === 'mysql') {
   const mysql = require('mysql2/promise');
   const pool = mysql.createPool({
     host: process.env.DB_HOST || '127.0.0.1',

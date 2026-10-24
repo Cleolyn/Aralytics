@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, BookOpen, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import useLearnerData from '../hooks/useLearnerData';
@@ -9,6 +9,7 @@ import { completedActivity } from '../utils/learning';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
+  const location = useLocation();
   const { data, loading, error, refresh } = useLearnerData();
   if (loading) return <div className="container"><Loading /></div>;
   const readIds = new Set(data?.logs.map(l => l.material_id) || []);
@@ -20,7 +21,7 @@ export default function StudentDashboard() {
   const support = data?.interventions.filter(i => !['RESOLVED','COMPLETED','EXEMPTED','EXEMPT','OVERRIDDEN'].includes(i.status)) || [];
   return <div className="container">
     <div className="page-heading"><div><h1>Mabuhay, {user?.first_name || 'learner'}.</h1><p>Ready for your next lesson?</p><div className="breadcrumb" style={{ marginTop: 14, marginBottom: 0 }}>{user?.section || 'Your class'} <span>/</span> Araling Panlipunan 10 <span>/</span> Contemporary Issues</div></div></div>
-    <Notice error>{error || data?.warnings.join(' ')}</Notice>{(error || data?.warnings.length > 0) && <button className="text-action" onClick={refresh}>Retry loading</button>}
+    <Notice error>{location.state?.unauthorizedNotice || error || data?.warnings.join(' ')}</Notice>{(error || data?.warnings.length > 0) && <button className="text-action" onClick={refresh}>Retry loading</button>}
     <div className="split-content"><div>
       <section className="continue-lesson"><div><span className="eyebrow">{next ? 'Continue learning' : 'Your learning journey'}</span><h2>{next?.title || 'Discover your next lesson.'}</h2><p className="muted">{next ? `${next.file_type} · ${next.melc_code || 'Araling Panlipunan'}` : 'Your teacher’s materials will appear in Lessons.'}</p><Link to={next ? `/student/materials/${next.id}` : '/student/materials'} className="btn btn-primary">{next ? 'Open lesson' : 'Browse lessons'}<ArrowRight size={17} /></Link></div><img src="/images/community-learning.jpg" alt="" width="1774" height="887" /></section>
       <div className="ilaw-steps" aria-label="Learning journey"><span>1 · Layunin</span><ArrowRight size={14} /><span>2 · Learn</span><ArrowRight size={14} /><span>3 · Assessment</span><ArrowRight size={14} /><span>4 · Pagsulong</span></div>

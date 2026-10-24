@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const { clerkMiddleware } = require('@clerk/express');
 const { initializeDatabase } = require('./db/init');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -35,6 +36,18 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Bridge query-param tokens (used by file-download URLs) into the Authorization header
+// so Clerk's middleware can authenticate them uniformly.
+app.use((req, _res, next) => {
+  if (req.query.token && !req.headers.authorization) {
+    req.headers.authorization = `Bearer ${req.query.token}`;
+  }
+  next();
+});
+
+// Parse and verify Clerk session tokens on every request
+app.use(clerkMiddleware());
+
 // Health Check
 app.get('/api/health', (req, res) => {
   res.json({
@@ -59,6 +72,18 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/performance-tasks', performanceTaskRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/student', studentRoutes);
+
+//Test route to check database connection
+const db = require('../db.js');
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await db.execute("SELECT 1 as connected;");
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ error: "Failed to connect to database" });
+  }
+});
 
 // Error Handling Middleware
 app.use(errorHandler);

@@ -1,38 +1,63 @@
-const jwt = require('jsonwebtoken');
+const { createClerkClient, getAuth } = require('@clerk/express');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aralytics_jwt_secret_ponce_ap10_secure_key_2026';
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+// ---------------------------------------------------------------------------
+// Simple in-memory user cache (avoids an API call to Clerk on every request)
+// ---------------------------------------------------------------------------
+const _userCache = new Map(); // userId → { clerkUser, expiresAt }
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function _getCachedClerkUser(userId) {
+  const entry = _userCache.get(userId);
+  if (entry && entry.expiresAt > Date.now()) return entry.clerkUser;
+  const clerkUser = await clerkClient.users.getUser(userId);
+  _userCache.set(userId, { clerkUser, expiresAt: Date.now() + CACHE_TTL });
+  return clerkUser;
+}
 
 /**
- * 1. Verify JWT Authentication Token (FR-01, FR-02)
- * Validates Bearer token in headers or query string.
- * Decodes user claims and attaches req.user:
- * { user_id, email, full_name, role ['TEACHER'|'STUDENT'], section_id }
+ * Invalidate cache after metadata updates (e.g. role assignment).
  */
-function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-  let token = null;
+function invalidateUserCache(userId) {
+  _userCache.delete(userId);
+}
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
-  } else if (req.query && req.query.token) {
-    token = req.query.token;
-  }
-
-  if (!token) {
+/**
+ * 1. Verify Clerk Session Token (replaces JWT verifyToken)
+ * Reads the Bearer token from Authorization header (or query param token),
+ * fetches Clerk user metadata, and attaches req.user with the same shape
+ * that the rest of the API middleware/controllers expect:
+ *   { user_id, id, email, full_name, first_name, last_name, role, section_id, section }
+ */
+async function verifyToken(req, res, next) {
+  const { userId } = getAuth(req);
+  if (!userId) {
     return res.status(401).json({
       success: false,
       message: 'Access Denied: Missing or invalid authorization token.'
     });
   }
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    const clerkUser = await _getCachedClerkUser(userId);
+    const meta = clerkUser.publicMetadata || {};
+    req.user = {
+      user_id: userId,
+      id: userId,
+      email: clerkUser.primaryEmailAddress?.emailAddress,
+      full_name: `${clerkUser.firstName} ${clerkUser.lastName}`,
+      first_name: clerkUser.firstName,
+      last_name: clerkUser.lastName,
+      role: meta.role,
+      section_id: meta.section_id,
+      section: meta.section
+    };
     next();
   } catch (err) {
+    console.error('[AUTH] Clerk user fetch error:', err.message);
     return res.status(401).json({
       success: false,
-      message: 'Access Denied: Token expired or signature invalid.'
+      message: 'Access Denied: Could not verify session.'
     });
   }
 }
@@ -55,19 +80,16 @@ function requireRole(roles) {
 
 /**
  * 3. Teacher Role Guard (FR-01, FR-03, FR-05..44, NFR-01)
- * Express middleware rejecting any request from non-Teacher tokens with HTTP 403 Forbidden.
  */
 const requireTeacher = requireRole('TEACHER');
 
 /**
  * 4. Student Role Guard (FR-01, FR-04, FR-06..50, NFR-01)
- * Express middleware restricting access strictly to authenticated STUDENT accounts.
  */
 const requireStudent = requireRole('STUDENT');
 
 /**
  * 5. Student Data Isolation Guard (FR-04, NFR-01)
- * Enforces that students can ONLY read or modify their own student records.
  */
 function requireOwnStudentData(paramKey = 'student_id') {
   return (req, res, next) => {
@@ -95,5 +117,6 @@ module.exports = {
   requireTeacher,
   requireStudent,
   requireOwnStudentData,
-  JWT_SECRET
+  invalidateUserCache,
+  clerkClient
 };

@@ -67,11 +67,11 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/register" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <RegisterPage />} />
+      <Route path="/register/*" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <RegisterPage />} />
       <Route path="/help" element={<HelpPage />} />
       {/* Public Login Route */}
       <Route
-        path="/login"
+        path="/login/*"
         element={
           user ? (
             <Navigate

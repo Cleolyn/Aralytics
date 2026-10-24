@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -13,13 +14,15 @@ if (!rootElement) {
 } else {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <ErrorBoundary>
+      <ClerkProvider afterSignOutUrl="/">
         <BrowserRouter>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
+          <ErrorBoundary>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </ErrorBoundary>
         </BrowserRouter>
-      </ErrorBoundary>
+      </ClerkProvider>
     </React.StrictMode>
   );
 }

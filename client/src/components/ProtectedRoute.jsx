@@ -36,7 +36,15 @@ export function ProtectedRoute({ role, children }) {
 
   // 4. Student route attempted by Teacher -> Redirect to Teacher Command Center (FR-04)
   if (role === 'STUDENT' && user.role !== 'STUDENT') {
-    return <Navigate to="/teacher/dashboard" replace />;
+    return (
+      <Navigate
+        to="/teacher/dashboard"
+        state={{
+          unauthorizedNotice: 'This page is for learners. You have been returned to your Instructor workspace.'
+        }}
+        replace
+      />
+    );
   }
 
   // 5. Authorized session

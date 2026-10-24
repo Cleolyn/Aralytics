@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, ClipboardCheck, Users, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -9,6 +9,7 @@ import { formatDate } from '../utils/learning';
 
 export default function TeacherOverview() {
   const { user } = useAuth();
+  const location = useLocation();
   const { data, loading, error, refresh } = useRemoteData(async () => {
     const [classes,tasks,queue,quizzes] = await Promise.all([api.getClasses(),api.getPerformanceTasks(),api.getRemediationQueue(),api.getQuizzes()]);
     return { classes: classes.classes, tasks: tasks.tasks, queue: queue.queue, quizzes: quizzes.quizzes };
@@ -18,7 +19,7 @@ export default function TeacherOverview() {
   const learners = new Set(support.map(q => q.student.id)).size;
   const dueTasks = data?.tasks.filter(t => t.due_date && new Date(t.due_date.replace(' ','T')) >= new Date()).sort((a,b) => a.due_date.localeCompare(b.due_date)).slice(0,3) || [];
   return <div className="container"><div className="page-heading"><div><h1>Magandang araw, Teacher {user?.first_name}.</h1><p>Here is what needs your attention.</p></div><Link className="btn btn-primary" to="/teacher/quizzes/create">Create assessment <ArrowRight size={17} /></Link></div>
-    <Notice error>{error}</Notice>{error && <button className="text-action" onClick={refresh}>Try again</button>}
+    <Notice error>{location.state?.unauthorizedNotice || error}</Notice>{error && <button className="text-action" onClick={refresh}>Try again</button>}
     {loading ? <Loading /> : data && <div className="split-content"><div><section><h2>Needs attention</h2>
       <div className="action-row"><ClipboardCheck size={24} aria-hidden="true" /><div><strong>{pending} {pending === 1 ? 'submission' : 'submissions'} to review</strong><p>Performance tasks awaiting your feedback.</p></div><Link className="text-action" to="/teacher/gradebook?view=tasks">Review submissions <ArrowRight size={16} /></Link></div>
       <div className="action-row"><Users size={24} aria-hidden="true" /><div><strong>{learners} {learners === 1 ? 'learner needs' : 'learners need'} support</strong><p>Recommended or assigned follow-up practice.</p></div><Link className="text-action" to="/teacher/remediation">View learner support <ArrowRight size={16} /></Link></div>

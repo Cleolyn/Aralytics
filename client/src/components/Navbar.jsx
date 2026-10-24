@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from 'lucide-react';
+import { UserButton } from '@clerk/react';
 import { useAuth } from '../context/AuthContext';
 import Brand from './Brand';
 import OfflineStatus from './OfflineStatus';
@@ -57,7 +58,7 @@ export default function Navbar() {
       <button ref={menuRef} className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-label="Open navigation" aria-expanded={open} aria-controls="workspace-navigation"><Menu size={23} /></button>
       <span className="workspace-label">{isTeacher ? 'Instructor' : 'Learner'} workspace</span>
       <div className="header-actions"><OfflineStatus />
-        <div className="profile"><span className="avatar" aria-hidden="true">{user?.first_name?.[0]}{user?.last_name?.[0]}</span><div className="profile-name">{user?.first_name} {user?.last_name}<small>{isTeacher ? 'Araling Panlipunan teacher' : user?.section || 'Learner'}</small></div></div>
+        <UserButton afterSignOutUrl="/" />
       </div>
     </header>
   </>;

@@ -1,19 +1,36 @@
 const API_BASE = '/api';
 
-export function getToken() {
-  return localStorage.getItem('aralytics_token');
+// ---------------------------------------------------------------------------
+// Token getter — wired by AuthContext to Clerk's async getToken()
+// ---------------------------------------------------------------------------
+let _tokenGetter = null;
+let _lastToken = null; // cached for synchronous URL builders
+
+/** Called once from AuthContext when Clerk session is ready. */
+export function setTokenGetter(fn) {
+  _tokenGetter = fn;
 }
 
-export function setToken(token) {
-  if (token) {
-    localStorage.setItem('aralytics_token', token);
-  } else {
-    localStorage.removeItem('aralytics_token');
+/** Async — always returns the freshest Clerk session JWT. */
+export async function getToken() {
+  if (_tokenGetter) {
+    const t = await _tokenGetter();
+    if (t) _lastToken = t;
+    return t;
   }
+  return null;
 }
+
+/** Synchronous — returns cached token for URL builders (e.g. file downloads). */
+export function getTokenSync() {
+  return _lastToken;
+}
+
+/** @deprecated — kept only for any legacy code that still calls setToken(). */
+export function setToken() {}
 
 export async function request(endpoint, options = {}) {
-  const token = getToken();
+  const token = await getToken();
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
@@ -36,8 +53,7 @@ export async function request(endpoint, options = {}) {
     });
 
     if (res.status === 401) {
-      // Token invalid or expired
-      setToken(null);
+      // Session expired — fire event for AuthContext to handle
       window.dispatchEvent(new CustomEvent('auth:expired'));
     }
 
@@ -149,12 +165,12 @@ export const api = {
   }),
   getAnalyticsXlsxUrl: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const token = getToken();
+    const token = getTokenSync();
     return `/api/analytics/export/xlsx?token=${token}&${query}`;
   },
   getAnalyticsPdfUrl: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const token = getToken();
+    const token = getTokenSync();
     return `/api/analytics/export/pdf?token=${token}&${query}`;
   },
 
@@ -195,12 +211,12 @@ export const api = {
   // Export URLs
   getXlsxExportUrl: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const token = getToken();
+    const token = getTokenSync();
     return `/api/analytics/export/xlsx?token=${token}&${query}`;
   },
   getPdfExportUrl: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    const token = getToken();
+    const token = getTokenSync();
     return `/api/analytics/export/pdf?token=${token}&${query}`;
   }
 };
