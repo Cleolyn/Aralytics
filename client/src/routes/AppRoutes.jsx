@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Brand from '../components/Brand';
 import OfflineStatus from '../components/OfflineStatus';
+import IsoLoader from '../components/iso/IsoLoader';
 import LoginPage from '../pages/LoginPage';
 import LandingPage from '../pages/LandingPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -63,7 +64,7 @@ export default function AppRoutes() {
   }, [location.pathname]);
   const navigate = useNavigate();
 
-  if (loading) return <div className="container" role="status">Preparing Aralytics…</div>;
+  if (loading) return <IsoLoader variant="page">Preparing Aralytics</IsoLoader>;
 
   return (
     <Routes>
