@@ -100,7 +100,7 @@ if (dialect === 'turso' || dialect === 'libsql') {
   };
 } else {
   // SQLite relational engine (uses better-sqlite3 if available, otherwise Node's built-in node:sqlite)
-  const dbPath = path.resolve(__dirname, '../../', process.env.DB_SQLITE_PATH || 'aralytics.sqlite');
+  const dbPath = process.env.DB_SQLITE_PATH === ':memory:' ? ':memory:' : path.resolve(__dirname, '../../', process.env.DB_SQLITE_PATH || 'aralytics.sqlite');
   let sqlite;
   try {
     const Database = require('better-sqlite3');

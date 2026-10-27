@@ -1,5 +1,3 @@
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 const db = require('../config/database');
 
 async function initializeDatabase() {
@@ -282,36 +280,12 @@ async function initializeDatabase() {
 
   console.log('[ARALYTICS DB] Tables verified/created successfully.');
 
-  // Seed default data if users table is empty
-  const { rows: existingUsers } = await db.query('SELECT COUNT(*) as count FROM users');
-  const userCount = Number(existingUsers[0].count || existingUsers[0]['COUNT(*)'] || 0);
+  // Curriculum is independent of account creation. Accounts are provisioned by verified Clerk sign-in.
+  const { rows: existingCurriculum } = await db.query('SELECT COUNT(*) as count FROM curriculum_quarters');
+  const curriculumCount = Number(existingCurriculum[0].count || 0);
 
-  if (userCount === 0) {
-    console.log('[ARALYTICS DB] Seeding initial curriculum, ILAW competencies, users, and quizzes...');
-
-    const salt = await bcrypt.genSalt(10);
-    const teacherHash = await bcrypt.hash('TeacherPass123!', salt);
-    const studentHash = await bcrypt.hash('StudentPass123!', salt);
-
-    const teacherId = 'usr-teacher-001';
-    const student1Id = 'usr-student-001';
-    const student2Id = 'usr-student-002';
-    const student3Id = 'usr-student-003';
-
-    // 1. Users
-    await db.query(
-      `INSERT INTO users (id, lrn_or_id, first_name, last_name, email, password_hash, role, section) VALUES
-      (?, ?, ?, ?, ?, ?, 'TEACHER', NULL),
-      (?, ?, ?, ?, ?, ?, 'STUDENT', '10-Rizal'),
-      (?, ?, ?, ?, ?, ?, 'STUDENT', '10-Rizal'),
-      (?, ?, ?, ?, ?, ?, 'STUDENT', '10-Bonifacio')`,
-      [
-        teacherId, 'EMP-2026-001', 'Cleo', 'Ponce', 'teacher@ponce.edu.ph', teacherHash,
-        student1Id, '123456789012', 'Juan', 'Dela Cruz', 'juan.delacruz@student.deped.gov.ph', studentHash,
-        student2Id, '123456789013', 'Maria', 'Clara', 'maria.clara@student.deped.gov.ph', studentHash,
-        student3Id, '123456789014', 'Andres', 'Bonifacio', 'andres.bonifacio@student.deped.gov.ph', studentHash
-      ]
-    );
+  if (curriculumCount === 0) {
+    console.log('[ARALYTICS DB] Seeding initial curriculum and ILAW competencies...');
 
     // 2. Curriculum Quarters
     await db.query(
@@ -364,6 +338,7 @@ async function initializeDatabase() {
   }
 
   console.log('[ARALYTICS DB] Ready.');
+  await require('../services/enrollmentService').initializeEnrollmentTables();
 }
 
 if (require.main === module) {
