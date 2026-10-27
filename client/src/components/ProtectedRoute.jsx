@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import IsoLoader from './iso/IsoLoader';
 
 /**
  * Immutable Role Protected Route Guard (FR-01..04, NFR-01)
@@ -14,7 +15,7 @@ export function ProtectedRoute({ role, children }) {
   const location = useLocation();
 
   // 1. Session verification in progress
-  if (loading) return <div className="container" role="status">Checking your session…</div>;
+  if (loading) return <IsoLoader variant="page">Checking your session</IsoLoader>;
 
   // 2. Unauthenticated: Redirect immediately to /login with state preservation
   if (!user) {
