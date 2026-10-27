@@ -134,9 +134,39 @@ export function BanaueTerraces({ className = '' }) {
   return <IsoScene boxes={boxes} pad={6} className={className} label="Isometric illustration of the Banaue Rice Terraces" />;
 }
 
+// ---- Taal Volcano ---------------------------------------------------------
+export function Taal({ className = '' }) {
+  const boxes = [b(-0.5, -0.5, -0.35, 12, 12, 0.35, '#cfe3ea', { layer: -1 })];
+  const tiers = [[6.4, '#7d9a58'], [5.2, '#86a05a'], [4, '#8d8a62'], [2.8, '#75645a']];
+  tiers.forEach(([size, c], k) => boxes.push(b(5.5 - size / 2, 5.5 - size / 2, k * 0.6, size, size, 0.6, c)));
+  boxes.push(b(4.7, 4.7, 2.4, 1.6, 1.6, 0.06, '#8fbac8', { className: 'iso-water' }));
+  boxes.push(...tree(2.6, 7.6), ...tree(7.9, 3.0));
+  const [sx, sy] = proj(5.5, 5.5, 2.6);
+  return (
+    <IsoScene boxes={boxes} extend={[[5.5, 5.5, 6]]} pad={6} className={className} label="Isometric illustration of Taal Volcano on its lake island">
+      {[0, 1].map(i => <circle key={i} className="iso-smoke" cx={sx} cy={sy} r="4" style={{ '--d': `${i * 2}s` }} />)}
+    </IsoScene>
+  );
+}
+
+// ---- Hundred Islands ------------------------------------------------------
+const ISLETS = [[1.5, 1.5, 1.7], [5, 0.8, 1.3], [8.5, 2.5, 1.9], [2.5, 5.8, 1.5], [6, 6.5, 2.1], [9.5, 8.5, 1.3], [0.8, 9.2, 1.2], [6.8, 3.9, 1], [3.4, 9.6, 1.6]];
+export function HundredIslands({ className = '' }) {
+  const boxes = [b(-0.5, -0.5, -0.35, 12.5, 12.5, 0.35, '#cfe3ea', { layer: -1 })];
+  ISLETS.forEach(([x, y, size], i) => {
+    const style = { '--d': `${i * 110}ms` };
+    boxes.push(b(x, y, 0, size, size, 0.5, '#a09484', { className: 'iso-rise', style }));
+    boxes.push(b(x + 0.1, y + 0.1, 0.5, size - 0.2, size - 0.2, 0.45, '#6f9a4e', { className: 'iso-rise', style }));
+    if (size > 1.4) boxes.push(b(x + size / 2 - 0.25, y + size / 2 - 0.25, 0.95, 0.5, 0.5, 0.6, LEAF, { className: 'iso-rise', style }));
+  });
+  return <IsoScene boxes={boxes} pad={6} className={className} label="Isometric illustration of the Hundred Islands" />;
+}
+
 export const LANDMARKS = [
   { id: 'mayon', name: 'Mayon Volcano', place: 'Albay, Bicol', Scene: Mayon, blurb: 'Famous for its near-perfect cone, it is the most active volcano in the country.' },
   { id: 'chocolate', name: 'Chocolate Hills', place: 'Bohol, Central Visayas', Scene: ChocolateHills, blurb: 'Over a thousand grass-covered limestone mounds that turn brown in the dry season.' },
+  { id: 'taal', name: 'Taal Volcano', place: 'Batangas, Calabarzon', Scene: Taal, blurb: 'One of the smallest active volcanoes in the world, set on an island inside Taal Lake.' },
+  { id: 'hundred', name: 'Hundred Islands', place: 'Pangasinan, Ilocos Region', Scene: HundredIslands, blurb: 'More than a hundred small limestone islets scattered across Lingayen Gulf.' },
   { id: 'banaue', name: 'Banaue Rice Terraces', place: 'Ifugao, Cordillera', Scene: BanaueTerraces, blurb: 'Terraces carved into the mountains by the Ifugao people over many centuries.' }
 ];
 
