@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HEROES, HeroFigure } from './iso/heroes';
+import { ArrowLeft, ArrowRight } from './icons';
 
 const INTERVAL = 7000;
 const prefersReduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -18,7 +19,13 @@ export default function HeroShowcase() {
     return () => clearTimeout(id);
   }, [playing, index]);
 
-  const choose = i => { setAuto(false); setIndex(i); };
+  const choose = i => { setAuto(false); setIndex((i + HEROES.length) % HEROES.length); };
+  const step = dir => choose(index + dir);
+  const onStageKey = e => {
+    if (e.defaultPrevented) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+  };
   const onKey = (e, i) => {
     const next = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? (i + 1) % HEROES.length : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? (i + HEROES.length - 1) % HEROES.length : null;
     if (next === null) return;
@@ -28,11 +35,13 @@ export default function HeroShowcase() {
   };
 
   return (
-    <div className="showcase" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div className="showcase" onKeyDown={onStageKey} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <div className="showcase-stage" role="tabpanel" id="hero-panel" aria-labelledby={`hero-tab-${hero.id}`}>
+        <button type="button" className="arrow-btn stage-arrow stage-prev" onClick={() => step(-1)} aria-label="Previous hero"><ArrowLeft size={20} aria-hidden="true" /></button>
         <div key={hero.id} className="stage-figure">
           <HeroFigure hero={hero} label={`Isometric figure of ${hero.name}`} />
         </div>
+        <button type="button" className="arrow-btn stage-arrow stage-next" onClick={() => step(1)} aria-label="Next hero"><ArrowRight size={20} aria-hidden="true" /></button>
       </div>
       <div className="showcase-body">
         <div key={hero.id} className="showcase-text" aria-live="polite">
