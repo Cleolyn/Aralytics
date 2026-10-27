@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Globe2, ChartNoAxesColumn } from '../components/icons';
 import PublicLayout from '../components/PublicLayout';
+import Reveal from '../components/Reveal';
+import HeroShowcase from '../components/HeroShowcase';
+import GeoShowcase from '../components/GeoShowcase';
 
 export default function LandingPage() {
   return (
@@ -11,7 +14,7 @@ export default function LandingPage() {
           <span className="eyebrow">Grade 10 · Araling Panlipunan</span>
           <h1 style={{ marginTop: 16 }}>Learn Araling Panlipunan the easy way.</h1>
           <p>Read your class lessons, answer quizzes, and check your grades in one place.</p>
-          <div className="hero-actions">
+          <div className="hero-actions rise" style={{ animationDelay: '240ms' }}>
             <Link to="/register?role=STUDENT" className="btn btn-primary">
               Start as Student <ArrowRight size={17} />
             </Link>
@@ -42,7 +45,15 @@ export default function LandingPage() {
           </div>
         ))}
       </section>
-      <section id="about" className="hero" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))' }}>
+      <section id="heroes" className="story" aria-labelledby="heroes-title">
+      <Reveal className="story-head"><h2 id="heroes-title">Mga Bayani ng Bayan</h2><p>Meet the people whose courage and ideas shaped the Philippines. Pick a hero to learn their story.</p></Reveal>
+      <Reveal delay={120}><HeroShowcase /></Reveal>
+    </section>
+    <section id="places" className="story" aria-labelledby="places-title">
+      <Reveal className="story-head"><h2 id="places-title">Kilalanin ang Pilipinas</h2><p>From volcanoes to rice terraces, the land itself is part of every Araling Panlipunan lesson.</p></Reveal>
+      <GeoShowcase />
+    </section>
+    <section id="about" className="hero" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))' }}>
         <div>
           <h2>Made for students and teachers.</h2>
           <p>
