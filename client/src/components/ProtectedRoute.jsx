@@ -22,6 +22,10 @@ export function ProtectedRoute({ role, children }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (!user.email_verified || (user.role === 'STUDENT' && user.enrollment_status !== 'APPROVED')) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   // 3. Teacher route attempted by Student -> Redirect with Unauthorized Alert (FR-03)
   if (role === 'TEACHER' && user.role !== 'TEACHER') {
     return (

@@ -7,12 +7,12 @@ import { register } from './serviceWorkerRegistration';
 export default function App() {
   const { user } = useAuth();
   useEffect(() => {
-    if (!user || user.role !== 'STUDENT') return;
+    if (!user || user.role !== 'STUDENT' || !user.email_verified || user.enrollment_status !== 'APPROVED') return;
     const sync = () => syncReading(user.id).catch(() => {});
     sync();
     window.addEventListener('online', sync);
     return () => window.removeEventListener('online', sync);
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, user?.email_verified, user?.enrollment_status]);
   // Register PWA Service Worker for offline instructional capabilities
   useEffect(() => {
     register({

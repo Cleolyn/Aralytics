@@ -9,6 +9,10 @@ import useSplash from '../hooks/useSplash';
 import LoginPage from '../pages/LoginPage';
 import LandingPage from '../pages/LandingPage';
 import RegisterPage from '../pages/RegisterPage';
+import OnboardingPage from '../pages/OnboardingPage';
+import AuthCallbackPage from '../pages/AuthCallbackPage';
+import AuthTaskPage from '../pages/AuthTaskPage';
+import { accountHome as resolveAccountHome, AUTH_TASK_PATHS } from '../utils/authFlow';
 import HelpPage from '../pages/HelpPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import StudentDashboard from '../pages/StudentDashboard';
@@ -27,6 +31,12 @@ import ActivitiesPage from '../pages/ActivitiesPage';
 import ProgressPage from '../pages/ProgressPage';
 
 export { ProtectedRoute };
+
+function AuthRouteAlias() {
+  const location = useLocation();
+  const path = location.pathname.replace(/^\/sign-in(?=\/|$)/, '/login').replace(/^\/sign-up(?=\/|$)/, '/register');
+  return <Navigate to={path + location.search + location.hash} replace />;
+}
 
 function WorkspaceLayout({ children }) {
   return <div className="app-shell"><Navbar /><main id="main-content" tabIndex={-1}>{children}</main></div>;
@@ -55,22 +65,33 @@ function QuizRunnerRoute() {
  * Master AppRoutes Configuration (Strict Unswitchable Role Routing)
  */
 export default function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, sessionTask } = useAuth();
   const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class' };
     const segments = location.pathname.split('/');
     document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);
   }, [location.pathname]);
   const navigate = useNavigate();
 
+  // The callback must mount while Clerk completes a session or resolves a Protect challenge.
+  if (/^\/sso-callback\/?$/.test(location.pathname)) return <AuthCallbackPage />;
+  if (location.pathname.startsWith('/auth/tasks/')) return <AuthTaskPage />;
+  if (sessionTask) return <Navigate to={AUTH_TASK_PATHS[sessionTask] || '/auth/tasks/unsupported'} replace />;
+
   if (splash.show) return <IsoLoader variant="page" progress={splash.progress}>Preparing Aralytics</IsoLoader>;
+  if (loading) return <IsoLoader variant="page">Checking your account</IsoLoader>;
+
+  const accountHome = resolveAccountHome(user);
 
   return (
     <Routes>
-      <Route path="/register/*" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <RegisterPage />} />
+      <Route path="/sign-in/*" element={<AuthRouteAlias />} />
+      <Route path="/sign-up/*" element={<AuthRouteAlias />} />
+      <Route path="/onboarding" element={<OnboardingPage />} />
+      <Route path="/register/*" element={user ? <Navigate to={accountHome} replace /> : <RegisterPage />} />
       <Route path="/help" element={<HelpPage />} />
       {/* Public Login Route */}
       <Route
@@ -78,7 +99,7 @@ export default function AppRoutes() {
         element={
           user ? (
             <Navigate
-              to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'}
+              to={accountHome}
               replace
             />
           ) : (
@@ -87,7 +108,7 @@ export default function AppRoutes() {
         }
       />
 
-      <Route path="/" element={user ? <Navigate to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'} replace /> : <LandingPage />} />
+      <Route path="/" element={user ? <Navigate to={accountHome} replace /> : <LandingPage />} />
 
       {/* ====================================================================
           STRICT TEACHER ROUTE TREE (/teacher/*)
@@ -216,13 +237,7 @@ export default function AppRoutes() {
         path="*"
         element={
           <Navigate
-            to={
-              !user
-                ? '/login'
-                : user.role === 'TEACHER'
-                ? '/teacher/dashboard'
-                : '/student/dashboard'
-            }
+            to={accountHome}
             replace
           />
         }
