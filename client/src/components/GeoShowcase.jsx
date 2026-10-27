@@ -1,5 +1,6 @@
 import React from 'react';
 import Reveal from './Reveal';
+import Carousel from './Carousel';
 import { Archipelago, LANDMARKS } from './iso/geography';
 
 export default function GeoShowcase() {
@@ -17,16 +18,18 @@ export default function GeoShowcase() {
           </ul>
         </div>
       </Reveal>
-      <div className="landmarks">
-        {LANDMARKS.map(({ id, name, place, blurb, Scene }, i) => (
-          <Reveal key={id} className="landmark" delay={i * 120}>
-            <div className="landmark-art"><Scene /></div>
-            <h3>{name}</h3>
-            <p className="landmark-place">{place}</p>
-            <p>{blurb}</p>
-          </Reveal>
-        ))}
-      </div>
+      <Reveal delay={100}>
+        <Carousel title="Wonders of the Philippines" label="Wonders of the Philippines">
+          {LANDMARKS.map(({ id, name, place, blurb, Scene }) => (
+            <article key={id} className="landmark">
+              <div className="landmark-art"><Scene /></div>
+              <h4>{name}</h4>
+              <p className="landmark-place">{place}</p>
+              <p>{blurb}</p>
+            </article>
+          ))}
+        </Carousel>
+      </Reveal>
     </>
   );
 }
