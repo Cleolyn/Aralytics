@@ -325,3 +325,12 @@ textarea.form-input { min-height: 112px; resize: vertical; }
 @keyframes iso-wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 @keyframes iso-drop { 0% { opacity: 0; transform: translateY(-26px); } 14% { opacity: 1; transform: none; } 80% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; transform: translateY(-4px); } }
 @keyframes iso-dot { 0%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+.iso-progress { display: flex; align-items: center; gap: 12px; width: 220px; margin-top: 14px; }
+.iso-progress-track { flex: 1; height: 6px; border-radius: 6px; background: #eadfd3; overflow: hidden; }
+.iso-progress-fill { display: block; width: 100%; height: 100%; border-radius: 6px; background: var(--colors-primary); transform-origin: left; transition: transform .12s linear; }
+.iso-progress-value { min-width: 36px; text-align: right; font-size: 13px; font-weight: 600; color: var(--colors-body); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .iso-loader-page .iso-drop { animation: iso-land .85s var(--ease) both; animation-delay: calc(var(--d, 0ms) + 300ms); }
+}
+@keyframes iso-land { 0% { opacity: 0; transform: translateY(-34px); } 60% { opacity: 1; transform: translateY(3px); } 100% { opacity: 1; transform: none; } }
