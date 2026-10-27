@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, ArrowRight } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';

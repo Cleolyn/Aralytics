@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ClipboardCheck, Users, BookOpen } from 'lucide-react';
+import { ArrowRight, ClipboardCheck, Users, BookOpen } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, FileUp } from 'lucide-react';
+import { ArrowRight, FileUp } from '../components/icons';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import useLearnerData from '../hooks/useLearnerData';

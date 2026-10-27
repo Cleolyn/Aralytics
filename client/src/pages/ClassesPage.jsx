@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '../components/icons';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import { EmptyState, Loading, Notice } from '../components/ui/Feedback';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, BookOpen, Check } from 'lucide-react';
+import { ArrowRight, BookOpen, Check } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import useLearnerData from '../hooks/useLearnerData';
 import ActivityTable from '../components/ActivityTable';

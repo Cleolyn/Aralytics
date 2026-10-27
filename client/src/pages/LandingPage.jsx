@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Globe2, ChartNoAxesColumn } from 'lucide-react';
+import { ArrowRight, BookOpen, Globe2, ChartNoAxesColumn } from '../components/icons';
 import PublicLayout from '../components/PublicLayout';
 
 export default function LandingPage() {

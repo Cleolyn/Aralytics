@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Clock, Flag, Maximize2, WifiOff } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Flag, Maximize2, WifiOff } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';

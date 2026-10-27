@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Download } from 'lucide-react';
+import { Download } from '../components/icons';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import Dialog from '../components/ui/Dialog';

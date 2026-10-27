@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Download, Plus, Edit3, Trash2, FileUp } from 'lucide-react';
+import { ArrowRight, Download, Plus, Edit3, Trash2, FileUp } from '../components/icons';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import useRemoteData from '../hooks/useRemoteData';

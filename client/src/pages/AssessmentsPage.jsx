@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, Plus } from '../components/icons';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import Dialog from '../components/ui/Dialog';
