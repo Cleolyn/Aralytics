@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle, CheckCircle2 } from '../icons';
 import { Mayon } from '../iso/geography';
+import IsoLoader from '../iso/IsoLoader';
 
 export function Notice({ children, error = false, success = false }) {
   if (!children) return null;
@@ -11,7 +12,7 @@ export function EmptyState({ title = 'Nothing here yet', children }) {
   return <div className="empty-state"><div className="empty-art"><Mayon /></div><h3>{title}</h3><p>{children}</p></div>;
 }
 export function Loading({ children = 'Loading your workspace…' }) {
-  return <p className="empty-state" role="status">{children}</p>;
+  return <IsoLoader variant="inline">{children}</IsoLoader>;
 }
 export function Status({ children, tone = '' }) {
   return <span className={`status ${tone ? `status-${tone}` : ''}`}>{children}</span>;
