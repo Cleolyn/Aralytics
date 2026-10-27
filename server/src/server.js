@@ -60,6 +60,7 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/enrollment', require('./routes/enrollmentRoutes'));
 app.use('/api/curriculum', curriculumRoutes);
 app.use('/api/materials', materialsRoutes);
 app.use('/api/quizzes', quizRoutes);

@@ -1,5 +1,6 @@
 const { createClerkClient, getAuth } = require('@clerk/express');
-const jwt = require('jsonwebtoken');
+const db = require('../config/database');
+const { getEnrollment } = require('../services/enrollmentService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aralytics_jwt_secret_ponce_ap10_secure_key_2026';
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
@@ -14,7 +15,11 @@ async function _getCachedClerkUser(userId) {
   const entry = _userCache.get(userId);
   if (entry && entry.expiresAt > Date.now()) return entry.clerkUser;
   const clerkUser = await clerkClient.users.getUser(userId);
-  _userCache.set(userId, { clerkUser, expiresAt: Date.now() + CACHE_TTL });
+  const primary = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId);
+  if (primary?.verification?.status === 'verified') {
+    if (_userCache.size >= 10000) _userCache.delete(_userCache.keys().next().value);
+    _userCache.set(userId, { clerkUser, expiresAt: Date.now() + CACHE_TTL });
+  }
   return clerkUser;
 }
 
@@ -32,7 +37,8 @@ function invalidateUserCache(userId) {
  * that the rest of the API middleware/controllers expect:
  *   { user_id, id, email, full_name, first_name, last_name, role, section_id, section }
  */
-async function verifyToken(req, res, next) {
+async function verifyIdentity(req, res, next) {
+  res.set('Cache-Control', 'no-store');
   let userId = null;
   try {
     const authObj = getAuth(req);
@@ -42,22 +48,6 @@ async function verifyToken(req, res, next) {
   }
 
   if (!userId) {
-    // Fallback for local/legacy JWT tokens (used in unit tests & non-Clerk flows)
-    const authHeader = req.headers?.authorization || req.headers?.Authorization;
-    const rawToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : req.query?.token;
-    if (rawToken) {
-      try {
-        const decoded = jwt.verify(rawToken, JWT_SECRET);
-        req.user = {
-          ...decoded,
-          user_id: decoded.user_id || decoded.id,
-          id: decoded.id || decoded.user_id
-        };
-        return next();
-      } catch {
-        // Not a local JWT; fall through to 401
-      }
-    }
     return res.status(401).json({
       success: false,
       message: 'Access Denied: Missing or invalid authorization token.'
@@ -65,17 +55,22 @@ async function verifyToken(req, res, next) {
   }
   try {
     const clerkUser = await _getCachedClerkUser(userId);
+    const primaryEmail = clerkUser.emailAddresses?.find(email => email.id === clerkUser.primaryEmailAddressId);
+    if (primaryEmail?.verification?.status !== 'verified') {
+      return res.status(403).json({ success: false, code: 'EMAIL_UNVERIFIED', message: 'Verify your email address before continuing.' });
+    }
+    const { rows } = await db.query('SELECT id, role, full_name, first_name, last_name, section, section_id, lrn_or_id FROM users WHERE id = ?', [userId]);
     const meta = clerkUser.publicMetadata || {};
     req.user = {
       user_id: userId,
       id: userId,
-      email: clerkUser.primaryEmailAddress?.emailAddress,
-      full_name: `${clerkUser.firstName} ${clerkUser.lastName}`,
+      email: primaryEmail.emailAddress,
+      email_verified: true,
+      full_name: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' '),
       first_name: clerkUser.firstName,
       last_name: clerkUser.lastName,
-      role: meta.role,
-      section_id: meta.section_id,
-      section: meta.section
+      role: rows[0]?.role || (meta.role === 'TEACHER' ? 'TEACHER' : 'STUDENT'),
+      ...(rows[0] || {})
     };
     next();
   } catch (err) {
@@ -85,6 +80,21 @@ async function verifyToken(req, res, next) {
       message: 'Access Denied: Could not verify session.'
     });
   }
+}
+
+// Every learning endpoint uses this guard, including endpoints without a role check.
+async function verifyToken(req, res, next) {
+  return verifyIdentity(req, res, async () => {
+    try {
+      if (req.user.role === 'STUDENT') {
+        const enrollment = await getEnrollment(req.user.id);
+        if (enrollment?.status !== 'APPROVED') return res.status(403).json({
+          success: false, code: 'ENROLLMENT_REQUIRED', message: 'Your adviser must approve your enrollment before you can access your class.'
+        });
+      }
+      return next();
+    } catch (err) { next(err); }
+  });
 }
 
 /**
@@ -137,6 +147,7 @@ function requireOwnStudentData(paramKey = 'student_id') {
 }
 
 module.exports = {
+  verifyIdentity,
   verifyToken,
   requireRole,
   requireTeacher,

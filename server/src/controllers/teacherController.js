@@ -49,9 +49,12 @@ async function getClasses(req, res, next) {
              COALESCE(u.section_id, u.section, 'Unassigned') as section,
              (SELECT COUNT(*) FROM quiz_submissions s WHERE s.student_id = u.id AND s.status = 'SUBMITTED') as quiz_submissions,
              (SELECT COUNT(*) FROM performance_task_submissions p WHERE p.student_id = u.id) as task_submissions
-      FROM users u WHERE u.role = 'STUDENT'
+      FROM users u
+      JOIN enrollment_requests e ON e.user_id = u.id AND e.status = 'APPROVED'
+      JOIN class_invitations i ON i.id = e.invitation_id
+      WHERE u.role = 'STUDENT' AND i.teacher_id = ?
       ORDER BY section, u.last_name, u.first_name
-    `);
+    `, [req.user.id || req.user.user_id]);
     const sections = new Map();
     for (const learner of learners) {
       if (!sections.has(learner.section)) sections.set(learner.section, { section: learner.section, learners: 0, learners_with_quiz_submissions: 0 });
