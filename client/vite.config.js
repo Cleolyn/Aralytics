@@ -15,8 +15,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    envPrefix: ['VITE_', 'CLERK_'],
+    envPrefix: ['VITE_'],
     define: {
+      'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(publishableKey),
       'process.env': {
         VITE_CLERK_PUBLISHABLE_KEY: publishableKey,
         CLERK_PUBLISHABLE_KEY: publishableKey

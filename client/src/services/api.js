@@ -5,17 +5,22 @@ const API_BASE = '/api';
 // ---------------------------------------------------------------------------
 let _tokenGetter = null;
 let _lastToken = null; // cached for synchronous URL builders
+let _tokenGeneration = 0;
 
 /** Called once from AuthContext when Clerk session is ready. */
 export function setTokenGetter(fn) {
   _tokenGetter = fn;
+  _lastToken = null;
+  _tokenGeneration++;
 }
 
 /** Async — always returns the freshest Clerk session JWT. */
 export async function getToken() {
   if (_tokenGetter) {
+    const generation = _tokenGeneration;
     const t = await _tokenGetter();
-    if (t) _lastToken = t;
+    if (generation !== _tokenGeneration) return null;
+    _lastToken = t || null;
     return t;
   }
   return null;
@@ -57,7 +62,9 @@ export async function request(endpoint, options = {}) {
       window.dispatchEvent(new CustomEvent('auth:expired'));
     }
 
-    const data = await res.json();
+    let data;
+    try { data = await res.json(); }
+    catch { throw new Error('The server returned an unreadable response. Check that the backend is running and try again.'); }
     if (!res.ok) {
       throw new Error(data.message || `Request failed with status ${res.status}`);
     }
