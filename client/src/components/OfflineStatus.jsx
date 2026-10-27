@@ -61,11 +61,11 @@ export default function OfflineStatus() {
         title={
           online
             ? 'Connected to the internet'
-            : 'Offline. Open previously downloaded lessons; quizzes require internet.'
+            : 'Offline. You can open saved lessons. Quizzes need internet.'
         }
       >
         <Icon size={16} aria-hidden="true" />
-        <span>{online ? 'Online' : 'Offline · lessons only'}</span>
+        <span>{online ? 'Online' : 'Offline · saved lessons only'}</span>
       </span>
     </span>
   );

@@ -182,10 +182,10 @@ export async function syncReading(userId) {
     emitSyncStatus({
       state: 'synced',
       count: queue.length,
-      message: `Synchronized ${queue.length} offline reading record(s).`
+      message: `Saved ${queue.length} reading update(s).`
     });
   } catch (err) {
-    emitSyncStatus({ state: 'error', count: queue.length, message: 'Offline queue will retry when connection stabilizes.' });
+    emitSyncStatus({ state: 'error', count: queue.length, message: 'Offline changes will sync when your internet comes back.' });
     throw err;
   }
 }
@@ -209,18 +209,18 @@ export async function markRead(userId, materialId) {
   if (navigator.onLine) {
     await syncReading(userId);
   } else {
-    emitSyncStatus({ state: 'queued', count: 1, message: 'Saved to offline sync queue. Will sync automatically when online.' });
+    emitSyncStatus({ state: 'queued', count: 1, message: 'Saved offline. Will sync when you are back online.' });
   }
 }
 
 export async function downloadMaterial(material) {
-  if (!navigator.onLine) throw new Error('Connect to the internet to download this lesson.');
+  if (!navigator.onLine) throw new Error('Connect to the internet to save this lesson.');
   if (!('caches' in window)) throw new Error('Offline downloads are not supported in this browser.');
   const url = materialUrl(material.storage_url);
-  if (!url || new URL(url).origin !== window.location.origin) throw new Error('This resource is hosted elsewhere. Open it online or save it using your browser.');
+  if (!url || new URL(url).origin !== window.location.origin) throw new Error('This file is on another website. Open it online or save it in your browser.');
   const response = await fetch(url);
-  if (!response.ok) throw new Error('Could not download this resource. Please try again.');
-  if (response.headers.get('content-type')?.includes('text/html')) throw new Error('The resource link returned a web page. Ask your teacher for the file link.');
+  if (!response.ok) throw new Error('Could not save this lesson. Please try again.');
+  if (response.headers.get('content-type')?.includes('text/html')) throw new Error('This link opens a web page instead of a file. Ask your teacher for the direct file link.');
   const cache = await caches.open(MATERIAL_CACHE);
   await cache.put(url, response);
 }

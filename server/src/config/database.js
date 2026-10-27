@@ -99,12 +99,20 @@ if (dialect === 'turso' || dialect === 'libsql') {
     }
   };
 } else {
-  // SQLite relational engine
-  const Database = require('better-sqlite3');
+  // SQLite relational engine (uses better-sqlite3 if available, otherwise Node's built-in node:sqlite)
   const dbPath = path.resolve(__dirname, '../../', process.env.DB_SQLITE_PATH || 'aralytics.sqlite');
-  const sqlite = new Database(dbPath);
-  sqlite.pragma('foreign_keys = ON');
-  sqlite.pragma('journal_mode = WAL');
+  let sqlite;
+  try {
+    const Database = require('better-sqlite3');
+    sqlite = new Database(dbPath);
+    sqlite.pragma('foreign_keys = ON');
+    sqlite.pragma('journal_mode = WAL');
+  } catch {
+    const { DatabaseSync } = require('node:sqlite');
+    sqlite = new DatabaseSync(dbPath);
+    sqlite.exec('PRAGMA foreign_keys = ON');
+    sqlite.exec('PRAGMA journal_mode = WAL');
+  }
 
   dbInstance = {
     dialect: 'sqlite',

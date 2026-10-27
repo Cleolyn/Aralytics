@@ -219,7 +219,7 @@ export const api = {
 
   getSubmissionFileUrl: (url) => {
     if (!url?.startsWith('/api/performance-tasks/files/')) return null;
-    return `${url}?token=${encodeURIComponent(getToken() || '')}`;
+    return `${url}?token=${encodeURIComponent(getTokenSync() || '')}`;
   },
 
   // Export URLs

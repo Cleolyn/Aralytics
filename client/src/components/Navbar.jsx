@@ -8,7 +8,7 @@ import OfflineStatus from './OfflineStatus';
 
 const teacherLinks = [
   ['/teacher/dashboard', 'Overview', LayoutDashboard], ['/teacher/classes', 'Classes', Users],
-  ['/teacher/materials', 'Lessons', BookOpen], ['/teacher/assessments', 'Assessments', ClipboardList],
+  ['/teacher/materials', 'Lessons', BookOpen], ['/teacher/assessments', 'Quizzes and Tasks', ClipboardList],
   ['/teacher/gradebook', 'Gradebook', FileSpreadsheet], ['/teacher/reports', 'Reports', ChartNoAxesColumn]
 ];
 const learnerLinks = [
@@ -46,7 +46,7 @@ export default function Navbar() {
     <aside id="workspace-navigation" ref={sidebarRef} className={`sidebar ${open ? 'open' : ''}`}>
       <Brand to={home} />
       <button className="icon-button sidebar-close" onClick={() => setOpen(false)} aria-label="Close navigation"><X size={20} /></button>
-      <nav aria-label={isTeacher ? 'Instructor navigation' : 'Learner navigation'}>
+      <nav aria-label={isTeacher ? 'Teacher navigation' : 'Student navigation'}>
         {links.map(([to,label,Icon]) => <NavLink key={to} to={to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}><Icon size={19} aria-hidden="true" />{label}</NavLink>)}
       </nav>
       <div className="sidebar-bottom">
@@ -56,7 +56,7 @@ export default function Navbar() {
     </aside>
     <header className="workspace-header">
       <button ref={menuRef} className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-label="Open navigation" aria-expanded={open} aria-controls="workspace-navigation"><Menu size={23} /></button>
-      <span className="workspace-label">{isTeacher ? 'Instructor' : 'Learner'} workspace</span>
+      <span className="workspace-label">{isTeacher ? 'Teacher' : 'Student'} workspace</span>
       <div className="header-actions"><OfflineStatus />
         <UserButton afterSignOutUrl="/" />
       </div>

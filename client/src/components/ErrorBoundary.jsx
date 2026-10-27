@@ -67,10 +67,10 @@ export default class ErrorBoundary extends React.Component {
               marginBottom: '8px',
               color: 'var(--colors-ink)'
             }}>
-              May Naganap na Runtime Error
+              Something went wrong
             </h2>
             <p style={{ color: 'var(--colors-body)', fontSize: '0.92rem', marginBottom: '20px', lineHeight: 1.5 }}>
-              Hindi maipakita nang buo ang bahaging ito dahil sa isang runtime exception. Paki-refresh o i-reset ang sesyon.
+              We could not load this page right now. Please refresh or go back to the home page.
             </p>
             {this.state.error && (
               <pre style={{
@@ -98,7 +98,7 @@ export default class ErrorBoundary extends React.Component {
                 padding: '12px 24px'
               }}
             >
-              <RefreshCw size={16} /> I-reload ang Aralytics Platform
+              <RefreshCw size={16} /> Reload Aralytics
             </button>
           </div>
         </div>

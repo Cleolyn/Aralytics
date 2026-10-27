@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useCallback, useState, useRef } from 'react';
-import { useUser, useAuth as useClerkAuth } from '@clerk/react';
+import { useUser, useAuth as useClerkAuth, useClerk } from '@clerk/react';
 import { setTokenGetter } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -15,11 +15,33 @@ export const LOGIN_INTENT_KEY = 'aralytics:login-intent';
 export function AuthProvider({ children }) {
   const { user: clerkUser, isLoaded } = useUser();
   const { signOut, getToken } = useClerkAuth();
+  const clerk = useClerk();
+  const [clerkTimedOut, setClerkTimedOut] = useState(false);
   const [syncingRole, setSyncingRole] = useState(true);
   const [verifiedRole, setVerifiedRole] = useState(null);
   const [verifiedProfile, setVerifiedProfile] = useState(null);
   const [studentSession, setStudentSession] = useState(null);
   const initialBootHandledRef = useRef(false);
+
+  const clerkReadyOrFailed = isLoaded || clerk?.status === 'error' || clerkTimedOut;
+
+  // Prevent infinite "Preparing Aralytics…" screen if Clerk JS fails or times out
+  useEffect(() => {
+    if (isLoaded) {
+      setClerkTimedOut(false);
+      return;
+    }
+    if (clerk?.status === 'error') {
+      setClerkTimedOut(true);
+      setSyncingRole(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setClerkTimedOut(true);
+      setSyncingRole(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [isLoaded, clerk?.status]);
 
   const [authError, setAuthError] = useState(() => {
     if (typeof window === 'undefined') return '';
@@ -230,7 +252,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
-        loading: (!isLoaded || syncingRole) && !studentSession?.user,
+        loading: (!clerkReadyOrFailed || syncingRole) && !studentSession?.user,
         logout,
         loginStudent,
         authError,

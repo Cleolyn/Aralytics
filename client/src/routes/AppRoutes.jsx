@@ -56,9 +56,9 @@ export default function AppRoutes() {
   const { user, loading } = useAuth();
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Assessments', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Learner support', interventions: 'Suggested practice', login: 'Log in', register: 'Create account', help: 'Help' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help' };
     const segments = location.pathname.split('/');
-    document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Assessment' : 'Araling Panlipunan')} · Aralytics`;
+    document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);
   }, [location.pathname]);
   const navigate = useNavigate();

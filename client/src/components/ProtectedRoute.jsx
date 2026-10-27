@@ -27,7 +27,7 @@ export function ProtectedRoute({ role, children }) {
       <Navigate
         to="/student/dashboard"
         state={{
-          unauthorizedNotice: 'This page is for teachers. You can continue from your learner overview.'
+          unauthorizedNotice: 'This page is for teachers. You have been returned to your student home.'
         }}
         replace
       />
@@ -40,7 +40,7 @@ export function ProtectedRoute({ role, children }) {
       <Navigate
         to="/teacher/dashboard"
         state={{
-          unauthorizedNotice: 'This page is for learners. You have been returned to your Instructor workspace.'
+          unauthorizedNotice: 'This page is for students. You have been returned to your teacher home.'
         }}
         replace
       />

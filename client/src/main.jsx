@@ -7,6 +7,11 @@ import { AuthProvider } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
+const PUBLISHABLE_KEY =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  import.meta.env.CLERK_PUBLISHABLE_KEY ||
+  'pk_test_Y3VyaW91cy1vcmlvbGUtNjMyMC5jbGVyay5hY2NvdW50cy5kZXYk';
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
@@ -14,7 +19,7 @@ if (!rootElement) {
 } else {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <ClerkProvider afterSignOutUrl="/">
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
         <BrowserRouter>
           <ErrorBoundary>
             <AuthProvider>

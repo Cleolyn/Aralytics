@@ -88,7 +88,7 @@ export default function RegisterPage() {
     const sanitized = raw.replace(/\D/g, '');
     setFieldErrors((prev) => ({
       ...prev,
-      lrn_or_id: raw !== sanitized ? 'Numeric digits (0–9) only.' : ''
+      lrn_or_id: raw !== sanitized ? 'Numbers only (0 to 9).' : ''
     }));
     setProfile((prev) => ({ ...prev, lrn_or_id: sanitized }));
   };
@@ -116,21 +116,21 @@ export default function RegisterPage() {
   const validateRequiredStudentFields = () => {
     const nextErrors = {};
     if (!profile.lrn_or_id.trim() || !/^[0-9]+$/.test(profile.lrn_or_id.trim())) {
-      nextErrors.lrn_or_id = 'Required (0–9)';
+      nextErrors.lrn_or_id = 'Required (numbers only)';
     }
     if (!profile.section.trim()) {
       nextErrors.section = 'Required';
     }
     if (!profile.first_name.trim() || !NAME_REGEX.test(profile.first_name.trim())) {
-      nextErrors.first_name = 'Required (letters)';
+      nextErrors.first_name = 'Required (letters only)';
     }
     if (!profile.last_name.trim() || !NAME_REGEX.test(profile.last_name.trim())) {
-      nextErrors.last_name = 'Required (letters)';
+      nextErrors.last_name = 'Required (letters only)';
     }
     setFieldErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
-      setGateNotice('Complete your Student Number / LRN, Class Section, First Name, and Last Name before continuing.');
+      setGateNotice('Please fill in your LRN, Class Section, First Name, and Last Name before continuing.');
       if (nextErrors.lrn_or_id) lrnRef.current?.focus();
       else if (nextErrors.section) sectionRef.current?.focus();
       else if (nextErrors.first_name) firstNameRef.current?.focus();
@@ -199,8 +199,8 @@ export default function RegisterPage() {
       <div className="auth-layout">
         <section className="auth-story">
           <span className="eyebrow">Araling Panlipunan</span>
-          <h1 style={{ marginTop: 20 }}>Your learning journey starts here.</h1>
-          <p>Para sa mas malawak na pag-unawa at mas magandang komunidad.</p>
+          <h1 style={{ marginTop: 20 }}>Create your account.</h1>
+          <p>Join your class to read lessons, answer quizzes, and check your grades.</p>
           <img src="/images/community-learning.jpg" alt="" width="1774" height="887" />
         </section>
         <section className="auth-form clerk-embed">
@@ -212,7 +212,7 @@ export default function RegisterPage() {
               className={selectedRole === 'STUDENT' ? 'active' : ''}
               onClick={() => handleTabChange('STUDENT')}
             >
-              Learner Account
+              Student Account
             </button>
             <button
               type="button"
@@ -298,7 +298,7 @@ export default function RegisterPage() {
                 style={{ minHeight: 30, height: 30, padding: '2px 12px', fontSize: 12.5, marginTop: 2 }}
                 disabled={submitting}
               >
-                {submitting ? 'Connecting to Clerk…' : 'Continue as Learner (Clerk LRN)'}
+                {submitting ? 'Creating account…' : 'Continue as Student'}
               </button>
             </form>
           ) : (

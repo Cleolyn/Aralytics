@@ -2,14 +2,19 @@
   "name": "aralytics-monorepo",
   "version": "1.0.0",
   "description": "Aralytics (Ponce AP10 Learning Hub) - LMS, Assessment & Automated Intervention System",
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
+    "postinstall": "npm --prefix server install && npm --prefix client install",
     "server": "cd server && node src/server.js",
     "client": "cd client && npm run dev",
     "init-db": "cd server && node src/db/init.js",
     "seed-users": "node server/scripts/seedUsers.js",
     "seed-samples": "cd server && node src/db/seed_samples.js",
     "test": "cd server && npm test",
-    "dev": "npm run init-db && (cd server && node src/server.js) & (cd client && npm run dev)",
+    "dev": "node -e \"const {spawn}=require('child_process');['server','client'].forEach(s=>spawn('npm run '+s,{stdio:'inherit',shell:true}))\"",
     "build": "npm --prefix client run build",
     "test:redesign": "npm --prefix server run test:redesign"
   },

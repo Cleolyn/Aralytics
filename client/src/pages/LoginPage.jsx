@@ -95,7 +95,7 @@ export default function LoginPage() {
     const sanitized = raw.replace(/\D/g, '');
     setFieldErrors((prev) => ({
       ...prev,
-      lrn_or_id: raw !== sanitized ? 'Numeric digits (0–9) only.' : ''
+      lrn_or_id: raw !== sanitized ? 'Numbers only (0 to 9).' : ''
     }));
     setProfile((prev) => ({ ...prev, lrn_or_id: sanitized }));
   };
@@ -123,21 +123,21 @@ export default function LoginPage() {
   const validateRequiredStudentFields = () => {
     const nextErrors = {};
     if (!profile.lrn_or_id.trim() || !/^[0-9]+$/.test(profile.lrn_or_id.trim())) {
-      nextErrors.lrn_or_id = 'Required (0–9)';
+      nextErrors.lrn_or_id = 'Required (numbers only)';
     }
     if (!profile.section.trim()) {
       nextErrors.section = 'Required';
     }
     if (!profile.first_name.trim() || !NAME_REGEX.test(profile.first_name.trim())) {
-      nextErrors.first_name = 'Required (letters)';
+      nextErrors.first_name = 'Required (letters only)';
     }
     if (!profile.last_name.trim() || !NAME_REGEX.test(profile.last_name.trim())) {
-      nextErrors.last_name = 'Required (letters)';
+      nextErrors.last_name = 'Required (letters only)';
     }
     setFieldErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
-      setGateNotice('Complete your Student Number / LRN, Class Section, First Name, and Last Name before signing in.');
+      setGateNotice('Please fill in your LRN, Class Section, First Name, and Last Name before signing in.');
       if (nextErrors.lrn_or_id) lrnRef.current?.focus();
       else if (nextErrors.section) sectionRef.current?.focus();
       else if (nextErrors.first_name) firstNameRef.current?.focus();
@@ -162,7 +162,6 @@ export default function LoginPage() {
         last_name: profile.last_name.trim()
       });
 
-      // Establish real Clerk session via Clerk Sign-In Ticket when available
       if (data.clerkTicket && signInLoaded && signIn && setActive) {
         try {
           const attempt = await signIn.create({
@@ -206,9 +205,9 @@ export default function LoginPage() {
     <PublicLayout simple>
       <div className="auth-layout">
         <section className="auth-story">
-          <span className="eyebrow">Your learning journey</span>
+          <span className="eyebrow">Araling Panlipunan</span>
           <h1 style={{ marginTop: 20 }}>Welcome back.</h1>
-          <p>Tuloy ang pagkatuto. Explore our world, one lesson at a time.</p>
+          <p>Sign in to open your lessons, answer quizzes, and check your grades.</p>
           <img src="/images/community-learning.jpg" alt="" width="1774" height="887" />
         </section>
         <section className="auth-form clerk-embed">
@@ -220,7 +219,7 @@ export default function LoginPage() {
               className={selectedRole === 'STUDENT' ? 'active' : ''}
               onClick={() => handleTabChange('STUDENT')}
             >
-              Learner Sign In
+              Student Sign In
             </button>
             <button
               type="button"
@@ -321,7 +320,7 @@ export default function LoginPage() {
                 style={{ minHeight: 30, height: 30, padding: '2px 12px', fontSize: 12.5, marginTop: 2 }}
                 disabled={submitting}
               >
-                {submitting ? 'Connecting to Clerk…' : 'Sign in as Learner (Clerk LRN)'}
+                {submitting ? 'Signing in…' : 'Sign in as Student'}
               </button>
             </form>
           ) : (
@@ -333,7 +332,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 className="form-input"
-                placeholder="Numeric digits only (0–9)"
+                placeholder="Numbers only (0 to 9)"
                 value={profile.lrn_or_id}
                 onChange={handleIdChange}
                 maxLength={16}

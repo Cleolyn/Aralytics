@@ -5,12 +5,51 @@ import { useAuth } from '../context/AuthContext';
 
 export default function HelpPage() {
   const { user } = useAuth();
-  return <PublicLayout simple><article className="container" style={{ maxWidth: 880, paddingInline: 0 }}><div className="page-heading"><div><h1>How can we help?</h1><p>A quick guide to your Aralytics workspace.</p></div></div>
-    {user && <Link className="text-action" to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'}>← Back to your workspace</Link>}
-    <section id="login" className="section"><h2>Logging in</h2><p style={{ marginTop: 16 }}>Use your email, LRN, or employee ID and your password. Your account opens the correct learner or teacher workspace automatically. If you have forgotten your password or need a teacher account, contact your teacher or school administrator. Password reset by email is not currently available.</p></section>
-    <section className="section"><h2>Lessons and offline access</h2><p style={{ marginTop: 16 }}>Open Lessons to browse your materials. Use “Download for offline” while connected. Only downloaded materials are available without internet. Mark lessons as read to record your progress; offline reading records sync when you reconnect.</p></section>
-    <section className="section"><h2>Activities and quizzes</h2><p style={{ marginTop: 16 }}>Activities shows your quizzes and performance tasks. Check the instructions and due dates before submitting. Quizzes require internet. During a quiz, keep the assessment window active; focus changes are recorded for teacher review.</p></section>
-    <section className="section"><h2>Grades and support</h2><p style={{ marginTop: 16 }}>My Progress shows your own scores, submitted work, and teacher feedback. If practice is recommended, open Pagsulong to work on the suggested material. Teachers review submissions from Gradebook and learner support from Classes.</p></section>
-    <section id="account-data" className="section"><h2>Your account and learning records</h2><p style={{ marginTop: 16 }}>Aralytics stores your school account details, class section, submissions, scores, reading progress, and assessment focus records. Teachers can review learner records and feedback. Your browser stores your login session and downloaded learning resources. On a shared device, log out when finished and remove saved downloads through Lessons.</p><p style={{ marginTop: 16 }}>For questions about your school’s data policies or account records, contact your school administrator.</p></section>
-  </article></PublicLayout>;
+  return (
+    <PublicLayout simple>
+      <article className="container" style={{ maxWidth: 880, paddingInline: 0 }}>
+        <div className="page-heading">
+          <div>
+            <h1>How can we help?</h1>
+            <p>Simple tips for using Aralytics.</p>
+          </div>
+        </div>
+        {user && (
+          <Link className="text-action" to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'}>
+            ← Back to home
+          </Link>
+        )}
+        <section id="login" className="section">
+          <h2>Signing in</h2>
+          <p style={{ marginTop: 16 }}>
+            Students can sign in using their LRN, class section, and name. Teachers can sign in using their teacher account. If you need help with your account, ask your teacher or school admin.
+          </p>
+        </section>
+        <section className="section">
+          <h2>Lessons and offline reading</h2>
+          <p style={{ marginTop: 16 }}>
+            Open Lessons to read your class materials. Click Download while you have internet so you can still read them later when offline. Click Mark as read when you finish a lesson.
+          </p>
+        </section>
+        <section className="section">
+          <h2>Activities and quizzes</h2>
+          <p style={{ marginTop: 16 }}>
+            Open Activities to see your quizzes and class tasks. Check the instructions and due date before submitting. Quizzes need an internet connection, and you should stay on the quiz page until you finish.
+          </p>
+        </section>
+        <section className="section">
+          <h2>Grades and extra practice</h2>
+          <p style={{ marginTop: 16 }}>
+            My Progress shows your quiz scores, submitted tasks, and teacher comments. If you need extra review on a topic, open Practice to read the suggested material.
+          </p>
+        </section>
+        <section id="account-data" className="section">
+          <h2>Your account and privacy</h2>
+          <p style={{ marginTop: 16 }}>
+            Aralytics saves your name, section, submitted work, quiz scores, and reading progress so you and your teacher can track your classwork. If you are using a shared computer or phone, remember to log out when you are done.
+          </p>
+        </section>
+      </article>
+    </PublicLayout>
+  );
 }

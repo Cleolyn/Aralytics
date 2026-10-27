@@ -15,7 +15,7 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
       const isFull = Boolean(document.fullscreenElement);
       setIsFullscreen(isFull);
       if (!isFull && isQuizActive) {
-        handleProctorViolation('FULLSCREEN_EXIT', 'Umalis ka sa Full-Screen mode habang nagaganap ang pagsusulit.');
+        handleProctorViolation('FULLSCREEN_EXIT', 'You left full screen mode during the quiz.');
       }
     };
 
@@ -45,7 +45,7 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
         setLastWarningText(message);
 
         if (res.is_flagged_for_cheating) {
-          alert(`CRITICAL PROCTORING ALERT: Naabot mo ang limitasyong ${maxBlurLimit} blurs/tab-switches. Ang iyong pagsusulit ay mamarkahan ng Cheating Flag at isusumite.`);
+          alert(`Quiz Alert: You reached the limit of ${maxBlurLimit} tab switches. Your quiz will be flagged for review and submitted.`);
           if (onAutoSubmit) {
             onAutoSubmit();
           }
@@ -61,12 +61,12 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
     if (!isQuizActive) return;
 
     const handleWindowBlur = () => {
-      handleProctorViolation('WINDOW_BLUR', 'Nakitang lumabas ang cursor o nawala ang pokus sa bintana ng pagsusulit.');
+      handleProctorViolation('WINDOW_BLUR', 'The quiz window lost focus.');
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        handleProctorViolation('TAB_HIDDEN', 'Nakitang lumipat ka ng tab ng browser habang sumasagot.');
+        handleProctorViolation('TAB_HIDDEN', 'You switched browser tabs during the quiz.');
       }
     };
 
@@ -101,10 +101,10 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <ShieldAlert size={18} color="#ef4444" />
           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
-            Live Proctoring Watchdog Aktibo:
+            Quiz Monitor Active:
           </span>
           <span style={{ fontSize: '0.82rem', color: blurCount > 0 ? '#f87171' : '#34d399', fontWeight: 700 }}>
-            {blurCount} / {maxBlurLimit} Paglabag (Blurs/Tab switches)
+            {blurCount} / {maxBlurLimit} Tab switches
           </span>
         </div>
 
@@ -115,11 +115,11 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
               className="btn btn-sm btn-secondary"
               style={{ fontSize: '0.75rem', padding: '4px 10px', borderColor: 'rgba(59, 130, 246, 0.4)' }}
             >
-              <Maximize2 size={13} /> I-lock sa Full Screen
+              <Maximize2 size={13} /> Use Full Screen
             </button>
           )}
           <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-            STRICT ONLINE ONLY
+            Online Quiz
           </span>
         </div>
       </div>
@@ -130,10 +130,10 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
           <AlertTriangle size={24} style={{ flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-              BABALA SA INTEGRIDAD NG PAGSUSULIT! ({blurCount} / {maxBlurLimit})
+              Please stay on this quiz tab ({blurCount} / {maxBlurLimit})
             </div>
             <div style={{ fontSize: '0.82rem', opacity: 0.95 }}>
-              {lastWarningText} Ang bawat paglipat ng window ay naitatala sa audit log ng guro.
+              {lastWarningText} Switching tabs or windows is recorded for your teacher.
             </div>
           </div>
           <button
@@ -141,7 +141,7 @@ export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAuto
             className="btn btn-sm"
             style={{ background: 'rgba(0, 0, 0, 0.3)', color: 'white', border: 'none', padding: '4px 10px', fontSize: '0.75rem' }}
           >
-            Naiintindihan ko
+            Got it
           </button>
         </div>
       )}
