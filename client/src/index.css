@@ -159,12 +159,18 @@ textarea.form-input { min-height: 112px; resize: vertical; }
 .password-field { position: relative; } .password-field input { padding-right: 52px; } .password-field button { position: absolute; top: 1px; right: 1px; }
 .auth-form .full-width { width: 100%; } .auth-foot { padding-top: 24px; margin-top: 24px; border-top: 1px solid var(--border-subtle); font-size: 14px; }
 .account-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); gap: 64px; align-items: center; max-width: 1060px; margin: 56px auto 80px; }
-.account-intro h1 { font-size: clamp(32px, 3.5vw, 48px); max-width: 15ch; }
+.account-intro h1 { font-size: 32px; max-width: 17ch; }
 .account-intro > p { margin-top: 20px; max-width: 42ch; }
 .account-form { min-width: 0; padding: 28px; background: var(--colors-canvas-soft); border-radius: 16px; }
 .account-form > p { margin-top: 12px; }
 .account-form .cl-rootBox, .account-form .cl-cardBox { width: 100%; max-width: 100%; }
 .account-form .cl-cardBox, .account-form .cl-card { box-shadow: none; }
+.account-form .cl-socialButtons, .account-form .cl-dividerRow { display: none; }
+.account-form .cl-footer, .account-form .cl-formButtonPrimary, .account-form .cl-button { background-image: none; box-shadow: none; }
+.account-form button { box-shadow: none !important; background-image: none !important; }
+.google-auth { margin-top: 24px; }
+.google-auth > button { width: 100%; }
+.google-auth > p { margin-top: 20px; text-align: center; font-size: 14px; color: var(--colors-body); }
 .account-note { color: var(--colors-body); font-size: 14px; overflow-wrap: anywhere; }
 .account-recovery, .join-sheet { display: grid; gap: 20px; }
 .enrollment-journey { padding-left: 20px; margin: 28px 0; }
@@ -203,8 +209,8 @@ textarea.form-input { min-height: 112px; resize: vertical; }
 .enrollment-request { padding: 24px 0; border-top: 1px solid var(--border-subtle); }
 .enrollment-request .enrollment-details { font-size: 14px; }
 .enrollment-empty { padding: 24px 0; }
-@media (max-width: 900px) { .account-layout { gap: 32px; } .account-form { padding: 24px; } .join-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 24px; } .enrollment-columns { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .account-layout, .join-layout { grid-template-columns: 1fr; gap: 24px; margin: 28px auto 40px; } .account-intro h1 { font-size: 30px; max-width: none; } .account-intro .enrollment-journey, .account-intro .account-note { display: none; } .account-intro > p { margin-top: 12px; } .account-form, .join-sheet, .enrollment-panel { padding: 20px; } .join-context { padding: 0; } .join-context .enrollment-journey { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 13px; } .join-context .account-note { font-size: 13px; } .enrollment-details > div { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; } .enrollment-manager .section-heading { flex-wrap: wrap; } .invitation-row { flex-wrap: wrap; } }
+@media (max-width: 900px) { .account-layout { gap: 32px; } .account-form { padding: 24px; } .join-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 24px; } .enrollment-columns { grid-template-columns: 1fr; } .enrollment-columns > .enrollment-panel:last-child { order: -1; } }
+@media (max-width: 640px) { .account-layout, .join-layout { grid-template-columns: 1fr; gap: 24px; margin: 28px auto 40px; } .account-intro h1 { font-size: 24px; max-width: none; } .account-intro .enrollment-journey, .account-intro .account-note { display: none; } .account-intro > p { margin-top: 12px; } .account-form, .join-sheet, .enrollment-panel { padding: 20px; } .join-context { padding: 0; } .join-context .enrollment-journey { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 13px; } .join-context .account-note { font-size: 13px; } .enrollment-details > div { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; } .enrollment-manager .section-heading { flex-wrap: wrap; } .invitation-row { flex-wrap: wrap; } }
 .continue-lesson { display: grid; grid-template-columns: 1fr 46%; align-items: center; gap: 32px; padding: 28px; background: var(--colors-canvas-soft); border: 1px solid var(--panel-line); border-radius: 16px; } .continue-lesson h2 { font-size: 2.3rem; margin: 12px 0; } .continue-lesson .btn { margin-top: 24px; } .continue-lesson img { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; border-radius: 12px; }
 .ilaw-steps { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: 13px; color: var(--colors-body); margin: 20px 0; } .ilaw-steps span { display: flex; gap: 8px; align-items: center; }
 .dialog-backdrop { position: fixed; inset: 0; background: #35241d66; display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 150; }
