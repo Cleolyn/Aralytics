@@ -1,0 +1,10 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { FixtureProvider } from './enrollment-fixtures';
+import OnboardingPage from '../src/pages/OnboardingPage';
+import EnrollmentManager from '../src/components/EnrollmentManager';
+import PublicLayout from '../src/components/PublicLayout';
+import '../src/index.css';
+const teacher = new URLSearchParams(location.search).get('view') === 'teacher';
+createRoot(document.getElementById('root')).render(<BrowserRouter><FixtureProvider>{teacher ? <PublicLayout account><div className="container"><h1>Adviser enrollment</h1><EnrollmentManager /></div></PublicLayout> : <OnboardingPage />}</FixtureProvider></BrowserRouter>);
