@@ -1,6 +1,6 @@
 # Aralytics (Ponce AP10 Learning Hub)
 
-The interface uses a brown and cream Araling Panlipunan theme, open sections, readable tables, and English-led Taglish. See [brand.md](brand.md) for the design system.
+The interface uses a white and brown Araling Panlipunan theme, open sections, readable tables, and English-led Taglish. See [brand.md](brand.md) for the design system.
 
 Learners use **Overview → Lessons → Activities → My Progress**. Teachers use **Overview → Classes → Lessons → Assessments → Gradebook → Reports**. Practice and learner support are linked from the relevant progress and review screens. Public pages include landing, login, registration, and help.
 

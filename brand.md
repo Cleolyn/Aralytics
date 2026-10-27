@@ -4,19 +4,19 @@ Aralytics is a welcoming learning space for Junior High School Araling Panlipuna
 
 ## Design direction
 
-Use an open editorial layout: cream canvas, brown typography and actions, generous space, thin horizontal rules, and clear lists. Do not put every section inside a card. Navigation is a flat rail with an active indicator; secondary navigation uses underlined tabs. Use cards only when a distinct interactive surface genuinely needs containment. Do not use gradients, glass effects, decorative shadows, KPI tile grids, or pill-shaped navigation.
+Use an open editorial layout: white canvas, brown typography and actions, soft light-brown surfaces, generous space, and clear lists. Do not put every section inside a card. Navigation is a flat rail with an active indicator; secondary navigation uses underlined tabs. Use cards only when a distinct interactive surface genuinely needs containment. Do not use gradients, glass effects, decorative shadows, KPI tile grids, or pill-shaped navigation.
 
 ## Palette
 
 | Token | Value | Purpose |
 | --- | --- | --- |
-| Canvas | `#FAF7F2` | Main background |
-| Sand | `#F2EBE1` | Navigation, subtle selected rows |
+| Canvas | `#FFFFFF` | Main background |
+| Sand | `#FAF6F2` | Panels, asides, hover rows (`#F3EBE4` for selected rows and active navigation) |
 | Ink | `#35241D` | Headings and primary text |
 | Body | `#655348` | Supporting readable text |
 | Primary | `#5A3827` | Primary actions and links |
 | Primary hover | `#43291D` | Hover state |
-| Rule | `#D9CCBE` | Section and table separators |
+| Rule | `#EEE6DE` | Section and table separators |
 | Olive | `#52613D` | Completed / on track |
 | Amber | `#8A561D` | Pending / needs practice |
 | Critical | `#A0352A` | Errors and urgent issues |
@@ -25,7 +25,7 @@ Pair status colors with explicit text. Normal text must meet WCAG AA contrast (4
 
 ## Typography and spacing
 
-Use Georgia for editorial page headings and Inter (with system sans-serif fallback) for body text, controls, and navigation. Body copy is at least 16px; supporting text is at least 14px. Keep prose around 65 characters per line. Page headings scale from 32px on mobile to 44px on desktop. Use an 8px spacing rhythm. Buttons and fields use a restrained 4px corner radius; controls should offer approximately 44px touch targets. Avoid uppercase body copy and technical badges.
+Use Georgia for editorial page headings and Inter (with system sans-serif fallback) for body text, controls, and navigation. Body copy is at least 16px; supporting text is at least 14px. Keep prose around 65 characters per line. Page headings scale from 32px on mobile to 44px on desktop. Use an 8px spacing rhythm. Buttons and fields use an 8px corner radius, panels and images 12-16px; controls should offer approximately 44px touch targets. Avoid uppercase body copy and technical badges.
 
 ## Voice
 
