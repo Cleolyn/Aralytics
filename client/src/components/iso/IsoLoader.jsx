@@ -6,9 +6,12 @@ const b = (x, y, z, w, d, h, c, extra) => ({ x, y, z, w, d, h, c, ...extra });
 // Tile colours step from pale sand to the brand brown along the diagonal.
 const RAMP = ['#efe6dc', '#e4d6c7', '#d6c1ac', '#c4a78b', '#ad8666', '#936548', '#7a4d37', '#66402e', '#5a3827'];
 
-const tiles = [];
+// The outer ring of tiles ripples. The middle 3x3 is a solid, static plinth so the books never sink into the wave.
+const PLINTH_TOP = 0.7;
+const tiles = [b(1.04, 1.04, 0, 2.92, 2.92, PLINTH_TOP, '#e6d9ca')];
 for (let x = 0; x < 5; x++) {
   for (let y = 0; y < 5; y++) {
+    if (x >= 1 && x <= 3 && y >= 1 && y <= 3) continue;
     tiles.push(b(x + 0.04, y + 0.04, 0, 0.92, 0.92, 0.5, RAMP[x + y], { className: 'iso-wave', style: { '--d': `${(x + y) * 130}ms` } }));
   }
 }
@@ -23,9 +26,9 @@ const book = (x, y, z, w, d, h, cover, i) => {
   ];
 };
 const books = [
-  ...book(0.9, 0.8, 0.5, 2.6, 2.0, 0.5, '#5a3827', 0),
-  ...book(1.1, 1.0, 1.0, 2.3, 1.9, 0.45, '#6f8f4e', 1),
-  ...book(1.0, 0.95, 1.45, 2.2, 1.7, 0.4, '#c9a24b', 2)
+  ...book(1.2, 1.5, PLINTH_TOP, 2.6, 2.0, 0.5, '#5a3827', 0),
+  ...book(1.35, 1.55, PLINTH_TOP + 0.5, 2.3, 1.9, 0.45, '#6f8f4e', 1),
+  ...book(1.4, 1.65, PLINTH_TOP + 0.95, 2.2, 1.7, 0.4, '#c9a24b', 2)
 ];
 
 export default function IsoLoader({ children = 'Loading…', variant = 'inline', progress }) {
