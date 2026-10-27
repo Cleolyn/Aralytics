@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Brand from '../components/Brand';
 import OfflineStatus from '../components/OfflineStatus';
 import IsoLoader from '../components/iso/IsoLoader';
+import useSplash from '../hooks/useSplash';
 import LoginPage from '../pages/LoginPage';
 import LandingPage from '../pages/LandingPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -55,6 +56,7 @@ function QuizRunnerRoute() {
  */
 export default function AppRoutes() {
   const { user, loading } = useAuth();
+  const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
     const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help' };
@@ -64,7 +66,7 @@ export default function AppRoutes() {
   }, [location.pathname]);
   const navigate = useNavigate();
 
-  if (loading) return <IsoLoader variant="page">Preparing Aralytics</IsoLoader>;
+  if (splash.show) return <IsoLoader variant="page" progress={splash.progress}>Preparing Aralytics</IsoLoader>;
 
   return (
     <Routes>
