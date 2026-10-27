@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../icons';
 
 export default function Dialog({ title, children, onClose }) {
   const ref = useRef(null);

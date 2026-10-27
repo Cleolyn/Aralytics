@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
-import { ShieldAlert, Maximize2, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, Maximize2, AlertTriangle } from './icons';
 
 export default function ProctoringGuard({ submissionId, maxBlurLimit = 3, onAutoSubmit, isQuizActive }) {
   const [blurCount, setBlurCount] = useState(0);

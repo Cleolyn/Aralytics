@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from 'lucide-react';
+import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from './icons';
 import { UserButton } from '@clerk/react';
 import { useAuth } from '../context/AuthContext';
 import Brand from './Brand';

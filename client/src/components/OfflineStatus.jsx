@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, CheckCircle2 } from './icons';
 import { useAuth } from '../context/AuthContext';
 import { syncReading } from '../utils/offlineLearning';
 

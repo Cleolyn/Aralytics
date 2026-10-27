@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import { ShieldAlert, RefreshCw } from './icons';
 
 /**
  * Universal React Error Boundary to prevent white screen of death

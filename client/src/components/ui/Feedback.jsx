@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from '../icons';
 
 export function Notice({ children, error = false, success = false }) {
   if (!children) return null;
