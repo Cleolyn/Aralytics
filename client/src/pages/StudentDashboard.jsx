@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Check } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import useLearnerData from '../hooks/useLearnerData';
 import ActivityTable from '../components/ActivityTable';
+import { HEROES, HeroFigure } from '../components/iso/heroes';
 import { Loading, Notice } from '../components/ui/Feedback';
 import { cleanText, completedActivity } from '../utils/learning';
 
@@ -19,6 +20,7 @@ export default function StudentDashboard() {
   const readCount = materials.filter(m => readIds.has(m.id)).length;
   const upcoming = data?.activities.filter(a => !completedActivity(a)).slice(0, 4) || [];
   const support = data?.interventions.filter(i => !['RESOLVED', 'COMPLETED', 'EXEMPTED', 'EXEMPT', 'OVERRIDDEN'].includes(i.status)) || [];
+  const hero = HEROES[Math.floor(Date.now() / 86400000) % HEROES.length];
   return (
     <div className="container">
       <div className="page-heading">
@@ -92,6 +94,17 @@ export default function StudentDashboard() {
             <Link className="text-action" to="/student/progress">
               Check your grades <ArrowRight size={15} />
             </Link>
+          </section>
+          <section aria-labelledby="hero-of-day">
+            <h2 id="hero-of-day">Bayani ngayon</h2>
+            <div className="hero-of-day">
+              <HeroFigure hero={hero} label={`Isometric figure of ${hero.name}`} />
+              <div>
+                <strong>{hero.name}</strong>
+                <p>{hero.role} · {hero.years}</p>
+              </div>
+            </div>
+            <p style={{ marginTop: 12 }}>{hero.blurb}</p>
           </section>
           <section>
             <BookOpen size={23} aria-hidden="true" />
