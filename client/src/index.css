@@ -334,3 +334,9 @@ textarea.form-input { min-height: 112px; resize: vertical; }
   .iso-loader-page .iso-drop { animation: iso-land .85s var(--ease) both; animation-delay: calc(var(--d, 0ms) + 300ms); }
 }
 @keyframes iso-land { 0% { opacity: 0; transform: translateY(-34px); } 60% { opacity: 1; transform: translateY(3px); } 100% { opacity: 1; transform: none; } }
+
+.iso-mist { fill: #fff; opacity: .6; }
+@media (prefers-reduced-motion: no-preference) {
+  .iso-mist { animation: iso-mist 9s ease-in-out infinite alternate; } .iso-mist-late { animation-duration: 12s; animation-delay: -4s; }
+}
+@keyframes iso-mist { from { transform: translateX(-14px); opacity: .35; } to { transform: translateX(14px); opacity: .7; } }
