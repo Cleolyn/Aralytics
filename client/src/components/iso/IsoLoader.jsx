@@ -28,12 +28,20 @@ const books = [
   ...book(1.0, 0.95, 1.45, 2.2, 1.7, 0.4, '#c9a24b', 2)
 ];
 
-export default function IsoLoader({ children = 'Loading…', variant = 'inline' }) {
+export default function IsoLoader({ children = 'Loading…', variant = 'inline', progress }) {
   return (
     <div className={`iso-loader iso-loader-${variant}`} role="status">
       {variant === 'page' && <span className="iso-loader-brand">Aralytics</span>}
       <div className="iso-loader-art"><IsoScene boxes={tiles} figure={books} pad={4} /></div>
       <p className="iso-loader-text">{children}<span className="iso-dots" aria-hidden="true"><i /><i /><i /></span></p>
+      {progress !== undefined && (
+        <div className="iso-progress">
+          <div className="iso-progress-track" role="progressbar" aria-label="Loading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
+            <span className="iso-progress-fill" style={{ transform: `scaleX(${Math.min(100, Math.max(0, progress)) / 100})` }} />
+          </div>
+          <span className="iso-progress-value" aria-hidden="true">{Math.round(progress)}%</span>
+        </div>
+      )}
     </div>
   );
 }
