@@ -1,20 +1,20 @@
 :root {
-  --colors-primary: #5a3827; --colors-primary-hover: #43291d; --colors-on-primary: #fffdf8;
-  --colors-canvas: #faf7f2; --colors-canvas-soft: #f2ebe1; --colors-ink: #35241d;
-  --colors-ink-soft: #432f25; --colors-ink-mid: #514036; --colors-body: #655348;
-  --colors-body-mid: #746357; --colors-mute: #aa9582; --border-subtle: #d9ccbe;
-  --border-glass: #d9ccbe; --border-focus: #5a3827;
+  --colors-primary: #5a3827; --colors-primary-hover: #3f271b; --colors-on-primary: #ffffff;
+  --colors-canvas: #ffffff; --colors-canvas-soft: #faf6f2; --colors-tint: #f3ebe4; --colors-ink: #2b1d16;
+  --colors-ink-soft: #432f25; --colors-ink-mid: #514036; --colors-body: #5c4a3f;
+  --colors-body-mid: #6b5a4e; --colors-mute: #9a8878; --border-subtle: #eee6de;
+  --border-glass: #eee6de; --border-focus: #5a3827;
   --bg-primary: var(--colors-canvas); --bg-secondary: var(--colors-canvas-soft);
-  --bg-card: transparent; --bg-card-soft: var(--colors-canvas-soft); --bg-card-hover: #f2ebe1;
+  --bg-card: transparent; --bg-card-soft: var(--colors-canvas-soft); --bg-card-hover: #faf6f2;
   --bg-glass: var(--colors-canvas); --text-main: var(--colors-ink); --text-muted: var(--colors-body); --text-sub: var(--colors-body-mid);
-  --accent-gold: var(--colors-primary); --accent-gold-light: #f2ebe1; --accent-gold-glow: transparent;
+  --accent-gold: var(--colors-primary); --accent-gold-light: #f3ebe4; --accent-gold-glow: transparent;
   --accent-blue: var(--colors-primary); --accent-blue-dark: var(--colors-primary-hover); --accent-blue-glow: transparent;
-  --status-mastered: #52613d; --status-mastered-bg: #edf0e5;
-  --status-reinforce: #8a561d; --status-reinforce-bg: #f7eddd;
-  --status-critical: #a0352a; --status-critical-bg: #fbede9;
+  --status-mastered: #52613d; --status-mastered-bg: #f1f4ea;
+  --status-reinforce: #8a561d; --status-reinforce-bg: #fbf3e6;
+  --status-critical: #a0352a; --status-critical-bg: #fdf1ee;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-body: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --rounded-none: 0; --rounded-sm: 4px; --rounded-md: 4px; --rounded-pill: 4px; --rounded-full: 50%;
+  --rounded-none: 0; --rounded-sm: 8px; --rounded-md: 8px; --rounded-pill: 8px; --rounded-full: 50%;
   --shadow-sm: none; --shadow-md: none; --shadow-glow: none;
 }
 * { box-sizing: border-box; }
@@ -25,9 +25,9 @@ h1 { font-size: clamp(2rem, 3.3vw, 2.75rem); } h2 { font-size: 1.65rem; } h3 { f
 a { color: var(--colors-primary); text-underline-offset: 4px; }
 button,input,select,textarea { font: inherit; } button,a,input,select,textarea { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; } button:disabled { cursor: not-allowed; opacity: .55; }
-:focus-visible { outline: 3px solid #946747; outline-offset: 4px; }
+:focus-visible { outline: 2px solid var(--colors-primary); outline-offset: 3px; }
 img { display: block; max-width: 100%; } svg { flex-shrink: 0; }
-::selection { background: #e3d2bd; color: #35241d; }
+::selection { background: #ead9c8; color: #2b1d16; }
 .container { width: 100%; max-width: 1380px; margin: 0 auto; padding: 40px 48px 64px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 20px; border-radius: 4px; border: 1px solid transparent; font: 600 14px/1.5 var(--font-body); text-decoration: none; transition: background .15s; }
 .btn-primary,.btn-accent { color: var(--colors-on-primary); background: var(--colors-primary); }
