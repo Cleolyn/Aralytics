@@ -5,7 +5,7 @@ const b = (x, y, z, w, d, h, c, extra) => ({ x, y, z, w, d, h, c, ...extra });
 const WOOD = '#6e4429';
 const LEAF = '#5f8a4a';
 
-const tree = (x, y) => [b(x + 0.22, y + 0.22, 0, 0.26, 0.26, 0.5, WOOD), b(x, y, 0.5, 0.7, 0.7, 0.75, LEAF)];
+const tree = (x, y, z = 0) => [b(x + 0.22, y + 0.22, z, 0.26, 0.26, 0.5, WOOD), b(x, y, z + 0.5, 0.7, 0.7, 0.75, LEAF)];
 
 // ---- Archipelago ---------------------------------------------------------
 const GRID = [
@@ -122,16 +122,49 @@ export function ChocolateHills({ className = '' }) {
 }
 
 // ---- Banaue Rice Terraces ------------------------------------------------
+// A forested ridge at the back, with terraces stepping down toward the viewer. Flooded paddies reflect the sky,
+// planted ones show crop rows, stone walls hold each step, and an Ifugao-style hut sits on a middle terrace.
+const TERRACES = [[1.0, 10.5], [0.4, 11.2], [1.2, 10.4], [0.3, 11.4], [1.0, 10.8], [0.4, 11.5]];
+const STEP = 1.5;
+const terraceTop = j => (TERRACES.length - j) * 0.62 + 0.5;
+
 export function BanaueTerraces({ className = '' }) {
-  const boxes = [b(-0.5, -0.5, -0.35, 9.5, 9.5, 0.35, '#dbe5c8', { layer: -1 })];
-  for (let i = 0; i < 6; i++) {
-    const s = 8.5 - i * 1.3;
-    const z = i * 0.7;
-    boxes.push(b(0, 0, z, s, s, 0.7, i % 2 ? '#86a85a' : '#6f9448'));
-    if (i === 1 || i === 3) boxes.push(b(0.25, 0.25, z + 0.7, s - 0.5, s - 0.5, 0.05, '#bcd9dc', { className: 'iso-water' }));
-  }
-  boxes.push(b(0.6, 0.6, 4.2, 1.1, 1.1, 0.7, '#a97b4f'), b(0.5, 0.5, 4.9, 1.3, 1.3, 0.45, '#7a5232'));
-  return <IsoScene boxes={boxes} pad={6} className={className} label="Isometric illustration of the Banaue Rice Terraces" />;
+  const boxes = [
+    b(-0.6, -3.4, -0.35, 13.2, 15.4, 0.35, '#dbe5c8', { layer: -1 }),
+    // Forested ridge, tapering upward in steps.
+    b(0.3, -3.2, 0, 11.4, 3.2, 4.6, '#3f6a37', { top: '#4f7d41' }),
+    b(0.8, -3.2, 4.6, 9.8, 2.8, 1.3, '#3b6433', { top: '#52844a' }),
+    b(1.6, -3.2, 5.9, 7.6, 2.0, 1.2, '#37602f', { top: '#5a8a49' }),
+    b(2.6, -3.2, 7.1, 4.8, 1.4, 1.0, '#335c2c', { top: '#639352' })
+  ];
+  TERRACES.forEach(([xs, xe], j) => {
+    const y = j * STEP;
+    const h = terraceTop(j);
+    const flooded = j % 2 === 1;
+    boxes.push(b(xs, y, 0, xe - xs, STEP, h, '#948564', { top: flooded ? '#7ea24f' : '#86ad57' }));
+    if (flooded) {
+      boxes.push(b(xs + 0.28, y + 0.28, h, xe - xs - 0.56, STEP - 0.56, 0.06, '#a8d0d9', { className: 'iso-water' }));
+    } else {
+      for (let k = 0; k < 3; k++) boxes.push(b(xs + 0.3, y + 0.28 + k * 0.42, h, xe - xs - 0.6, 0.16, 0.05, '#a6ca70'));
+    }
+  });
+  const hutZ = terraceTop(2);
+  boxes.push(
+    b(8.4, 3.5, hutZ, 1.1, 1.0, 0.65, '#8a5a36'),
+    b(8.25, 3.35, hutZ + 0.65, 1.4, 1.3, 0.35, '#d4b25a'),
+    b(8.5, 3.6, hutZ + 1.0, 0.9, 0.8, 0.3, '#c9a24b'),
+    b(8.8, 3.85, hutZ + 1.3, 0.3, 0.3, 0.25, '#b89440'),
+    ...tree(10.2, 3.1, hutZ), ...tree(0.6, 4.6, terraceTop(3)),
+    ...tree(10.8, -2.6, 4.6), ...tree(10.9, -1.0, 4.6), ...tree(9.5, -2.8, 5.9), ...tree(9.6, -1.4, 5.9),
+    ...tree(1.8, -2.7, 7.1), ...tree(7.7, -2.6, 7.1)
+  );
+  const [mx, my] = proj(5, -2, 8.4);
+  return (
+    <IsoScene boxes={boxes} extend={[[5, -2, 11]]} pad={6} className={className} label="Isometric illustration of the Banaue Rice Terraces">
+      <ellipse className="iso-mist" cx={mx - 18} cy={my} rx="26" ry="5" />
+      <ellipse className="iso-mist iso-mist-late" cx={mx + 22} cy={my + 7} rx="20" ry="4" />
+    </IsoScene>
+  );
 }
 
 // ---- Taal Volcano ---------------------------------------------------------
