@@ -1,13 +1,13 @@
 :root {
   --colors-primary: #5a3827; --colors-primary-hover: #3f271b; --colors-on-primary: #ffffff;
-  --colors-canvas: #ffffff; --colors-canvas-soft: #faf6f2; --colors-tint: #f3ebe4; --colors-ink: #2b1d16;
+  --colors-canvas: #ffffff; --colors-canvas-soft: #fdfbf9; --colors-tint: #f7f3ef; --colors-ink: #2b1d16;
   --colors-ink-soft: #432f25; --colors-ink-mid: #514036; --colors-body: #5c4a3f;
-  --colors-body-mid: #6b5a4e; --colors-mute: #9a8878; --border-subtle: #eee6de;
-  --border-glass: #eee6de; --border-focus: #5a3827;
+  --colors-body-mid: #6b5a4e; --colors-mute: #9a8878; --border-subtle: #f0eae4;
+  --border-glass: #f0eae4; --border-focus: #5a3827;
   --bg-primary: var(--colors-canvas); --bg-secondary: var(--colors-canvas-soft);
-  --bg-card: transparent; --bg-card-soft: var(--colors-canvas-soft); --bg-card-hover: #faf6f2;
+  --bg-card: transparent; --bg-card-soft: var(--colors-canvas-soft); --bg-card-hover: #fdfbf9;
   --bg-glass: var(--colors-canvas); --text-main: var(--colors-ink); --text-muted: var(--colors-body); --text-sub: var(--colors-body-mid);
-  --accent-gold: var(--colors-primary); --accent-gold-light: #f3ebe4; --accent-gold-glow: transparent;
+  --accent-gold: var(--colors-primary); --accent-gold-light: #f7f3ef; --accent-gold-glow: transparent;
   --accent-blue: var(--colors-primary); --accent-blue-dark: var(--colors-primary-hover); --accent-blue-glow: transparent;
   --status-mastered: #52613d; --status-mastered-bg: #f1f4ea;
   --status-reinforce: #8a561d; --status-reinforce-bg: #fbf3e6;
