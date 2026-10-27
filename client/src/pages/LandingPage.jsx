@@ -5,7 +5,7 @@ import PublicLayout from '../components/PublicLayout';
 
 export default function LandingPage() {
   return <PublicLayout>
-    <section className="hero">
+    <section className="hero hero-landing">
       <div><span className="eyebrow">People · Places · Society</span><h1 style={{ marginTop: 16 }}>Understand our world. Shape our community.</h1><p>Your learning space for Araling Panlipunan. Learn, practice, and grow—isang aralin sa bawat hakbang.</p><div className="hero-actions"><Link to="/register?role=STUDENT" className="btn btn-primary">Start learning <ArrowRight size={17} /></Link><Link to="/login?role=TEACHER" className="btn btn-secondary">I am a teacher</Link></div></div>
       <img className="hero-image" src="/images/community-learning.jpg" alt="" width="1774" height="887" fetchPriority="high" />
     </section>
