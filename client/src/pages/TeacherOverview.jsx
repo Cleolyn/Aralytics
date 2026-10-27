@@ -6,6 +6,7 @@ import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import { EmptyState, Loading, Notice } from '../components/ui/Feedback';
 import { cleanText, formatDate } from '../utils/learning';
+import EnrollmentManager from '../components/EnrollmentManager';
 
 export default function TeacherOverview() {
   const { user } = useAuth();
@@ -38,6 +39,7 @@ export default function TeacherOverview() {
           Create quiz <ArrowRight size={17} />
         </Link>
       </div>
+      <EnrollmentManager onReviewed={refresh} />
       <Notice error>{location.state?.unauthorizedNotice || error}</Notice>
       {error && (
         <button className="text-action" onClick={refresh}>

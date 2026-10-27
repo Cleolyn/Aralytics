@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import { EmptyState, Loading, Notice } from '../components/ui/Feedback';
 import { cleanText } from '../utils/learning';
+import EnrollmentManager from '../components/EnrollmentManager';
 
 export default function ClassesPage() {
   const { data, loading, error, refresh } = useRemoteData(api.getClasses);
@@ -31,6 +32,7 @@ export default function ClassesPage() {
           Open gradebook <ArrowRight size={16} />
         </Link>
       </div>
+      <EnrollmentManager onReviewed={refresh} />
       <Notice error>{error}</Notice>
       {error && (
         <button className="text-action" onClick={refresh}>
