@@ -8,3 +8,11 @@ build/
 *.sqlite-journal
 
 server/uploads/
+
+# Cloudflare local runtime and generated dependency bundle
+.wrangler/
+.cloudflare/
+.dev.vars*
+
+tmp/
+

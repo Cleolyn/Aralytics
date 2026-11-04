@@ -16,7 +16,9 @@
     "test": "cd server && npm test",
     "dev": "node -e \"const {spawn}=require('child_process');['server','client'].forEach(s=>spawn('npm run '+s,{stdio:'inherit',shell:true}))\"",
     "build": "npm --prefix client run build",
-    "test:redesign": "npm --prefix server run test:redesign"
+    "test:redesign": "npm --prefix server run test:redesign",
+    "build:cloudflare": "npm --prefix client run build && node scripts/prepare-worker.cjs",
+    "deploy:cloudflare": "npm run build:cloudflare && npm run init-db && npx wrangler d1 migrations apply aralytics-uploads --remote && npx wrangler deploy"
   },
   "keywords": [
     "aralytics",
@@ -27,5 +29,8 @@
     "intervention"
   ],
   "author": "Antigravity Loop Architect",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@hugeicons/react": "^1.1.10"
+  }
 }

@@ -1,6 +1,6 @@
-const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const storage = require('../services/uploadStorage');
 const materialRoot = path.resolve(__dirname, '../../resources/materials');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
@@ -39,7 +39,7 @@ async function getAllMaterials(req, res, next) {
     for (const material of materials) {
       if (material.storage_url?.startsWith('/api/materials/download/')) {
         const filename = material.storage_url.split('/').pop();
-        try { if (filename !== path.basename(filename)) throw new Error('Invalid name'); await fs.access(path.join(materialRoot, filename)); material.resource_available = true; }
+        try { if (filename !== path.basename(filename)) throw new Error('Invalid name'); if (!await storage.exists(req, 'materials', materialRoot, filename)) throw new Error('Missing file'); material.resource_available = true; }
         catch { material.resource_available = false; }
       }
     }
@@ -97,8 +97,7 @@ async function createMaterial(req, res, next) {
       const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
       const storedFilename = `${safeBase}-${Date.now()}${ext}`;
       const buffer = Buffer.from(file_content_base64, 'base64');
-      await fs.mkdir(materialRoot, { recursive: true });
-      await fs.writeFile(path.join(materialRoot, storedFilename), buffer);
+      await storage.put(req, 'materials', materialRoot, storedFilename, buffer);
       effectiveUrl = `/api/materials/download/${storedFilename}`;
       effectiveSize = buffer.length;
     }
@@ -160,8 +159,7 @@ async function updateMaterial(req, res, next) {
       const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
       const storedFilename = `${safeBase}-${Date.now()}${ext}`;
       const buffer = Buffer.from(file_content_base64, 'base64');
-      await fs.mkdir(materialRoot, { recursive: true });
-      await fs.writeFile(path.join(materialRoot, storedFilename), buffer);
+      await storage.put(req, 'materials', materialRoot, storedFilename, buffer);
       effectiveUrl = `/api/materials/download/${storedFilename}`;
       effectiveSize = buffer.length;
     }
@@ -200,7 +198,7 @@ async function deleteMaterial(req, res, next) {
     const current = existing[0];
     if (current.storage_url && current.storage_url.startsWith('/api/materials/download/')) {
       const fname = path.basename(current.storage_url);
-      await fs.unlink(path.join(materialRoot, fname)).catch(() => {});
+      await storage.remove(req, 'materials', materialRoot, fname);
     }
 
     await db.query(`DELETE FROM instructional_materials WHERE id = ?`, [id]);
@@ -219,11 +217,13 @@ async function deleteMaterial(req, res, next) {
 async function streamMaterialFile(req, res, next) {
   const { filename } = req.params;
   if (!/^[a-zA-Z0-9._-]+$/.test(filename) || filename.includes('..')) return res.status(400).json({ success: false, message: 'Invalid resource name.' });
-  const file = path.join(materialRoot, filename);
-  try { await fs.access(file); }
-  catch { return res.status(404).json({ success: false, message: 'This lesson file has not been provided yet. Ask your teacher for a working resource link.' }); }
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.sendFile(file, error => { if (error) next(error); });
+  try {
+    const object = await storage.get(req, 'materials', materialRoot, filename);
+    if (!object) return res.status(404).json({ success: false, message: 'This lesson file has not been provided yet. Ask your teacher for a working resource link.' });
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.type(path.extname(filename));
+    res.send(object);
+  } catch (error) { next(error); }
 }
 
 /**

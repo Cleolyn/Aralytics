@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
-const fs = require('fs/promises');
 const path = require('path');
+const storage = require('../services/uploadStorage');
 const uploadRoot = path.resolve(__dirname, '../../uploads/performance-tasks');
 
 /**
@@ -210,8 +210,7 @@ async function submitTask(req, res, next) {
         return res.status(400).json({ success: false, message: 'The file is invalid or larger than 5 MB.' });
       }
       const storedName = `${uuidv4()}${extension}`;
-      await fs.mkdir(uploadRoot, { recursive: true });
-      await fs.writeFile(path.join(uploadRoot, storedName), content, { flag: 'wx' });
+      await storage.put(req, 'performance-tasks', uploadRoot, storedName, content);
       effectiveFileUrl = `/api/performance-tasks/files/${storedName}`;
       effectiveSize = content.length;
     }
@@ -356,11 +355,12 @@ async function downloadFile(req, res, next) {
     if (!rows.length || (req.user.role !== 'TEACHER' && rows[0].student_id !== req.user.id)) {
       return res.status(404).json({ success: false, message: 'Submission file not found.' });
     }
-    try { await fs.access(path.join(uploadRoot, filename)); }
-    catch { return res.status(404).json({ success: false, message: 'This older submission has no uploaded file. Please submit the actual document.' }); }
+    const object = await storage.get(req, 'performance-tasks', uploadRoot, filename);
+    if (!object) return res.status(404).json({ success: false, message: 'This older submission has no uploaded file. Please submit the actual document.' });
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.download(path.join(uploadRoot, filename), path.basename(rows[0].file_name));
+    res.attachment(path.basename(rows[0].file_name));
+    res.send(object);
   } catch (err) { next(err); }
 }
 

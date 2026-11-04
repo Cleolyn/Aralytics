@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aralytics",
+  "account_id": "f83df8d94122bb2d5f4cf58d91806b7d",
+  "main": "server/src/worker.js",
+  "compatibility_date": "2026-10-29",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "client/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "routes": [
+    {
+      "pattern": "aralytics.cleolyn.dev",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "NODE_ENV": "production",
+    "DB_DIALECT": "turso"
+  },
+  "alias": {
+    "pdfkit": "./.cloudflare/pdfkit.cjs",
+    "@libsql/client": "./server/node_modules/@libsql/client/lib-esm/web.js"
+  },
+  "build": {
+    "command": "node scripts/prepare-worker.cjs"
+  },
+  "define": {
+    "__dirname": "\"/bundle\"",
+    "__filename": "\"/bundle/pdfkit.js\""
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "UPLOADS_DB",
+      "database_name": "aralytics-uploads",
+      "database_id": "fd2e27f6-d473-4284-a13b-c2a19684574c",
+      "migrations_dir": "server/migrations/uploads"
+    }
+  ]
+}
