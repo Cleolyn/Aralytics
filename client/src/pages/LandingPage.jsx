@@ -29,7 +29,7 @@ export default function LandingPage() {
           alt=""
           width="1774"
           height="887"
-          fetchPriority="high"
+          fetchpriority="high"
         />
       </section>
       <section id="how-it-works" className="feature-strip" aria-label="How Aralytics works">

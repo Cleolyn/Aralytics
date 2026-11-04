@@ -29,10 +29,15 @@ export function AuthProvider({ children }) {
     return () => clearTimeout(timer);
   }, [isLoaded]);
 
-  useEffect(() => {
+  if (clerkUser && getToken) {
     setTokenGetter(getToken);
-    return () => setTokenGetter(null);
-  }, [getToken]);
+  }
+
+  useEffect(() => {
+    if (clerkUser && getToken) {
+      setTokenGetter(getToken);
+    }
+  }, [clerkUser, getToken]);
 
   useEffect(() => {
     const expired = () => refreshUser();
@@ -45,7 +50,7 @@ export function AuthProvider({ children }) {
     const generation = ++syncGenerationRef.current;
     let cancelled = false;
     const active = () => !cancelled && generation === syncGenerationRef.current;
-    if (!clerkUser || sessionTask) { profileRef.current = null; setUser(null); setSyncing(false); setRefreshing(false); return; }
+    if (!clerkUser || sessionTask) { profileRef.current = null; setUser(null); setSyncing(false); setRefreshing(false); setTokenGetter(null); return; }
     if (profileRef.current?.id !== clerkUser.id) { setUser(null); setSyncing(true); }
     setRefreshing(true);
     const sync = async () => {
@@ -62,10 +67,10 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     syncGenerationRef.current++;
-    profileRef.current = null; setUser(null); setAuthError(''); setSyncing(false); setRefreshing(false); setTokenGetter(getToken);
+    profileRef.current = null; setUser(null); setAuthError(''); setSyncing(false); setRefreshing(false); setTokenGetter(null);
     try { await signOut(); }
     catch { setAuthError('Could not finish signing out. Check your connection and try signing out again.'); }
-  }, [signOut, getToken]);
+  }, [signOut]);
   return <AuthContext.Provider value={{ user, loading: (!isLoaded && !loadTimedOut) || syncing, refreshing, sessionTask, logout, authError,
     clearAuthError, refreshUser, isTeacher: user?.role === 'TEACHER', isStudent: user?.role === 'STUDENT' }}>{children}</AuthContext.Provider>;
 }

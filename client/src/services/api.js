@@ -9,8 +9,9 @@ let _tokenGeneration = 0;
 
 /** Called once from AuthContext when Clerk session is ready. */
 export function setTokenGetter(fn) {
+  if (_tokenGetter === fn) return;
   _tokenGetter = fn;
-  _lastToken = null;
+  if (!fn) _lastToken = null;
   _tokenGeneration++;
 }
 
