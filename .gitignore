@@ -33,3 +33,6 @@ Thumbs.db
 .cloudflare/
 .dev.vars*
 tmp/
+
+# Local production data backups (never commit)
+.backups/
