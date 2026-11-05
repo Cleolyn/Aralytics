@@ -2,11 +2,11 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 function database(req) {
-  return req.app.locals.env?.UPLOADS_DB;
+  return req.app?.locals?.env?.UPLOADS_DB;
 }
 
 function bucket(req) {
-  return req.app.locals.env?.UPLOADS;
+  return req.app?.locals?.env?.UPLOADS;
 }
 
 module.exports = {
