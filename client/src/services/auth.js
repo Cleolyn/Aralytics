@@ -19,7 +19,7 @@ export async function syncVerifiedAccount(clerkUser, getToken, { timeoutMs = 200
     try { data = await response.json(); }
     catch { throw new Error('Aralytics could not reach the account service. Check that the backend is running and try again.'); }
     if (!response.ok) throw new Error(data.message || 'Could not verify your account. Please try again.');
-    if (data.success !== true || data.user?.id !== identity.id || data.user?.email_verified !== true || !['TEACHER', 'STUDENT'].includes(data.user?.role)) {
+    if (data.success !== true || data.user?.id !== identity.id || data.user?.email_verified !== true || !['ADMIN', 'TEACHER', 'STUDENT'].includes(data.user?.role)) {
       throw new Error('The account service returned an incompatible response. Restart the backend and try again.');
     }
     return data.user;

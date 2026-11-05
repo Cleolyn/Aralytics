@@ -25,7 +25,7 @@ CREATE TABLE `users` (
   `full_name` VARCHAR(150) NOT NULL,
   `email` VARCHAR(191) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
-  `role` ENUM('TEACHER', 'STUDENT') NOT NULL DEFAULT 'STUDENT',
+  `role` ENUM('ADMIN', 'TEACHER', 'STUDENT') NOT NULL DEFAULT 'STUDENT',
   `section_id` VARCHAR(50) NULL COMMENT 'Class section identifier, e.g. 10-Rizal',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

@@ -1,58 +1,37 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { accountHome, ROLE_HOMES } from '../utils/authFlow';
 import IsoLoader from './iso/IsoLoader';
 
+const WRONG_WORKSPACE = {
+  ADMIN: 'This page is for administrators. You have been returned to your home.',
+  TEACHER: 'This page is for teachers. You have been returned to your home.',
+  STUDENT: 'This page is for students. You have been returned to your home.'
+};
+
 /**
- * Immutable Role Protected Route Guard (FR-01..04, NFR-01)
- * Enforces server-verified authentication and role boundaries on every route transition.
- * 
- * @param {string} role - The required role ('TEACHER' or 'STUDENT').
- * @param {React.ReactNode} children - The protected workspace component.
+ * Role guard for workspace routes (FR-01..04, NFR-01). The server enforces the same
+ * boundaries on every API call; this only keeps people in the right workspace.
+ *
+ * @param {'ADMIN'|'TEACHER'|'STUDENT'} role - The role the page requires.
  */
 export function ProtectedRoute({ role, children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // 1. Session verification in progress
   if (loading) return <IsoLoader variant="page">Checking your session</IsoLoader>;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 
-  // 2. Unauthenticated: Redirect immediately to /login with state preservation
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
+  // Unverified accounts, and students without an approved class, finish setup first.
   if (!user.email_verified || (user.role === 'STUDENT' && user.enrollment_status !== 'APPROVED')) {
-    return <Navigate to="/onboarding" replace />;
+    return <Navigate to={accountHome(user)} replace />;
   }
 
-  // 3. Teacher route attempted by Student -> Redirect with Unauthorized Alert (FR-03)
-  if (role === 'TEACHER' && user.role !== 'TEACHER') {
-    return (
-      <Navigate
-        to="/student/dashboard"
-        state={{
-          unauthorizedNotice: 'This page is for teachers. You have been returned to your student home.'
-        }}
-        replace
-      />
-    );
+  if (user.role !== role) {
+    return <Navigate to={ROLE_HOMES[user.role] || '/login'} state={{ unauthorizedNotice: WRONG_WORKSPACE[role] }} replace />;
   }
 
-  // 4. Student route attempted by Teacher -> Redirect to Teacher Command Center (FR-04)
-  if (role === 'STUDENT' && user.role !== 'STUDENT') {
-    return (
-      <Navigate
-        to="/teacher/dashboard"
-        state={{
-          unauthorizedNotice: 'This page is for students. You have been returned to your teacher home.'
-        }}
-        replace
-      />
-    );
-  }
-
-  // 5. Authorized session
   return children;
 }
 

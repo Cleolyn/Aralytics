@@ -5,11 +5,15 @@ export const AUTH_TASK_PATHS = Object.freeze({
   'setup-mfa': '/auth/tasks/setup-mfa'
 });
 
+export const ROLE_HOMES = Object.freeze({ ADMIN: '/admin', TEACHER: '/teacher/dashboard', STUDENT: '/student/dashboard' });
+export const INSTRUCTOR_APPLICATION_PATH = '/instructor/apply';
+
 export function accountHome(user) {
   if (!user) return AUTH_PATHS.signIn;
   if (!user.email_verified) return AUTH_PATHS.afterAuth;
-  if (user.role === 'TEACHER') return '/teacher/dashboard';
-  return user.enrollment_status === 'APPROVED' ? '/student/dashboard' : AUTH_PATHS.afterAuth;
+  if (user.role === 'ADMIN' || user.role === 'TEACHER') return ROLE_HOMES[user.role];
+  if (user.enrollment_status === 'APPROVED') return ROLE_HOMES.STUDENT;
+  return user.instructor_application ? INSTRUCTOR_APPLICATION_PATH : AUTH_PATHS.afterAuth;
 }
 
 export function authErrorMessage(error, fallback = 'Could not complete sign-in. Please try again.') {

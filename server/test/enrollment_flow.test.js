@@ -18,6 +18,7 @@ const authRoutes = require('../src/routes/authRoutes');
 const enrollmentRoutes = require('../src/routes/enrollmentRoutes');
 require.cache[sdkPath].exports = originalSDK;
 const { initializeEnrollmentTables } = require('../src/services/enrollmentService');
+const { initializeInstructorApplicationTables } = require('../src/services/instructorApplicationService');
 
 async function run() {
   await db.query(`CREATE TABLE users (id TEXT PRIMARY KEY, lrn_or_id TEXT UNIQUE NOT NULL,
@@ -25,6 +26,12 @@ async function run() {
     password_hash TEXT NOT NULL, role TEXT NOT NULL, section TEXT, section_id TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
   await initializeEnrollmentTables();
+  await initializeInstructorApplicationTables();
+  // Teachers exist only as database roles (granted by admin approval), never via Clerk metadata.
+  for (const id of ['adviser-a', 'adviser-b']) {
+    await db.query(`INSERT INTO users (id, lrn_or_id, first_name, last_name, email, password_hash, role)
+      VALUES (?, ?, 'Test', ?, ?, 'CLERK_MANAGED_AUTH', 'TEACHER')`, [id, `account:${id}`, id, `${id}@example.test`]);
+  }
   for (const [id, role, verified] of [['adviser-a', 'TEACHER', true], ['adviser-b', 'TEACHER', true], ['learner-a', 'STUDENT', true], ['learner-b', 'STUDENT', true], ['unverified', 'STUDENT', false]]) {
     identities.set(id, { firstName: 'Test', lastName: id, primaryEmailAddressId: 'email',
       emailAddresses: [{ id: 'email', emailAddress: `${id}@example.test`, verification: { status: verified ? 'verified' : 'unverified' } }],
@@ -50,6 +57,8 @@ async function run() {
     const simultaneous = await Promise.all([call('/auth/sync', 'concurrent-learner', {}), call('/auth/sync', 'concurrent-learner', {})]);
     assert.deepEqual(simultaneous.map(result => result.status), [200, 200], 'First-login sync must be idempotent under React StrictMode');
     assert.equal((await call('/auth/sync', 'learner-a', { role: 'TEACHER', section: 'Fake', lrn_or_id: '123456789012' })).data.role, 'STUDENT');
+    identities.set('metadata-teacher', { ...identities.get('learner-b'), emailAddresses: [{ id: 'email', emailAddress: 'meta@example.test', verification: { status: 'verified' } }], publicMetadata: { role: 'TEACHER' } });
+    assert.equal((await call('/auth/sync', 'metadata-teacher', {})).data.role, 'STUDENT', 'Clerk metadata must not grant instructor access');
     identities.set('email-conflict', { ...identities.get('learner-a'), publicMetadata: { role: 'TEACHER' } });
     const conflict = await call('/auth/sync', 'email-conflict', {});
     assert.equal(conflict.status, 409); assert.equal(conflict.data.code, 'ACCOUNT_LINK_REQUIRED');

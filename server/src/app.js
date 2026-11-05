@@ -53,6 +53,8 @@ app.get('/api/test-db', async (_req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/enrollment', require('./routes/enrollmentRoutes'));
+app.use('/api/instructor-applications', require('./routes/instructorApplicationRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
 app.use('/api/materials', require('./routes/materialsRoutes'));
 app.use('/api/quizzes', require('./routes/quizRoutes'));

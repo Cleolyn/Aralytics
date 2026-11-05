@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from './icons';
+import { ROLE_HOMES } from '../utils/authFlow';
 import { UserButton } from '@clerk/react';
 import { useAuth } from '../context/AuthContext';
 import Brand from './Brand';
@@ -11,18 +12,23 @@ const teacherLinks = [
   ['/teacher/materials', 'Lessons', BookOpen], ['/teacher/assessments', 'Quizzes and Tasks', ClipboardList],
   ['/teacher/gradebook', 'Gradebook', FileSpreadsheet], ['/teacher/reports', 'Reports', ChartNoAxesColumn]
 ];
+const adminLinks = [
+  ['/admin', 'Instructor access', Users]
+];
 const learnerLinks = [
   ['/student/dashboard', 'Overview', LayoutDashboard], ['/student/materials', 'Lessons', BookOpen],
   ['/student/activities', 'Activities', ClipboardList], ['/student/progress', 'My Progress', GraduationCap]
 ];
 
 export default function Navbar() {
-  const { user, isTeacher, logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const sidebarRef = useRef(null);
-  const links = isTeacher ? teacherLinks : learnerLinks;
+  const role = user?.role || 'STUDENT';
+  const links = { ADMIN: adminLinks, TEACHER: teacherLinks, STUDENT: learnerLinks }[role] || learnerLinks;
+  const workspace = { ADMIN: 'Admin', TEACHER: 'Teacher', STUDENT: 'Student' }[role] || 'Student';
   useEffect(() => { setOpen(false); }, [location.pathname]);
   useEffect(() => {
     if (!open) return;
@@ -39,14 +45,14 @@ export default function Navbar() {
     document.addEventListener('keydown', handleKey);
     return () => { document.removeEventListener('keydown', handleKey); previous?.focus(); };
   }, [open]);
-  const home = isTeacher ? '/teacher/dashboard' : '/student/dashboard';
+  const home = ROLE_HOMES[role] || ROLE_HOMES.STUDENT;
   return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     {open && <button className="nav-backdrop" aria-label="Close navigation" onClick={() => setOpen(false)} />}
     <aside id="workspace-navigation" ref={sidebarRef} className={`sidebar ${open ? 'open' : ''}`}>
       <Brand to={home} />
       <button className="icon-button sidebar-close" onClick={() => setOpen(false)} aria-label="Close navigation"><X size={20} /></button>
-      <nav aria-label={isTeacher ? 'Teacher navigation' : 'Student navigation'}>
+      <nav aria-label={`${workspace} navigation`}>
         {links.map(([to,label,Icon]) => <NavLink key={to} to={to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}><Icon size={19} aria-hidden="true" />{label}</NavLink>)}
       </nav>
       <div className="sidebar-bottom">
@@ -56,7 +62,7 @@ export default function Navbar() {
     </aside>
     <header className="workspace-header">
       <button ref={menuRef} className="icon-button mobile-menu" onClick={() => setOpen(!open)} aria-label="Open navigation" aria-expanded={open} aria-controls="workspace-navigation"><Menu size={23} /></button>
-      <span className="workspace-label">{isTeacher ? 'Teacher' : 'Student'} workspace</span>
+      <span className="workspace-label">{workspace} workspace</span>
       <div className="header-actions"><OfflineStatus />
         <UserButton afterSignOutUrl="/" />
       </div>

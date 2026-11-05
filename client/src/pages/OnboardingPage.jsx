@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useClerk } from '@clerk/react';
 import PublicLayout from '../components/PublicLayout';
 import { useAuth } from '../context/AuthContext';
 import { request } from '../services/api';
 import { Notice } from '../components/ui/Feedback';
+import { INSTRUCTOR_APPLICATION_PATH, ROLE_HOMES } from '../utils/authFlow';
 
 export default function OnboardingPage() {
   const { user, loading, logout, refreshUser, refreshing } = useAuth();
@@ -17,7 +18,7 @@ export default function OnboardingPage() {
   const [checked, setChecked] = useState('');
   if (loading) return <div className="container" role="status">Checking your enrollment…</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.email_verified && user.role === 'TEACHER') return <Navigate to="/teacher/dashboard" replace />;
+  if (user.email_verified && user.role !== 'STUDENT') return <Navigate to={ROLE_HOMES[user.role] || '/login'} replace />;
   if (user.email_verified && user.enrollment_status === 'APPROVED') return <Navigate to="/student/dashboard" replace />;
   const enrollment = user.enrollment;
   const update = event => setProfile(prev => ({ ...prev, [event.target.name]: event.target.value }));
@@ -44,6 +45,7 @@ export default function OnboardingPage() {
     <aside className="join-context"><h2>Your place in Aralytics</h2><p>Araling Panlipunan 10</p>
       <ol className="enrollment-journey"><li>Verified account</li><li aria-current={!enrollment && !invitation ? 'step' : undefined}>Class code</li><li aria-current={invitation && enrollment?.status !== 'PENDING' ? 'step' : undefined}>Student details</li><li aria-current={enrollment?.status === 'PENDING' ? 'step' : undefined}>Adviser approval</li></ol>
       <p className="account-note">Signed in as {user.email}</p><button className="text-action" onClick={logout}>Sign out</button>
+      {user.email_verified && !enrollment && <Link className="text-action" to={INSTRUCTOR_APPLICATION_PATH}>{user.instructor_application ? 'View my instructor application' : 'Are you an instructor? Apply for access'}</Link>}
     </aside>
     <section className="join-sheet"><Notice error>{error}</Notice>
       {!user.email_verified ? <><h1>Verify your email</h1><p>Verify your email address before joining a class.</p><button className="btn btn-primary" onClick={() => clerk.openUserProfile()}>Manage email address</button><button className="text-action" onClick={refreshUser}>I’ve verified my email</button></> :

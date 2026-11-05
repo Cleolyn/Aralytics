@@ -29,6 +29,8 @@ import QuizManager from '../pages/QuizManager';
 import RemedialCenter from '../pages/RemedialCenter';
 import ActivitiesPage from '../pages/ActivitiesPage';
 import ProgressPage from '../pages/ProgressPage';
+import AdminDashboard from '../pages/AdminDashboard';
+import InstructorApplicationPage from '../pages/InstructorApplication';
 
 export { ProtectedRoute };
 
@@ -43,6 +45,7 @@ function WorkspaceLayout({ children }) {
 }
 const TeacherLayout = WorkspaceLayout;
 const StudentLayout = WorkspaceLayout;
+const AdminLayout = WorkspaceLayout;
 
 /**
  * Quiz Runner Wrapper extracting quiz ID from URL params
@@ -69,7 +72,7 @@ export default function AppRoutes() {
   const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application' };
     const segments = location.pathname.split('/');
     document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);
@@ -91,6 +94,8 @@ export default function AppRoutes() {
       <Route path="/sign-in/*" element={<AuthRouteAlias />} />
       <Route path="/sign-up/*" element={<AuthRouteAlias />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
+      <Route path="/instructor/apply" element={<InstructorApplicationPage />} />
+      <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
       <Route path="/register/*" element={user ? <Navigate to={accountHome} replace /> : <RegisterPage />} />
       <Route path="/help" element={<HelpPage />} />
       {/* Public Login Route */}

@@ -339,6 +339,7 @@ async function initializeDatabase() {
 
   console.log('[ARALYTICS DB] Ready.');
   await require('../services/enrollmentService').initializeEnrollmentTables();
+  await require('../services/instructorApplicationService').initializeInstructorApplicationTables();
 }
 
 if (require.main === module) {

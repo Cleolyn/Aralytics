@@ -9,7 +9,7 @@ In the Clerk instance used by the client and server:
 1. Enable Google OAuth and email sign-in/sign-up. Require email verification at sign-up. Enable email verification codes if you want passwordless email sign-in. Disable phone/username sign-up and other social providers, including Facebook (which was enabled in the existing development instance).
 2. Keep student names, LRN, mobile, and section out of required account sign-up fields. These are collected after a valid class code. Google may supply a name automatically.
 3. Permit `/sso-callback` as the Google redirect callback, with `/onboarding` after authentication, and register the production origins/redirect URLs in the production Clerk instance.
-4. Provision advisers using trusted server-managed Clerk `publicMetadata.role = "TEACHER"` or an existing teacher database record. Public sign-up defaults to student; selecting a role or submitting `role: TEACHER` never grants teacher privileges. Existing database roles take precedence.
+4. Roles live only in the Aralytics database; Clerk `publicMetadata.role` is ignored. Public sign-up always creates a student. Advisers apply for instructor access at `/instructor/apply` and an admin approves them at `/admin`; the first admin is set with `npm run admin:grant -- <email> --apply`. Submitting `role: TEACHER` from a client never grants privileges.
 
 The application exposes an explicit Google button plus Clerk's email flow. Other social buttons are hidden as a group; disabling those providers in Clerk also closes their direct provider flows. The server independently rejects unverified primary emails, regardless of client state.
 
@@ -31,7 +31,7 @@ Clerk references: [email verification configuration](https://clerk.com/docs/reac
 
 Server startup creates `class_invitations` and `enrollment_requests` without assigning approvals to existing accounts. Existing students must complete enrollment and receive approval before regaining class access; their learning history is retained. Use the existing Clerk-linked identity for existing records rather than creating duplicate identities with the same email/LRN.
 
-Startup seeds only baseline curriculum and competencies. It does not create demo teachers or students; verified Clerk sign-in provisions application accounts. After a database reset, adviser roles must be present in trusted Clerk public metadata before signing in again.
+Startup seeds only baseline curriculum and competencies. It does not create demo teachers or students; verified Clerk sign-in provisions application accounts. After a database reset, sign in once and re-run `npm run admin:grant -- <email> --apply`; instructors then re-apply and are approved again.
 
 This first version has one enrollment per student account. School-year rollover, transfers between approved classes, and multiple simultaneous class memberships need a later enrollment-history workflow. Code-attempt throttling is per account and process (15 attempts per 15 minutes); use a shared limiter before scaling to multiple server instances.
 

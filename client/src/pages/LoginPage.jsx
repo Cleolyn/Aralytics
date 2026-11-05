@@ -22,6 +22,7 @@ export function AuthFrame({ register = false, children }) {
       <p>Araling Panlipunan 10, with your adviser and your classmates.</p>
       <ol className="enrollment-journey"><li>Sign in with Google or email</li><li>Join with your adviser’s class code</li><li>Complete your profile for adviser approval</li></ol>
       <p className="account-note">You can create an account now and join your class when your adviser shares a code.</p>
+      <p className="account-note">Instructors: create an account, then apply for instructor access. An administrator verifies every instructor.</p>
     </section><section className="account-form" aria-label={register ? 'Create an account' : 'Sign in'}>{children}</section>
   </div></PublicLayout>;
 }

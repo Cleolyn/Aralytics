@@ -2,6 +2,7 @@ const { createClerkClient, getAuth } = require('@clerk/express');
 const db = require('../config/database');
 const { getEnrollment } = require('../services/enrollmentService');
 
+const ROLES = ['STUDENT', 'TEACHER', 'ADMIN'];
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 // ---------------------------------------------------------------------------
@@ -33,7 +34,9 @@ function invalidateUserCache(userId) {
  * Verifies the Clerk session (Bearer header, or `?token=` bridged in app.js),
  * requires a verified primary email, and attaches `req.user`:
  *   { user_id, id, email, full_name, first_name, last_name, role, section_id, section, lrn_or_id }
- * The database role wins over Clerk `publicMetadata.role`; unknown users default to STUDENT.
+ * The role comes only from the database: new accounts are STUDENT, TEACHER is granted
+ * by an admin approving an instructor application, and ADMIN by `npm run admin:grant`.
+ * Clerk metadata is deliberately ignored so instructor access stays admin-verified.
  */
 async function verifyIdentity(req, res, next) {
   res.set('Cache-Control', 'no-store');
@@ -58,7 +61,6 @@ async function verifyIdentity(req, res, next) {
       return res.status(403).json({ success: false, code: 'EMAIL_UNVERIFIED', message: 'Verify your email address before continuing.' });
     }
     const { rows } = await db.query('SELECT id, role, full_name, first_name, last_name, section, section_id, lrn_or_id FROM users WHERE id = ?', [userId]);
-    const meta = clerkUser.publicMetadata || {};
     req.user = {
       user_id: userId,
       id: userId,
@@ -67,8 +69,8 @@ async function verifyIdentity(req, res, next) {
       full_name: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' '),
       first_name: clerkUser.firstName,
       last_name: clerkUser.lastName,
-      role: rows[0]?.role || (meta.role === 'TEACHER' ? 'TEACHER' : 'STUDENT'),
-      ...(rows[0] || {})
+      ...(rows[0] || {}),
+      role: ROLES.includes(rows[0]?.role) ? rows[0].role : 'STUDENT'
     };
     next();
   } catch (err) {
@@ -115,6 +117,7 @@ function requireRole(roles) {
 const requireTeacher = requireRole('TEACHER');
 
 const requireStudent = requireRole('STUDENT');
+const requireAdmin = requireRole('ADMIN');
 
 /** Students may only request their own records; teachers have oversight (FR-04, NFR-01). */
 function requireOwnStudentData(paramKey = 'student_id') {
@@ -143,7 +146,9 @@ module.exports = {
   requireRole,
   requireTeacher,
   requireStudent,
+  requireAdmin,
   requireOwnStudentData,
+  ROLES,
   invalidateUserCache,
   clerkClient
 };

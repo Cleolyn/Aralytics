@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
     catch { setAuthError('Could not finish signing out. Check your connection and try signing out again.'); }
   }, [signOut]);
   return <AuthContext.Provider value={{ user, loading: (!isLoaded && !loadTimedOut) || syncing, refreshing, sessionTask, logout, authError,
-    clearAuthError, refreshUser, isTeacher: user?.role === 'TEACHER', isStudent: user?.role === 'STUDENT' }}>{children}</AuthContext.Provider>;
+    clearAuthError, refreshUser, isAdmin: user?.role === 'ADMIN', isTeacher: user?.role === 'TEACHER', isStudent: user?.role === 'STUDENT' }}>{children}</AuthContext.Provider>;
 }
 export function useAuth() {
   const context = useContext(AuthContext);

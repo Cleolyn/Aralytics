@@ -16,7 +16,8 @@
     "db:samples": "node src/db/seeds --outputs",
     "test": "node test/run.js",
     "test:enrollment": "node test/run.js enrollment_flow",
-    "test:redesign": "node test/run.js redesign_flow offline_policy"
+    "test:redesign": "node test/run.js redesign_flow offline_policy",
+    "admin:grant": "node src/db/grantAdmin.js"
   },
   "license": "ISC",
   "dependencies": {

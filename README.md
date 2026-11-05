@@ -138,17 +138,30 @@ npm run dev
 
 On first start the API creates all tables and seeds the AP10 curriculum (quarters, topics, ILAW competencies). It does **not** create demo accounts.
 
-### 5. Create the first teacher account
+### 5. Create the admin, then approve instructors
 
-Accounts are created automatically the first time someone signs in through Clerk. Everyone defaults to **student**; the role cannot be self-selected. To make an adviser a **teacher**:
+Accounts are created the first time someone signs in through Clerk, and every new account is a **student**. Roles come only from the Aralytics database (Clerk metadata is ignored):
 
-1. In the Clerk dashboard, open **Users** → the adviser → **Metadata** → **Public**, and set:
-   ```json
-   { "role": "TEACHER" }
-   ```
-2. Have the adviser sign in **after** setting the metadata.
+| Role | How it is granted | Workspace |
+| --- | --- | --- |
+| `STUDENT` | Automatically on first sign-in | `/student/*` after joining a class |
+| `TEACHER` | An admin approves the person's instructor application | `/teacher/*` |
+| `ADMIN` | `npm run admin:grant` (server CLI) | `/admin` |
 
-The role stored in the database takes precedence once an account exists. If the person already signed in as a student, change their row instead (for SQLite: `UPDATE users SET role = 'TEACHER' WHERE email = '…';`).
+**Make the first admin.** Have the person sign in once, then run against the target database (`server/.env`):
+
+```bash
+npm run admin:grant -- admin@example.com           # preview
+npm run admin:grant -- admin@example.com --apply   # make the change
+```
+
+`ADMIN` replaces the account's previous role. Admins verify instructors; they don't use the teacher or student workspaces.
+
+**Instructors apply; the admin approves.**
+1. The instructor creates an account, then opens **Are you an instructor? Apply for access** on the onboarding screen (`/instructor/apply`) and submits their name, school, position, mobile number, and optional employee ID.
+2. The admin reviews it under **Instructor access** (`/admin`) and either approves it (the account becomes a teacher) or returns it with a reason. A returned applicant can correct the details and resubmit.
+
+Accounts enrolled as students in a class can't apply; instructors should use a separate account.
 
 ### 6. Enroll students
 
@@ -230,6 +243,7 @@ Root scripts (run from the repository root):
 | `start` | Start the API without a file watcher |
 | `build` / `preview` | Build / preview the production client |
 | `db:init` / `db:seed` / `db:samples` | Database setup and demo data |
+| `admin:grant` | Give an existing account the ADMIN role (`-- <email> [--apply]`) |
 | `test` / `test:server` / `test:client` | Test suites |
 | `build:cloudflare` | Client build + Workers module shims (`.cloudflare/`) |
 | `deploy:cloudflare` | Build, init the Turso schema, apply D1 migrations, and deploy the Worker |
@@ -262,6 +276,7 @@ The enrollment code-attempt limiter is in-memory and per process; use a shared l
 
 ### Access boundaries
 
+- **Admin:** reviews instructor applications and sees who has instructor access (`/admin`).
 - **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals.
 - **Student:** enrolled class content only. Students can read only their own records; every learning API requires an approved enrollment.
 - Every private API verifies the Clerk session and requires a verified primary email.
@@ -296,7 +311,8 @@ Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
 | "Sign-in is unavailable … publishable key is missing" | Set `VITE_CLERK_PUBLISHABLE_KEY` in `client/.env` or `server/.env`, then restart `npm run dev`. |
 | `No such built-in module: node:sqlite` | Upgrade to Node.js 22.13+. |
 | "Could not connect to the account service" | The API isn't running or isn't on port 5001. Check <http://localhost:5001/api/health>. |
-| Signed in as a teacher but shown student screens | The account was created before the Clerk `role` metadata was set. Update `users.role` in the database. |
+| An instructor only sees student screens | Their application hasn't been approved yet. An admin approves it at `/admin`. |
+| Nobody can open `/admin` | No admin exists yet (for example after a database reset). Run `npm run admin:grant -- <email> --apply`. |
 | `EADDRINUSE` on 3000 or 5001 | Another process is using the port. Stop it or change `PORT` (and the proxy target in `client/vite.config.js`). |
 | Lesson shows "File missing" | Add the file to `server/resources/materials/` or link an HTTPS resource. |
 

@@ -132,6 +132,14 @@ export const api = {
     return `${url}?token=${encodeURIComponent(getTokenSync() || '')}`;
   },
 
+  // Instructor applications (applicant) and admin review
+  getMyInstructorApplication: () => request('/instructor-applications/me'),
+  submitInstructorApplication: (payload) => post('/instructor-applications', payload),
+  getAdminSummary: () => request('/admin/summary'),
+  getInstructorApplications: (params) => request(withQuery('/admin/applications', params)),
+  reviewInstructorApplication: (userId, payload) => post(`/admin/applications/${encodeURIComponent(userId)}`, payload, 'PATCH'),
+  getInstructors: () => request('/admin/instructors'),
+
   // Offline reading sync (SRS FR-50)
   syncOfflineReadLogs: (logs) => post('/materials/sync-read-logs', { logs }),
   getReadLogs: () => request('/materials/read-logs')

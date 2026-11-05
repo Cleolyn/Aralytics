@@ -14,7 +14,11 @@ try {
     [{ role: 'TEACHER', email_verified: true }, '/teacher/dashboard'],
     [profile, '/onboarding'], [{ ...profile, enrollment_status: 'PENDING' }, '/onboarding'],
     [{ ...profile, enrollment_status: 'REJECTED' }, '/onboarding'],
-    [{ ...profile, enrollment_status: 'APPROVED' }, '/student/dashboard']
+    [{ ...profile, enrollment_status: 'APPROVED' }, '/student/dashboard'],
+    [{ role: 'ADMIN', email_verified: true }, '/admin'], [{ role: 'ADMIN', email_verified: false }, '/onboarding'],
+    [{ ...profile, instructor_application: { status: 'PENDING' } }, '/instructor/apply'],
+    [{ ...profile, instructor_application: { status: 'REJECTED' } }, '/instructor/apply'],
+    [{ ...profile, enrollment_status: 'APPROVED', instructor_application: { status: 'PENDING' } }, '/student/dashboard']
   ]) assert.equal(accountHome(user), destination);
   assert.equal(isAuthStart('/register'), true);
   assert.equal(isAuthStart('/register/protect-check'), false);
@@ -26,13 +30,15 @@ try {
 
   globalThis.fetch = async (_url, options) => { assert.equal(options.headers.Authorization, 'Bearer verified-token'); return json({ success: true, user: profile }); };
   assert.deepEqual(await syncVerifiedAccount(clerkUser, async () => 'verified-token'), profile);
+  globalThis.fetch = async () => json({ success: true, user: { ...profile, role: 'ADMIN' } });
+  assert.equal((await syncVerifiedAccount(clerkUser, async () => 'token')).role, 'ADMIN', 'Admins are a valid account role');
   let requested = false;
   globalThis.fetch = async () => { requested = true; throw new Error('Unexpected fetch'); };
   const unverified = await syncVerifiedAccount({ ...clerkUser, reload: async () => ({ ...identity, primaryEmailAddress: { ...identity.primaryEmailAddress, verification: { status: 'unverified' } } }) }, () => { throw new Error('Must not mint a token for onboarding'); });
   assert.equal(unverified.email_verified, false); assert.equal(requested, false);
   await assert.rejects(syncVerifiedAccount(clerkUser, async () => null), /session is not ready/);
   assert.equal(requested, false);
-  for (const invalid of [{ ...profile, email_verified: undefined }, { ...profile, id: 'another-user' }, { ...profile, role: 'ADMIN' }]) {
+  for (const invalid of [{ ...profile, email_verified: undefined }, { ...profile, id: 'another-user' }, { ...profile, role: 'SUPERUSER' }]) {
     globalThis.fetch = async () => json({ success: true, user: invalid });
     await assert.rejects(syncVerifiedAccount(clerkUser, async () => 'token'), /incompatible response/);
   }
