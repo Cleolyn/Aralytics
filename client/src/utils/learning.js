@@ -5,13 +5,15 @@ export function formatDate(value, fallback = 'No due date') {
   return new Intl.DateTimeFormat('en-PH', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' }).format(date);
 }
 
+/** Display-safe text: underscores and dashes become spaces; blank values use `fallback`. */
 export function cleanText(value, fallback = '') {
   if (value === null || value === undefined) return fallback;
-  return String(value)
+  const text = String(value)
     .replace(/_/g, ' ')
     .replace(/[—–]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+  return text || fallback;
 }
 
 export function formatStatus(status) {

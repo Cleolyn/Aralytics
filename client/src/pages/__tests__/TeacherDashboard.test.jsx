@@ -87,8 +87,7 @@ describe('TeacherDashboard — quiz scores', () => {
     expect(within(dialog).getByText('4 tab or window changes were recorded during the quiz.')).toBeInTheDocument();
     expect(within(dialog).getByText(/^Switched tab · /)).toBeInTheDocument();
     expect(within(dialog).getByText('Answer: B')).toBeInTheDocument();
-    // Current behavior: an empty answer renders blank (see follow-up fix).
-    expect(within(dialog).getAllByText(/^Answer:/).map(n => n.textContent)).toEqual(['Answer: B', 'Answer: ']);
+    expect(within(dialog).getByText('Answer: No answer')).toBeInTheDocument();
     expect(within(dialog).getByText('Correct')).toBeInTheDocument();
     expect(within(dialog).getByText('Incorrect')).toBeInTheDocument();
 
