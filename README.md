@@ -48,11 +48,13 @@ The repository is an **npm workspaces** monorepo: one `npm install` at the root 
 │   │   ├── components/        Shared UI (layout, navigation, dialogs, illustrations)
 │   │   ├── context/           AuthContext (Clerk session + account sync)
 │   │   ├── hooks/             Data-loading hooks
-│   │   ├── pages/             Route screens for learners, teachers, and public pages
+│   │   ├── pages/             Route screens; large pages are folders (index.jsx + parts)
+│   │   │   └── __tests__/     Component tests (Vitest + Testing Library)
 │   │   ├── routes/            AppRoutes (role-based routing)
 │   │   ├── services/          API client and account sync
-│   │   └── utils/             Auth flow, learning, and offline helpers
-│   ├── test/                  Auth unit test + optional browser regression harness
+│   │   ├── test/              Shared test setup and render helpers
+│   │   └── utils/             Auth flow, learning, files, device storage, offline helpers
+│   ├── test/                  Auth-flow test + optional browser regression harness
 │   └── vite.config.js         Dev server (port 3000) proxies /api → :5001
 ├── server/                    Express REST API
 │   ├── resources/materials/   Public lesson files served at /api/materials/download/:file
@@ -60,6 +62,7 @@ The repository is an **npm workspaces** monorepo: one `npm install` at the root 
 │   ├── src/
 │   │   ├── app.js             Express app (middleware + routes)
 │   │   ├── server.js          Entry point: load .env, init database, listen
+│   │   ├── worker.js          Cloudflare Workers entry (wraps app.js)
 │   │   ├── config/            Database adapter (sqlite | turso | mysql)
 │   │   ├── controllers/       Request handlers
 │   │   ├── db/                Schema init, MySQL schema, demo/test seeds
@@ -67,8 +70,9 @@ The repository is an **npm workspaces** monorepo: one `npm install` at the root 
 │   │   ├── routes/            Route definitions under /api
 │   │   └── services/          Analytics, enrollment, answer grading
 │   └── test/                  Test suites + runner (test/run.js)
-├── docs/                      Brand guide, auth/enrollment guide, design references, sample reports
-└── scripts/dev.js             Runs API and client together
+├── docs/                      Brand, auth/enrollment, Cloudflare deployment, design refs, sample reports
+├── scripts/                   dev.js (API + client together), prepare-worker.cjs (Workers build)
+└── wrangler.jsonc             Cloudflare Workers configuration
 ```
 
 ## Prerequisites
@@ -186,15 +190,18 @@ The seed refuses to write to Turso or MySQL unless you pass `--allow-remote` (`n
 
 ### Lesson files
 
-Place shared lesson files in `server/resources/materials/` and link them as `/api/materials/download/<filename>`, or add HTTPS links from **Lessons → Add resource**. These files are public. Learner uploads go to `server/uploads/performance-tasks/` and are only downloadable by the submitting learner and teachers.
+Place shared lesson files in `server/resources/materials/` and link them as `/api/materials/download/<filename>`, or add HTTPS links from **Lessons → Add resource**. These files are public. Learner uploads go to `server/uploads/performance-tasks/` (or the D1 `UPLOADS_DB` binding on Cloudflare) and are only downloadable by the submitting learner and teachers.
 
 ## Testing
 
 ```bash
-npm test             # server suites, then client auth tests
+npm test             # server suites, then client tests
 npm run test:server  # server only
-npm run test:client  # client only
+npm run test:client  # client only (auth flow + component tests)
+npm run test:watch --workspace client   # component tests in watch mode
 ```
+
+**Client component tests** live in `client/src/**/*.test.{js,jsx}` and run in jsdom with [Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com). They render real pages inside a router with the API mocked, and assert what users see and what is sent to the API: filters and URL state, dialogs, uploads, saved drafts and quiz sessions, offline handling, and error messages. Run them before and after changing a page.
 
 The server runner (`server/test/run.js`) always creates a **fresh temporary SQLite database**, seeds the demo fixtures, runs each suite, and deletes it afterward. It ignores the database settings in `server/.env`, so tests never touch Turso, MySQL, or your working database.
 
@@ -224,10 +231,24 @@ Root scripts (run from the repository root):
 | `build` / `preview` | Build / preview the production client |
 | `db:init` / `db:seed` / `db:samples` | Database setup and demo data |
 | `test` / `test:server` / `test:client` | Test suites |
+| `build:cloudflare` | Client build + Workers module shims (`.cloudflare/`) |
+| `deploy:cloudflare` | Build, init the Turso schema, apply D1 migrations, and deploy the Worker |
 
 Any workspace script can be run directly with `npm run <script> --workspace server` or `--workspace client`.
 
 ## Deploying
+
+### Cloudflare Workers (current production)
+
+The live site runs on Cloudflare Workers: the SPA is served as static assets and Express runs via `nodejs_compat`, with Turso as the database and D1 for uploaded files. After `npm install` and `npx wrangler login`:
+
+```bash
+npm run deploy:cloudflare
+```
+
+Secrets (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`) are set with `npx wrangler secret put NAME`. Free-plan limits, storage details, and post-deploy checks are in [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md). To check the bundle without deploying: `npm run build:cloudflare && npx wrangler deploy --dry-run`.
+
+### Any Node host
 
 1. Build the client: `npm run build`. Serve `client/dist/` as a static single-page app (fallback all routes to `index.html`).
 2. Run the API with `npm start` and production environment variables (use a production Clerk instance, set `NODE_ENV=production` and `CORS_ORIGIN`).
@@ -282,6 +303,7 @@ Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
 ## Further documentation
 
 - [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md) — Clerk configuration, enrollment flow, rollout notes, verification
+- [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md) — Workers deployment, D1 upload storage, free-plan limits
 - [docs/brand.md](docs/brand.md) — design system: palette, typography, voice
 - [docs/design/](docs/design/) — design reference screens
 - [docs/sample-outputs/](docs/sample-outputs/) — example XLSX/PDF/JSON outputs
