@@ -1,26 +1,30 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test:enrollment": "node test/enrollment_flow.test.js",
-    "test": "node test/persistence_module.test.js && node test/analytics_engine.test.js && node test/verification_gate.test.js && node test/srs_compliance.test.js && node test/rbac_security.test.js && node test/auth_multi_user.test.js && npm run test:redesign && node test/master_loop_modules.test.js && npm run test:enrollment",
-    "test:redesign": "node test/redesign_flow.test.js && node test/offline_policy.test.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "description": "Aralytics REST API (Express + Clerk) with SQLite, Turso, or MySQL storage",
+  "private": true,
+  "main": "src/server.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:init": "node src/db/init.js",
+    "db:seed": "node src/db/seeds",
+    "db:samples": "node src/db/seeds --outputs",
+    "test": "node test/run.js",
+    "test:enrollment": "node test/run.js enrollment_flow",
+    "test:redesign": "node test/run.js redesign_flow offline_policy"
+  },
+  "license": "ISC",
   "dependencies": {
     "@clerk/express": "^2.1.83",
     "@libsql/client": "^0.18.0",
-    "bcryptjs": "^3.0.3",
-
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.24.5",
     "pdfkit": "^0.20.2",
     "uuid": "^14.0.2",

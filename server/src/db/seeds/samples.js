@@ -1,17 +1,20 @@
+/**
+ * Sample cohort for analytics demos: eight learners across 10-Rizal and 10-Bonifacio,
+ * four quizzes (one per Q1 competency), graded attempts in every mastery tier,
+ * proctoring flags, remedial materials, and interventions.
+ *
+ * writeSampleOutputs() renders the XLSX/PDF/JSON examples in docs/sample-outputs/.
+ * It only runs when explicitly requested (see seeds/index.js --outputs).
+ * Idempotent. SQLite/Turso syntax.
+ */
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcryptjs');
-const db = require('../config/database');
-const AnalyticsService = require('../services/AnalyticsService');
+const db = require('../../config/database');
+const AnalyticsService = require('../../services/AnalyticsService');
 
-async function seedSampleOutputs() {
-  console.log('======================================================================');
-  console.log('[SEED SAMPLES] Populating Diverse Student Cohorts & Sample Outputs...');
-  console.log('======================================================================');
+const DEFAULT_OUTPUT_DIR = path.resolve(__dirname, '../../../../docs/sample-outputs');
 
-  const salt = await bcrypt.genSalt(10);
-  const studentHash = await bcrypt.hash('StudentPass123!', salt);
-
+async function seedSampleCohort() {
   // 1. Ensure Diverse Students exist in 10-Rizal and 10-Bonifacio
   const sampleStudents = [
     { id: 'usr-student-001', lrn: '123456789012', first: 'Juan', last: 'Dela Cruz', email: 'juan.delacruz@student.deped.gov.ph', section: '10-Rizal' },
@@ -34,10 +37,10 @@ async function seedSampleOutputs() {
          full_name = excluded.full_name,
          section = excluded.section,
          section_id = excluded.section_id`,
-      [s.id, s.lrn, s.first, s.last, `${s.first} ${s.last}`, s.email, studentHash, s.section, s.section]
+      [s.id, s.lrn, s.first, s.last, `${s.first} ${s.last}`, s.email, 'CLERK_MANAGED_AUTH', s.section, s.section]
     );
   }
-  console.log(`[PASS] Verified ${sampleStudents.length} students across 10-Rizal and 10-Bonifacio.`);
+  console.log(`[SEED] Verified ${sampleStudents.length} students across 10-Rizal and 10-Bonifacio.`);
 
   // 2. Ensure Quizzes exist across all 4 Competencies
   const sampleQuizzes = [
@@ -62,8 +65,9 @@ async function seedSampleOutputs() {
       comp_id: 'comp-ap10-q1-003',
       title: 'Pagsusuri sa CBDRRM Approach at Kahandaan sa Kalamidad',
       instructions: 'Basahing mabuti ang bawat tanong ukol sa CBDRRM framework.',
-      total_points: 5,
-      passing_score: 4
+      // Must match the 9 questions seeded in course.js, or live scoring exceeds 100%.
+      total_points: 9,
+      passing_score: 7
     },
     {
       id: 'quiz-ap10-action-01',
@@ -83,7 +87,7 @@ async function seedSampleOutputs() {
       [q.id, q.comp_id, q.title, q.instructions, q.total_points, q.passing_score]
     );
   }
-  console.log(`[PASS] Verified 4 standard AP10 quizzes across all Q1 competencies.`);
+  console.log(`[SEED] Verified 4 standard AP10 quizzes across all Q1 competencies.`);
 
   // 3. Ensure Remedial Materials exist for each Competency
   const sampleMaterials = [
@@ -111,7 +115,7 @@ async function seedSampleOutputs() {
       [m.id, m.comp, m.title, m.title, m.type, m.path]
     );
   }
-  console.log(`[PASS] Populated ${sampleMaterials.length} remedial instructional resources.`);
+  console.log(`[SEED] Populated ${sampleMaterials.length} remedial instructional resources.`);
 
   // 4. Seed Diverse Attempts Across All Mastery Tiers (Mastered, Developing, Needs Intervention)
   // Clean attempts + proctoring flagged attempts
@@ -200,7 +204,7 @@ async function seedSampleOutputs() {
       }
     }
   }
-  console.log(`[PASS] Populated ${attemptsSeed.length} student assessment submissions.`);
+  console.log(`[SEED] Populated ${attemptsSeed.length} student assessment submissions.`);
 
   // 5. Seed Realistic Interventions for low-scoring students (< 70%)
   const sampleInterventions = [
@@ -283,13 +287,12 @@ async function seedSampleOutputs() {
       // If trigger_sub not in quiz_submissions, gracefully handle
     }
   }
-  console.log(`[PASS] Populated ${sampleInterventions.length} remedial intervention records.`);
+  console.log(`[SEED] Populated ${sampleInterventions.length} remedial intervention records.`);
 
-  // 6. Generate Actual Physical Sample Outputs in `sample_outputs/` directory
-  const outputDir = path.resolve(__dirname, '../../../sample_outputs');
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
+}
+
+async function writeSampleOutputs(outputDir = DEFAULT_OUTPUT_DIR) {
+  fs.mkdirSync(outputDir, { recursive: true });
 
   // A. Generate SheetJS Master Gradebook (.xlsx)
   const fullDataset = await AnalyticsService.getComprehensiveGradebookDataset();
@@ -347,18 +350,7 @@ async function seedSampleOutputs() {
   fs.writeFileSync(readLogsPath, JSON.stringify(readLogs, null, 2));
   console.log(`[OUTPUT GENERATED] JSON Offline Material Reading Logs -> ${readLogsPath}`);
 
-  console.log('======================================================================');
-  console.log('[COMPLETED] All 7 Sample Datasets & File Outputs Successfully Generated!');
-  console.log('======================================================================');
+  console.log(`[SEED] Sample outputs written to ${outputDir}`);
 }
 
-if (require.main === module) {
-  seedSampleOutputs()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('[SEED SAMPLES ERROR]', err);
-      process.exit(1);
-    });
-}
-
-module.exports = { seedSampleOutputs };
+module.exports = { seedSampleCohort, writeSampleOutputs, DEFAULT_OUTPUT_DIR };

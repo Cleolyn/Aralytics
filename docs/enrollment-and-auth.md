@@ -37,10 +37,10 @@ This first version has one enrollment per student account. School-year rollover,
 
 ## Verification
 
-`npm --prefix server run test:enrollment` uses an isolated in-memory database and a fake identity provider to exercise real HTTP routes, validation, adviser ownership, rejection/resubmission, approval, code closure, and blocked legacy tokens. It does not change live users.
+`npm run test:enrollment --workspace server` uses an isolated in-memory database and a fake identity provider to exercise real HTTP routes, validation, adviser ownership, rejection/resubmission, approval, code closure, and blocked legacy tokens. It does not change live users.
 
 For browser UI checks, run `node client/test/serve-enrollment-preview.mjs`, start the normal client on port 3000, then run `node client/test/enrollment-browser.mjs`. The fixture renders the real enrollment components with isolated identities and mocked API responses. The test checks the actual Google/email login page separately. Screenshots are saved to `.taste-skill/enrollment-qa/`.
 
 Live Google/email delivery and an actual adviser/student session require configured Clerk accounts and are not simulated by the isolated tests.
 
-`npm --prefix client run test:auth` checks account routing, verification requirements, sync failures/timeouts, and token isolation. For complete UI regression coverage, run `node client/test/serve-auth-preview.mjs`, then `node client/test/auth-browser.mjs`. This renders the real application, router, provider configuration, and auth context with an isolated Clerk/API adapter. It covers Google challenge recovery, email verification, pending session tasks, backend failures, enrollment approval, reload, and sign-out without creating live accounts or solving real challenges.
+`npm run test:auth --workspace client` checks account routing, verification requirements, sync failures/timeouts, and token isolation. For complete UI regression coverage, run `node client/test/serve-auth-preview.mjs`, then `node client/test/auth-browser.mjs`. This renders the real application, router, provider configuration, and auth context with an isolated Clerk/API adapter. It covers Google challenge recovery, email verification, pending session tasks, backend failures, enrollment approval, reload, and sign-out without creating live accounts or solving real challenges.

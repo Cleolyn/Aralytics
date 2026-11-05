@@ -1,13 +1,12 @@
 const assert = require('assert');
-const jwt = require('jsonwebtoken');
-const { requireRole, requireTeacher, requireStudent, JWT_SECRET } = require('../src/middleware/auth.middleware');
+const { requireRole, requireTeacher, requireStudent } = require('../src/middleware/auth');
 
 async function testRBACSecurity() {
   console.log('======================================================================');
   console.log('[TEST] MODULE: STRICT RBAC BOUNDARY ENFORCEMENT');
   console.log('======================================================================');
 
-  // Generate tokens for Student and Teacher
+  // Authenticated identities as attached to req.user by verifyToken
   const studentPayload = {
     id: 'usr-student-001',
     email: 'juan.delacruz@student.deped.gov.ph',
@@ -21,8 +20,6 @@ async function testRBACSecurity() {
     section: 'All'
   };
 
-  const studentToken = jwt.sign(studentPayload, JWT_SECRET, { expiresIn: '1h' });
-  const teacherToken = jwt.sign(teacherPayload, JWT_SECRET, { expiresIn: '1h' });
 
   // Helper mock response
   const createMockRes = () => {

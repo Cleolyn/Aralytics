@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { httpServerHandler } from 'cloudflare:node';
-import app from './server.js';
+import app from './app.js';
 
 app.locals.env = env;
 app.listen(5001);

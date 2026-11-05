@@ -1,110 +1,287 @@
-# Aralytics (Ponce AP10 Learning Hub)
+# Aralytics — Ponce AP10 Learning Hub
 
-The interface uses a white and brown Araling Panlipunan theme, open sections, readable tables, and English-led Taglish. See [brand.md](brand.md) for the design system.
+A web-based LMS, assessment engine, and automated intervention system for **DepEd Araling Panlipunan 10 (Kontemporaryong Isyu)**, aligned with the **ILAW Framework** — *Intentions, Learning Experiences, Assessment, Ways Forward*.
 
-Learners use **Overview → Lessons → Activities → My Progress**. Teachers use **Overview → Classes → Lessons → Assessments → Gradebook → Reports**. Practice and learner support are linked from the relevant progress and review screens. Public pages include landing, login, registration, and help.
+- **Teachers** manage classes and enrollment codes, publish lessons and quizzes, grade performance tasks, review proctoring flags, act on remediation recommendations, and export gradebooks (XLSX) and DepEd monitoring reports (PDF).
+- **Learners** join a class with an adviser-issued code, read lessons (with offline downloads), take proctored quizzes, submit performance tasks, and follow suggested practice.
 
-### Redesign behavior
-
-- Teacher and learner routes remain separate. Overview counts, grades, and reading progress use real authenticated records.
-- Quiz answers are graded against the server answer key. The focused runner saves answers and the deadline per learner on the device, supports review, and blocks repeat submissions. Internet is required to load and submit quizzes; the timer continues through connection loss.
-- Performance tasks accept actual PDF/DOCX documents up to 5 MB. Uploaded files live in `server/uploads/performance-tasks/` (ignored by Git); only the submitting learner and authenticated teachers can download them. Back up this directory alongside the database.
-- Teacher feedback appears in the learner’s progress and activity detail. Suggested practice uses the same records teachers review.
-- Lesson files in `server/resources/materials/` are shared public curriculum resources. The initial sample filenames do **not** include actual lesson documents; missing files show a clear message. Add real files or link accessible HTTPS resources from **Lessons → Add resource**. External resources open online; explicit offline downloads support same-origin files.
-- Offline reading logs and catalogs are stored per learner. An unexpired cached profile permits offline lesson navigation; online access still uses server authentication. Do not use a shared browser profile for private learning sessions.
-- The current curriculum is AP10; the redesign does not add Grade 7–9 curriculum content. Class visibility follows the existing school-wide teacher model.
-
-### Validate the redesign
-
-```bash
-npm run build
-DB_SQLITE_PATH=/private/tmp/aralytics-check.sqlite npm test
-```
-
-The full suite creates assessment fixtures before running analytics checks. For optional HTTP checks, start the API with a **separate disposable SQLite database**, initialize it, and run `npm run seed-users` with that same `DB_SQLITE_PATH`. Then:
-
-```bash
-ARALYTICS_TEST_URL=http://127.0.0.1:5001 ARALYTICS_DISPOSABLE_DB=yes npm run test:redesign
-```
-
-The optional HTTP checks create a test learner, upload a document, grade it, and submit a quiz. Never run them against your working school database. The normal redesign checks cover six question formats, duplicate/unknown answers, and private API cache isolation without an API server.
-
-A web-based LMS, assessment engine, and automated intervention system for **DepEd Araling Panlipunan 10 (Kontemporaryong Isyu)** built under the **ANTIGRAVITY-LOOP** architecture and strictly aligned with the **ILAW Framework** (*Intentions, Learning Experiences, Assessment, Ways Forward*).
+Every quiz submission is graded against the server answer key and immediately updates the gradebook, competency mastery, and remediation queue.
 
 ---
 
-## 🏛️ System Core Realities & Boundaries
+## Contents
 
-1. **Shared Learner Database:**
-   - Instructional materials, assessment quiz engine, proctoring security watchdog, and remedial intervention modules all read and write to a unified relational database.
-   - Every quiz submission instantly calculates score metrics, updates class gradebooks, evaluates competency mastery, and triggers remedial recommendations without manual re-encoding.
-2. **Access Control (RBAC):**
-   - **Teacher Role:** Manage curriculum, publish quizzes, monitor live proctoring flags, view master gradebooks, and export to **SheetJS (.xlsx)** and **PDFKit (.pdf)**.
-   - **Student Role:** Browse offline-cacheable instructional materials, take secured proctored assessments, view instant mastery breakdown, and complete remedial tasks in Ways Forward.
-3. **PWA Hybrid Access Boundary:**
-   - **Offline-capable:** Explicit same-origin lesson downloads via Service Workers (`/sw.js`). Viewing a file does not download it for offline use. Account, assessment, grading, and submission APIs are never cached.
-   - **Strictly online:** Quiz delivery, focus/tab-switch security monitoring, and live gradebook recording.
-4. **ILAW Framework Alignment:**
-   - **I - Intentions (Layunin):** MELC competency standards & learning objectives.
-   - **L - Learning Experiences (Karanasan):** Interactive modules, slide decks, and video lessons.
-   - **A - Assessment (Pagtataya):** Secured assessments with proctoring watchdogs.
-   - **W - Ways Forward (Pagsulong):** Automated remedial interventions triggered when score < 75%.
+- [Tech stack](#tech-stack)
+- [Project structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation and setup](#installation-and-setup)
+- [Running the app](#running-the-app)
+- [Database](#database)
+- [Testing](#testing)
+- [Script reference](#script-reference)
+- [Deploying](#deploying)
+- [How it works](#how-it-works)
+- [Troubleshooting](#troubleshooting)
+- [Further documentation](#further-documentation)
 
 ---
 
-## 🚀 Quick Start Guide
+## Tech stack
 
-### 1. Requirements
-- Node.js (v18+)
-- npm (v9+)
+| Layer | Technology |
+| --- | --- |
+| Client | React 18, React Router 7, Vite 6, PWA service worker |
+| API | Node.js, Express 5 |
+| Authentication | [Clerk](https://clerk.com) (Google and verified email) |
+| Database | SQLite (default, via Node's built-in `node:sqlite`), Turso/libSQL, or MySQL |
+| Reports | SheetJS (`xlsx`), PDFKit |
 
-### 2. Run Database Setup & Development Servers
-In the project root directory:
+The repository is an **npm workspaces** monorepo: one `npm install` at the root installs both packages.
 
-```bash
-# Initialize and seed DepEd AP10 curriculum, users, and quizzes
-npm run init-db
+## Project structure
 
-# Run Express API Server (Port 5001)
-npm run server
-
-# Run React PWA Client (Port 3000)
-npm run client
-
-# Run Complete Verification Test Suite
-npm test
+```text
+.
+├── client/                    React PWA (Vite)
+│   ├── public/                Static assets, manifest, service worker (sw.js)
+│   ├── src/
+│   │   ├── components/        Shared UI (layout, navigation, dialogs, illustrations)
+│   │   ├── context/           AuthContext (Clerk session + account sync)
+│   │   ├── hooks/             Data-loading hooks
+│   │   ├── pages/             Route screens for learners, teachers, and public pages
+│   │   ├── routes/            AppRoutes (role-based routing)
+│   │   ├── services/          API client and account sync
+│   │   └── utils/             Auth flow, learning, and offline helpers
+│   ├── test/                  Auth unit test + optional browser regression harness
+│   └── vite.config.js         Dev server (port 3000) proxies /api → :5001
+├── server/                    Express REST API
+│   ├── resources/materials/   Public lesson files served at /api/materials/download/:file
+│   ├── uploads/               Learner performance-task uploads (git-ignored, back this up)
+│   ├── src/
+│   │   ├── app.js             Express app (middleware + routes)
+│   │   ├── server.js          Entry point: load .env, init database, listen
+│   │   ├── config/            Database adapter (sqlite | turso | mysql)
+│   │   ├── controllers/       Request handlers
+│   │   ├── db/                Schema init, MySQL schema, demo/test seeds
+│   │   ├── middleware/        Clerk auth, role guards, error handler
+│   │   ├── routes/            Route definitions under /api
+│   │   └── services/          Analytics, enrollment, answer grading
+│   └── test/                  Test suites + runner (test/run.js)
+├── docs/                      Brand guide, auth/enrollment guide, design references, sample reports
+└── scripts/dev.js             Runs API and client together
 ```
 
-Or start both in tandem:
+## Prerequisites
+
+- **Node.js 22.13 or newer** (local SQLite uses Node's built-in `node:sqlite` module). Check with `node -v`.
+- **npm 10+** (bundled with Node).
+- **A Clerk account** — free at [dashboard.clerk.com](https://dashboard.clerk.com). Sign-in does not work without it.
+- *Optional:* a [Turso](https://turso.tech) database or a MySQL 8 server if you don't want local SQLite.
+
+## Installation and setup
+
+### 1. Clone and install
+
+```bash
+git clone <repository-url> aralytics
+cd aralytics
+npm install
+```
+
+This installs dependencies for both `server/` and `client/`.
+
+### 2. Create a Clerk application
+
+1. In the [Clerk dashboard](https://dashboard.clerk.com), create an application.
+2. Under **User & authentication**, enable **Google** and **Email** sign-in, and require **email verification**. Disable phone, username, and other social providers.
+3. Under **Paths / Redirect URLs**, allow `/sso-callback` and your app origin (`http://localhost:3000` for development).
+4. Copy the **Publishable key** (`pk_…`) and **Secret key** (`sk_…`) from **API keys**.
+
+The full Clerk checklist for production is in [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md).
+
+### 3. Configure environment variables
+
+```bash
+cp server/.env.example server/.env
+# Optional — the client falls back to server/.env if this file is missing:
+cp client/.env.example client/.env
+```
+
+Edit `server/.env`:
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `CLERK_SECRET_KEY` | Yes | Clerk secret key (`sk_…`). |
+| `CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key (`pk_…`). |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes* | Same publishable key for the client. *Can live in `client/.env` instead. |
+| `PORT` | No | API port (default `5001`). The Vite proxy expects `5001`. |
+| `DB_DIALECT` | No | `sqlite` (default), `turso`, or `mysql`. |
+| `DB_SQLITE_PATH` | No | SQLite file, relative to `server/` (default `aralytics.sqlite`). |
+| `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` | For Turso | libSQL URL and token. If the URL is set and `DB_DIALECT` is not, Turso is used. |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | For MySQL | MySQL connection. |
+| `CORS_ORIGIN` | No | Comma-separated allowed origins (default: all). Set this in production. |
+
+> `.env` files are git-ignored. Never commit real keys.
+
+### 4. Start the app
+
 ```bash
 npm run dev
 ```
 
-Visit the client at: `http://localhost:3000`  
-API health check at: `http://localhost:5001/api/health`
+- Client: <http://localhost:3000>
+- API health check: <http://localhost:5001/api/health>
 
----
+On first start the API creates all tables and seeds the AP10 curriculum (quarters, topics, ILAW competencies). It does **not** create demo accounts.
 
-## 🔑 Demo Access Credentials
+### 5. Create the first teacher account
 
-| Role | Email / Identifier | Password | Access Highlights |
-| :--- | :--- | :--- | :--- |
-| **Teacher (Coordinator)** | `teacher@ponce.edu.ph` (or `EMP-2026-001`) | `TeacherPass123!` | Dashboard, Proctoring Flags, Master Gradebook, Proficiency Profiling, Remediation Decisions, XLSX/PDF Exports |
-| **Student (Juan Dela Cruz)** | `juan.delacruz@student.deped.gov.ph` (or `123456789012`) | `StudentPass123!` | Section 10-Rizal, Offline Materials Hub, Proctored Quiz, Ways Forward |
+Accounts are created automatically the first time someone signs in through Clerk. Everyone defaults to **student**; the role cannot be self-selected. To make an adviser a **teacher**:
 
----
+1. In the Clerk dashboard, open **Users** → the adviser → **Metadata** → **Public**, and set:
+   ```json
+   { "role": "TEACHER" }
+   ```
+2. Have the adviser sign in **after** setting the metadata.
 
-## 📊 Analytics & DepEd Reporting Engine (`INTERVENTION-ANALYTICS-ENGINE`)
-1. **Proficiency Profiling Aggregator (`GET /api/analytics/proficiency`):**
-   - Aggregates cohort scores across MELC competencies and classifies into 3 tiers:
-     - **Mastered:** &ge; 85%
-     - **Developing:** 70% – 84%
-     - **Needs Intervention:** &lt; 70%
-2. **Remediation Routing Queue (`GET /api/analytics/remediation-queue`):**
-   - Automatically queues students scoring &lt; 70% alongside recommended competency remedial materials.
-3. **Teacher Decision Hooks (`POST /api/analytics/intervention/:id/action`):**
-   - Supports 1-click **"APPROVE"**, **"MODIFY"** (select from available competency remedial materials), and **"OVERRIDE"** (custom exempt / completed status).
-4. **Automated Exporters (`/api/analytics/export/xlsx` & `/api/analytics/export/pdf`):**
-   - **SheetJS (.xlsx):** Includes Student Name, Competency Mastery Flags, Tab-Switch Audit Warnings, Raw Scores, and Assigned Interventions.
-   - **PDFKit (.pdf):** Official DepEd monitoring layout with cohort distribution statistics and signature lines.
+The role stored in the database takes precedence once an account exists. If the person already signed in as a student, change their row instead (for SQLite: `UPDATE users SET role = 'TEACHER' WHERE email = '…';`).
 
+### 6. Enroll students
+
+1. As a teacher, open **Classes** and generate a class code (school year + section names). The code is shown **once** — copy it.
+2. Students sign up with Google or email, enter the code, then fill in LRN, name, mobile, and section.
+3. The teacher approves the request; the student can then access lessons and assessments.
+
+## Running the app
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | API (auto-restart on change) + Vite client together. Ctrl+C stops both. |
+| `npm run dev:server` | API only, on port 5001. |
+| `npm run dev:client` | Client only, on port 3000 (needs the API for `/api`). |
+| `npm run build` | Production build of the client to `client/dist/`. |
+| `npm start` | API in production mode (no watcher). |
+
+## Database
+
+The API talks to the database through one adapter (`server/src/config/database.js`), so the same code runs on all three dialects.
+
+**SQLite (default).** No setup needed; the file `server/aralytics.sqlite` is created on first start. Back it up together with `server/uploads/`. Database files are git-ignored.
+
+**Turso.** Create a database, then set `DB_DIALECT=turso`, `TURSO_DATABASE_URL`, and `TURSO_AUTH_TOKEN`.
+
+**MySQL.** Create the database, load `server/src/db/schema.mysql.sql`, then set `DB_DIALECT=mysql` and the `DB_*` connection variables.
+
+### Initialize or seed manually
+
+```bash
+npm run db:init     # create/upgrade tables and seed the curriculum (also runs on API start)
+npm run db:seed     # add demo data for local development (SQLite only)
+npm run db:samples  # db:seed + regenerate the example reports in docs/sample-outputs/
+```
+
+`db:seed` adds demo teachers, eight learners in 10-Rizal and 10-Bonifacio, a CBDRRM quiz covering all six question formats, graded attempts in every mastery tier, proctoring flags, remedial materials, interventions, and performance tasks. It is meant for exploring the dashboards and analytics locally. Demo records have no passwords and can't be signed into; sign in with your own Clerk account and they appear in your teacher views.
+
+The seed refuses to write to Turso or MySQL unless you pass `--allow-remote` (`npm run db:seed --workspace server -- --allow-remote`). Don't seed a school's live database.
+
+### Lesson files
+
+Place shared lesson files in `server/resources/materials/` and link them as `/api/materials/download/<filename>`, or add HTTPS links from **Lessons → Add resource**. These files are public. Learner uploads go to `server/uploads/performance-tasks/` and are only downloadable by the submitting learner and teachers.
+
+## Testing
+
+```bash
+npm test             # server suites, then client auth tests
+npm run test:server  # server only
+npm run test:client  # client only
+```
+
+The server runner (`server/test/run.js`) always creates a **fresh temporary SQLite database**, seeds the demo fixtures, runs each suite, and deletes it afterward. It ignores the database settings in `server/.env`, so tests never touch Turso, MySQL, or your working database.
+
+Run selected suites by name:
+
+```bash
+npm test --workspace server -- enrollment_flow srs_compliance
+```
+
+**Optional live HTTP checks.** `redesign_flow` can also exercise a running API (create a learner, upload a document, grade it, submit a quiz). Start the API against a separate, disposable database first, then:
+
+```bash
+ARALYTICS_TEST_URL=http://127.0.0.1:5001 ARALYTICS_DISPOSABLE_DB=yes npm run test:redesign --workspace server
+```
+
+**Browser regression harness (optional).** See [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md#verification). Screenshots are written to `.taste-skill/` (git-ignored).
+
+## Script reference
+
+Root scripts (run from the repository root):
+
+| Script | Description |
+| --- | --- |
+| `dev` | Run API and client together |
+| `dev:server` / `dev:client` | Run one side only |
+| `start` | Start the API without a file watcher |
+| `build` / `preview` | Build / preview the production client |
+| `db:init` / `db:seed` / `db:samples` | Database setup and demo data |
+| `test` / `test:server` / `test:client` | Test suites |
+
+Any workspace script can be run directly with `npm run <script> --workspace server` or `--workspace client`.
+
+## Deploying
+
+1. Build the client: `npm run build`. Serve `client/dist/` as a static single-page app (fallback all routes to `index.html`).
+2. Run the API with `npm start` and production environment variables (use a production Clerk instance, set `NODE_ENV=production` and `CORS_ORIGIN`).
+3. Route `/api/*` on the client's origin to the API (reverse proxy or platform rewrite). The Express app does not serve the client build.
+4. Register the production origin and `/sso-callback` in Clerk.
+5. Persist and back up the database and `server/uploads/`.
+
+The enrollment code-attempt limiter is in-memory and per process; use a shared limiter before running multiple API instances.
+
+## How it works
+
+### Access boundaries
+
+- **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals.
+- **Student:** enrolled class content only. Students can read only their own records; every learning API requires an approved enrollment.
+- Every private API verifies the Clerk session and requires a verified primary email.
+
+### Offline behavior (PWA)
+
+- **Works offline:** explicitly downloaded same-origin lesson files and the learner's cached reading logs (synced when back online).
+- **Online only:** quizzes, proctoring, grading, submissions, and exports. Account and assessment APIs are never cached.
+- Offline data is stored per learner; don't use a shared browser profile for private sessions.
+
+### Assessments and proctoring
+
+Quizzes support six formats: multiple choice, true/false, identification (with accepted aliases), matching, situational, and PISA-style data analysis. The runner saves answers and the deadline per learner on the device, blocks repeat submissions, and keeps the timer running through connection loss. Tab switches and window blur are logged; reaching the quiz's limit flags the attempt.
+
+### Analytics and intervention engine
+
+| Endpoint (teacher only) | Purpose |
+| --- | --- |
+| `GET /api/analytics/proficiency` | Cohort mastery per competency: **Mastered** ≥ 85%, **Developing** 70–84%, **Needs Intervention** < 70% |
+| `GET /api/analytics/remediation-queue` | Learners below 70% with recommended remedial materials |
+| `POST /api/analytics/intervention/:id/action` | `APPROVE`, `MODIFY` (choose a different material), or `OVERRIDE` |
+| `GET /api/analytics/quizzes/:quiz_id/item-analysis` | Difficulty (P) and discrimination (D) indices per item |
+| `GET /api/analytics/export/xlsx` | Master gradebook workbook |
+| `GET /api/analytics/export/pdf` | DepEd monitoring report |
+
+Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
+
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| "Sign-in is unavailable … publishable key is missing" | Set `VITE_CLERK_PUBLISHABLE_KEY` in `client/.env` or `server/.env`, then restart `npm run dev`. |
+| `No such built-in module: node:sqlite` | Upgrade to Node.js 22.13+. |
+| "Could not connect to the account service" | The API isn't running or isn't on port 5001. Check <http://localhost:5001/api/health>. |
+| Signed in as a teacher but shown student screens | The account was created before the Clerk `role` metadata was set. Update `users.role` in the database. |
+| `EADDRINUSE` on 3000 or 5001 | Another process is using the port. Stop it or change `PORT` (and the proxy target in `client/vite.config.js`). |
+| Lesson shows "File missing" | Add the file to `server/resources/materials/` or link an HTTPS resource. |
+
+## Further documentation
+
+- [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md) — Clerk configuration, enrollment flow, rollout notes, verification
+- [docs/brand.md](docs/brand.md) — design system: palette, typography, voice
+- [docs/design/](docs/design/) — design reference screens
+- [docs/sample-outputs/](docs/sample-outputs/) — example XLSX/PDF/JSON outputs

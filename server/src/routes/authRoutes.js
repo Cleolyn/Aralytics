@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const db = require('../config/database');
-const { verifyIdentity } = require('../middleware/authMiddleware');
+const { verifyIdentity } = require('../middleware/auth');
 const { getEnrollment } = require('../services/enrollmentService');
 
 function accountConflict(err) {

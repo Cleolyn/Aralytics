@@ -13,7 +13,7 @@ require.cache[sdkPath].exports = {
   getAuth: req => ({ userId: req.headers['x-test-user'] || null }),
   createClerkClient: () => ({ users: { getUser: async id => identities.get(id) } })
 };
-const { verifyToken } = require('../src/middleware/authMiddleware');
+const { verifyToken } = require('../src/middleware/auth');
 const authRoutes = require('../src/routes/authRoutes');
 const enrollmentRoutes = require('../src/routes/enrollmentRoutes');
 require.cache[sdkPath].exports = originalSDK;
@@ -92,7 +92,8 @@ async function run() {
     assert.equal((await call('/enrollment/validate-code', 'learner-b', { code })).status, 400);
     assert.equal((await call('/learning', 'learner-a')).status, 200, 'Closing an invitation must preserve approved access');
     // A forged legacy token cannot enter the production identity path.
-    const legacy = require('jsonwebtoken').sign({ id: 'learner-b', role: 'TEACHER' }, require('../src/middleware/authMiddleware').JWT_SECRET);
+    const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+    const legacy = `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ id: 'learner-b', role: 'TEACHER' })}.forged-signature`;
     const forged = await fetch(base + '/enrollment/manage', { headers: { Authorization: `Bearer ${legacy}` } });
     assert.equal(forged.status, 401);
     console.log('PASS: verified identity, code gating, validation, duplicate LRN, adviser ownership, rejection/resubmission, approval, immutable profile, code closure, and legacy-login removal.');

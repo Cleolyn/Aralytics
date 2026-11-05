@@ -2,23 +2,29 @@
   "name": "aralytics-monorepo",
   "version": "1.0.0",
   "description": "Aralytics (Ponce AP10 Learning Hub) - LMS, Assessment & Automated Intervention System",
+  "private": true,
   "workspaces": [
     "server",
     "client"
   ],
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
-    "postinstall": "npm --prefix server install && npm --prefix client install",
-    "server": "cd server && node src/server.js",
-    "client": "cd client && npm run dev",
-    "init-db": "cd server && node src/db/init.js",
-    "seed-users": "node server/scripts/seedUsers.js",
-    "seed-samples": "cd server && node src/db/seed_samples.js",
-    "test": "cd server && npm test",
-    "dev": "node -e \"const {spawn}=require('child_process');['server','client'].forEach(s=>spawn('npm run '+s,{stdio:'inherit',shell:true}))\"",
-    "build": "npm --prefix client run build",
-    "test:redesign": "npm --prefix server run test:redesign",
-    "build:cloudflare": "npm --prefix client run build && node scripts/prepare-worker.cjs",
-    "deploy:cloudflare": "npm run build:cloudflare && npm run init-db && npx wrangler d1 migrations apply aralytics-uploads --remote && npx wrangler deploy"
+    "dev": "node scripts/dev.js",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "start": "npm run start --workspace server",
+    "build": "npm run build --workspace client",
+    "preview": "npm run preview --workspace client",
+    "db:init": "npm run db:init --workspace server",
+    "db:seed": "npm run db:seed --workspace server",
+    "db:samples": "npm run db:samples --workspace server",
+    "test": "npm run test --workspace server && npm run test --workspace client",
+    "test:server": "npm run test --workspace server",
+    "test:client": "npm run test --workspace client",
+    "build:cloudflare": "npm run build && node scripts/prepare-worker.cjs",
+    "deploy:cloudflare": "npm run build:cloudflare && npm run db:init && npx wrangler d1 migrations apply aralytics-uploads --remote && npx wrangler deploy"
   },
   "keywords": [
     "aralytics",

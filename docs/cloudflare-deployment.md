@@ -34,8 +34,9 @@ This builds the frontend, prepares PDFKit's Workers-compatible bundle, initializ
 the Turso schema, applies D1 migrations, and deploys the Worker and custom domain.
 Wrangler is pinned to the Cloudflare account that owns `cleolyn.dev`.
 
-The five required secrets are set in Cloudflare: `TURSO_DATABASE_URL`,
-`TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `JWT_SECRET`.
+The required secrets are set in Cloudflare: `TURSO_DATABASE_URL`,
+`TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, and `CLERK_SECRET_KEY`. (`JWT_SECRET`
+is no longer read by the server and can be deleted.)
 Use `npx wrangler secret put NAME` to update them. Never commit their values.
 The current Clerk keys belong to a development instance. Changing to a Clerk
 production instance requires updating both the server secrets and the frontend

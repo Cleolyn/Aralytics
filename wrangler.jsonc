@@ -27,7 +27,7 @@
   },
   "alias": {
     "pdfkit": "./.cloudflare/pdfkit.cjs",
-    "@libsql/client": "./server/node_modules/@libsql/client/lib-esm/web.js"
+    "@libsql/client": "./.cloudflare/libsql-client.mjs"
   },
   "build": {
     "command": "node scripts/prepare-worker.cjs"

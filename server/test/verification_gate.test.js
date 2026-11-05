@@ -2,8 +2,6 @@ const assert = require('assert');
 const path = require('path');
 const db = require('../src/config/database');
 const { initializeDatabase } = require('../src/db/init');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 async function runSelfVerification() {
   console.log('======================================================================');

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const teacherController = require('../controllers/teacherController');
-const { verifyToken, requireTeacher } = require('../middleware/auth.middleware');
+const { verifyToken, requireTeacher } = require('../middleware/auth');
 
 // ENFORCE STRICT TEACHER GUARDRAILS ACROSS ENTIRE ROUTER (FR-01, FR-05..44, NFR-01)
 router.use(verifyToken, requireTeacher);

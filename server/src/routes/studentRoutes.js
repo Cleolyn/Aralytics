@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const studentController = require('../controllers/studentController');
-const { verifyToken, requireStudent } = require('../middleware/auth.middleware');
+const { verifyToken, requireStudent } = require('../middleware/auth');
 
 // ENFORCE STRICT STUDENT GUARDRAILS ACROSS ENTIRE ROUTER (FR-01, FR-04, FR-06..50, NFR-01)
 router.use(verifyToken, requireStudent);

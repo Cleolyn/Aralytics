@@ -32,9 +32,6 @@ export function getTokenSync() {
   return _lastToken;
 }
 
-/** @deprecated — kept only for any legacy code that still calls setToken(). */
-export function setToken() {}
-
 export async function request(endpoint, options = {}) {
   const token = await getToken();
   const headers = {
@@ -77,169 +74,65 @@ export async function request(endpoint, options = {}) {
   }
 }
 
-export const api = {
-  // Auth
-  login: (identifier, password) => request('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ identifier, password })
-  }),
-  register: (payload) => request('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  getCurrentUser: () => request('/auth/me'),
+const withQuery = (path, params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return query ? `${path}?${query}` : path;
+};
+const post = (endpoint, payload, method = 'POST') => request(endpoint, { method, body: JSON.stringify(payload) });
+// Downloads open in a new tab, so the session token travels as ?token= (bridged server-side).
+const downloadUrl = (path, params = {}) => withQuery(`${API_BASE}${path}`, { token: getTokenSync() || '', ...params });
 
+export const api = {
+  // Classes & learner records
   getClasses: () => request('/teacher/classes'),
   getPersonalScores: () => request('/student/scores'),
   getOwnSubmission: (id) => request(`/student/submissions/${id}`),
 
   // Curriculum & ILAW
   getTaxonomy: () => request('/curriculum/taxonomy'),
-  getByIlaw: (tag) => request(`/curriculum/ilaw/${tag}`),
 
-  // Materials (Offline Capable)
-  getMaterials: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/materials${query ? `?${query}` : ''}`);
-  },
-  getMaterialById: (id) => request(`/materials/${id}`),
-  createMaterial: (data) => request('/materials', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
-  updateMaterial: (id, data) => request(`/materials/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  }),
-  deleteMaterial: (id) => request(`/materials/${id}`, {
-    method: 'DELETE'
-  }),
+  // Materials (offline capable)
+  getMaterials: (params) => request(withQuery('/materials', params)),
+  createMaterial: (data) => post('/materials', data),
+  updateMaterial: (id, data) => post(`/materials/${id}`, data, 'PUT'),
+  deleteMaterial: (id) => request(`/materials/${id}`, { method: 'DELETE' }),
 
-  // Quizzes (Strictly Online)
+  // Quizzes (online only)
   getQuizzes: () => request('/quizzes'),
   getQuizById: (id) => request(`/quizzes/${id}`),
-  createQuiz: (payload) => request('/quizzes', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
+  createQuiz: (payload) => post('/quizzes', payload),
 
-  // Proctoring Security Watchdog (Strictly Online)
-  logProctoringEvent: (payload) => request('/proctoring/event', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  getProctoringTrail: (submissionId) => request(`/proctoring/trail/${submissionId}`),
-
-  // Submissions & Auto-Grading (Strictly Online)
-  startQuiz: (quiz_id) => request('/submissions/start', {
-    method: 'POST',
-    body: JSON.stringify({ quiz_id })
-  }),
-  submitQuiz: (submission_id, answers) => request('/submissions/submit', {
-    method: 'POST',
-    body: JSON.stringify({ submission_id, answers })
-  }),
+  // Submissions & grading (online only)
   getSubmissionById: (id) => request(`/submissions/detail/${id}`),
-  getGradebook: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/submissions/gradebook${query ? `?${query}` : ''}`);
-  },
+  getGradebook: (params) => request(withQuery('/submissions/gradebook', params)),
+  submitAssessmentAttempt: (payload) => post('/assessment/submit', payload),
+  logSecurityEventAsync: (payload) => post('/security/log-event', payload),
 
-  // DATA-PERSISTENCE-LAYER & SECURITY ENGINE API CONTRACTS
-  submitAssessmentAttempt: (payload) => request('/assessment/submit', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  logSecurityEventAsync: (payload) => request('/security/log-event', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-
-  // Remedial Interventions (Ways Forward)
+  // Practice & interventions (Ways Forward)
   getPractice: () => request('/student/practice'),
-  getInterventions: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/interventions${query ? `?${query}` : ''}`);
-  },
-  resolveIntervention: (id) => request(`/interventions/${id}/resolve`, {
-    method: 'PATCH'
-  }),
-
-  // INTERVENTION-ANALYTICS-ENGINE
-  getProficiencyProfiling: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/analytics/proficiency${query ? `?${query}` : ''}`);
-  },
-  getRemediationQueue: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/analytics/remediation-queue${query ? `?${query}` : ''}`);
-  },
-  handleInterventionAction: (id, payload) => request(`/analytics/intervention/${id}/action`, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  createIntervention: (payload) => request('/analytics/interventions', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  deleteIntervention: (id) => request(`/analytics/interventions/${id}`, {
-    method: 'DELETE'
-  }),
-  getAnalyticsXlsxUrl: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const token = getTokenSync();
-    return `/api/analytics/export/xlsx?token=${token}&${query}`;
-  },
-  getAnalyticsPdfUrl: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const token = getTokenSync();
-    return `/api/analytics/export/pdf?token=${token}&${query}`;
-  },
-
+  getProficiencyProfiling: (params) => request(withQuery('/analytics/proficiency', params)),
+  getRemediationQueue: (params) => request(withQuery('/analytics/remediation-queue', params)),
+  handleInterventionAction: (id, payload) => post(`/analytics/intervention/${id}/action`, payload),
+  createIntervention: (payload) => post('/analytics/interventions', payload),
+  deleteIntervention: (id) => request(`/analytics/interventions/${id}`, { method: 'DELETE' }),
   getItemAnalysis: (quizId) => request(`/analytics/quizzes/${quizId}/item-analysis`),
 
-  // Performance Tasks (SRS FR-43, FR-44)
-  getPerformanceTasks: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/performance-tasks${query ? `?${query}` : ''}`);
-  },
-  getPerformanceTaskById: (id) => request(`/performance-tasks/${id}`),
-  createPerformanceTask: (payload) => request('/performance-tasks', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
-  submitPerformanceTask: (id, payload) => request(`/performance-tasks/${id}/submit`, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  }),
+  // Reports (XLSX / PDF downloads)
+  getAnalyticsXlsxUrl: (params) => downloadUrl('/analytics/export/xlsx', params),
+  getAnalyticsPdfUrl: (params) => downloadUrl('/analytics/export/pdf', params),
+
+  // Performance tasks (SRS FR-43, FR-44)
+  getPerformanceTasks: (params) => request(withQuery('/performance-tasks', params)),
+  createPerformanceTask: (payload) => post('/performance-tasks', payload),
+  submitPerformanceTask: (id, payload) => post(`/performance-tasks/${id}/submit`, payload),
   getPerformanceTaskSubmissions: (id) => request(`/performance-tasks/${id}/submissions`),
-  gradePerformanceTaskSubmission: (id, payload) => request(`/performance-tasks/submissions/${id}/grade`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload)
-  }),
-
-  // Offline Read Sync (SRS FR-50)
-  syncOfflineReadLogs: (logs) => request('/materials/sync-read-logs', {
-    method: 'POST',
-    body: JSON.stringify({ logs })
-  }),
-  getReadLogs: () => request('/materials/read-logs'),
-
+  gradePerformanceTaskSubmission: (id, payload) => post(`/performance-tasks/submissions/${id}/grade`, payload, 'PATCH'),
   getSubmissionFileUrl: (url) => {
     if (!url?.startsWith('/api/performance-tasks/files/')) return null;
     return `${url}?token=${encodeURIComponent(getTokenSync() || '')}`;
   },
 
-  // Export URLs
-  getXlsxExportUrl: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const token = getTokenSync();
-    return `/api/analytics/export/xlsx?token=${token}&${query}`;
-  },
-  getPdfExportUrl: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const token = getTokenSync();
-    return `/api/analytics/export/pdf?token=${token}&${query}`;
-  }
+  // Offline reading sync (SRS FR-50)
+  syncOfflineReadLogs: (logs) => post('/materials/sync-read-logs', { logs }),
+  getReadLogs: () => request('/materials/read-logs')
 };
-

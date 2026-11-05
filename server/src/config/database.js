@@ -1,44 +1,41 @@
+/**
+ * Unified database adapter.
+ *
+ * Every dialect exposes the same interface so controllers stay dialect-agnostic:
+ *   db.dialect                      'sqlite' | 'turso' | 'mysql'
+ *   db.query(sql, params)        -> { rows, insertId, affectedRows }
+ *   db.transaction(async tx => …)   tx.query has the same signature
+ *
+ * Dialect selection: DB_DIALECT, otherwise 'turso' when TURSO_DATABASE_URL is set,
+ * otherwise a local SQLite file at DB_SQLITE_PATH (default: server/aralytics.sqlite).
+ */
 const path = require('path');
 const dotenv = require('dotenv');
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env'), quiet: true });
 
 const dialect = process.env.DB_DIALECT || (process.env.TURSO_DATABASE_URL ? 'turso' : 'sqlite');
 
-let dbInstance = null;
+function createTursoAdapter() {
+  const { createLibsqlClient } = require('./libsql');
+  const client = createLibsqlClient();
 
-if (dialect === 'turso' || dialect === 'libsql') {
-  const libsqlClient = require('../../db');
+  const run = async (executor, sql, args = []) => {
+    const result = await executor.execute({ sql: sql.trim(), args });
+    return {
+      rows: result.rows || [],
+      insertId: result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null,
+      affectedRows: result.rowsAffected || 0
+    };
+  };
 
-  dbInstance = {
+  return {
     dialect: 'turso',
-    client: libsqlClient,
-    async execute(sql, args = []) {
-      return libsqlClient.execute({ sql: sql.trim(), args });
-    },
-    async query(sql, params = []) {
-      const cleanSql = sql.trim();
-      const result = await libsqlClient.execute({ sql: cleanSql, args: params });
-      return {
-        rows: result.rows || [],
-        insertId: result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null,
-        affectedRows: result.rowsAffected || 0
-      };
-    },
+    query: (sql, params) => run(client, sql, params),
     async transaction(callback) {
-      const tx = await libsqlClient.transaction('write');
+      const tx = await client.transaction('write');
       try {
-        const txDb = {
-          async query(sql, params = []) {
-            const cleanSql = sql.trim();
-            const result = await tx.execute({ sql: cleanSql, args: params });
-            return {
-              rows: result.rows || [],
-              insertId: result.lastInsertRowid != null ? Number(result.lastInsertRowid) : null,
-              affectedRows: result.rowsAffected || 0
-            };
-          }
-        };
-        const result = await callback(txDb);
+        const result = await callback({ query: (sql, params) => run(tx, sql, params) });
         await tx.commit();
         return result;
       } catch (err) {
@@ -49,7 +46,9 @@ if (dialect === 'turso' || dialect === 'libsql') {
       }
     }
   };
-} else if (dialect === 'mysql') {
+}
+
+function createMysqlAdapter() {
   const mysql = require('mysql2/promise');
   const pool = mysql.createPool({
     host: process.env.DB_HOST || '127.0.0.1',
@@ -63,31 +62,23 @@ if (dialect === 'turso' || dialect === 'libsql') {
     dateStrings: true
   });
 
-  dbInstance = {
+  const run = async (executor, sql, params = []) => {
+    const [rows] = await executor.query(sql, params);
+    return {
+      rows: Array.isArray(rows) ? rows : [rows],
+      insertId: rows.insertId,
+      affectedRows: rows.affectedRows
+    };
+  };
+
+  return {
     dialect: 'mysql',
-    async query(sql, params = []) {
-      const [rows, fields] = await pool.query(sql, params);
-      return {
-        rows: Array.isArray(rows) ? rows : [rows],
-        insertId: rows.insertId,
-        affectedRows: rows.affectedRows
-      };
-    },
+    query: (sql, params) => run(pool, sql, params),
     async transaction(callback) {
       const connection = await pool.getConnection();
       await connection.beginTransaction();
       try {
-        const txDb = {
-          async query(sql, params = []) {
-            const [rows] = await connection.query(sql, params);
-            return {
-              rows: Array.isArray(rows) ? rows : [rows],
-              insertId: rows.insertId,
-              affectedRows: rows.affectedRows
-            };
-          }
-        };
-        const result = await callback(txDb);
+        const result = await callback({ query: (sql, params) => run(connection, sql, params) });
         await connection.commit();
         return result;
       } catch (err) {
@@ -98,72 +89,63 @@ if (dialect === 'turso' || dialect === 'libsql') {
       }
     }
   };
-} else {
-  // SQLite relational engine (uses better-sqlite3 if available, otherwise Node's built-in node:sqlite)
-  const dbPath = process.env.DB_SQLITE_PATH === ':memory:' ? ':memory:' : path.resolve(__dirname, '../../', process.env.DB_SQLITE_PATH || 'aralytics.sqlite');
+}
+
+/** Local SQLite: better-sqlite3 when installed, otherwise Node's built-in node:sqlite. */
+function createSqliteAdapter() {
+  const dbPath = process.env.DB_SQLITE_PATH === ':memory:'
+    ? ':memory:'
+    : path.resolve(__dirname, '../../', process.env.DB_SQLITE_PATH || 'aralytics.sqlite');
+
   let sqlite;
   try {
     const Database = require('better-sqlite3');
     sqlite = new Database(dbPath);
-    sqlite.pragma('foreign_keys = ON');
-    sqlite.pragma('journal_mode = WAL');
   } catch {
     const { DatabaseSync } = require('node:sqlite');
     sqlite = new DatabaseSync(dbPath);
-    sqlite.exec('PRAGMA foreign_keys = ON');
-    sqlite.exec('PRAGMA journal_mode = WAL');
   }
+  sqlite.exec('PRAGMA foreign_keys = ON');
+  sqlite.exec('PRAGMA journal_mode = WAL');
 
-  dbInstance = {
+  const READ_STATEMENT = /^(SELECT|PRAGMA|SHOW|DESCRIBE)/i;
+  const query = async (sql, params = []) => {
+    const cleanSql = sql.trim();
+    const stmt = sqlite.prepare(cleanSql);
+    if (READ_STATEMENT.test(cleanSql)) {
+      const rows = stmt.all(...params);
+      return { rows, insertId: null, affectedRows: rows.length };
+    }
+    const info = stmt.run(...params);
+    return { rows: [], insertId: info.lastInsertRowid, affectedRows: info.changes };
+  };
+
+  return {
     dialect: 'sqlite',
-    async query(sql, params = []) {
-      // Normalize parameter markers if needed, or query directly
-      const cleanSql = sql.trim();
-      const isSelect = /^SELECT|^PRAGMA|^SHOW|^DESCRIBE/i.test(cleanSql);
-
-      const stmt = sqlite.prepare(cleanSql);
-      if (isSelect) {
-        const rows = stmt.all(...params);
-        return { rows, insertId: null, affectedRows: rows.length };
-      } else {
-        const info = stmt.run(...params);
-        return {
-          rows: [],
-          insertId: info.lastInsertRowid,
-          affectedRows: info.changes
-        };
-      }
-    },
+    query,
     async transaction(callback) {
-      sqlite.prepare('BEGIN').run();
+      sqlite.exec('BEGIN');
       try {
-        const txDb = {
-          async query(sql, params = []) {
-            const cleanSql = sql.trim();
-            const isSelect = /^SELECT|^PRAGMA|^SHOW/i.test(cleanSql);
-            const stmt = sqlite.prepare(cleanSql);
-            if (isSelect) {
-              const rows = stmt.all(...params);
-              return { rows, insertId: null, affectedRows: rows.length };
-            } else {
-              const info = stmt.run(...params);
-              return {
-                rows: [],
-                insertId: info.lastInsertRowid,
-                affectedRows: info.changes
-              };
-            }
-          }
-        };
-        const result = await callback(txDb);
-        sqlite.prepare('COMMIT').run();
+        const result = await callback({ query });
+        sqlite.exec('COMMIT');
         return result;
       } catch (err) {
-        sqlite.prepare('ROLLBACK').run();
+        sqlite.exec('ROLLBACK');
         throw err;
       }
     }
   };
 }
 
-module.exports = dbInstance;
+const adapters = {
+  turso: createTursoAdapter,
+  libsql: createTursoAdapter,
+  mysql: createMysqlAdapter,
+  sqlite: createSqliteAdapter
+};
+
+if (!adapters[dialect]) {
+  throw new Error(`Unsupported DB_DIALECT "${dialect}". Use one of: sqlite, turso, mysql.`);
+}
+
+module.exports = adapters[dialect]();

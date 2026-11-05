@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
 const db = require('../config/database');
-const { verifyIdentity, requireTeacher, requireStudent } = require('../middleware/authMiddleware');
+const { verifyIdentity, requireTeacher, requireStudent } = require('../middleware/auth');
 const { getEnrollment, findInvitation, submitEnrollment, reviewEnrollment, hashCode, fail } = require('../services/enrollmentService');
 router.use(verifyIdentity);
 router.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });

@@ -5,7 +5,6 @@ const assessmentPersistenceController = require('../src/controllers/assessmentPe
 const materialsController = require('../src/controllers/materialsController');
 const analyticsController = require('../src/controllers/analyticsController');
 const performanceTaskController = require('../src/controllers/performanceTaskController');
-const authController = require('../src/controllers/authController');
 
 function createMockRes() {
   return {
@@ -153,9 +152,9 @@ async function testMasterLoopModules() {
   }
 
   // ---------------------------------------------------------------------------
-  // MODULE D: Student Performance Task & Strict Input Validation
+  // MODULE D: Student Performance Task Archive Upload
   // ---------------------------------------------------------------------------
-  console.log('--> Module D: Performance Task Media/Archive Upload & Strict Input Sanitization');
+  console.log('--> Module D: Performance Task Media/Archive Upload');
   {
     const { rows: tasks } = await db.query('SELECT id FROM performance_tasks LIMIT 1');
     const taskId = tasks[0].id;
@@ -179,34 +178,6 @@ async function testMasterLoopModules() {
     assert.strictEqual(subRes.body.submission.file_name, 'project_deliverable.zip');
     console.log('    [PASS] Student Performance Task accepted archive (.zip) deliverable.');
 
-    // Reject invalid name containing numbers/symbols during registration
-    const badNameReq = {
-      body: {
-        first_name: 'Juan123',
-        last_name: 'Dela Cruz!',
-        email: `badname-${Date.now()}@example.test`,
-        lrn_or_id: '109876543210',
-        password: 'Password123!'
-      }
-    };
-    const badNameRes = createMockRes();
-    await authController.register(badNameReq, badNameRes, (err) => { if (err) throw err; });
-    assert.strictEqual(badNameRes.statusCode, 400, 'Must reject digits/symbols in name fields with 400');
-
-    // Reject non-numeric student_id_number when explicitly provided
-    const badIdReq = {
-      body: {
-        first_name: 'Maria',
-        last_name: 'Clara',
-        email: `badid-${Date.now()}@example.test`,
-        student_id_number: 'ABC-12345',
-        password: 'Password123!'
-      }
-    };
-    const badIdRes = createMockRes();
-    await authController.register(badIdReq, badIdRes, (err) => { if (err) throw err; });
-    assert.strictEqual(badIdRes.statusCode, 400, 'Must reject non-numeric student_id_number with 400');
-    console.log('    [PASS] Strict server-side input validation enforced for Name and Student Number fields.');
   }
 
   console.log('======================================================================');
