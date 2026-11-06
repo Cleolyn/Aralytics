@@ -172,6 +172,14 @@ async function run() {
     for (const id of [probe.data.file.id, other.data.file.id]) await db.query('DELETE FROM files WHERE id = ?', [id]);
     shardA.sql.exec('DELETE FROM file_chunks'); shardB.sql.exec('DELETE FROM file_chunks');
 
+    // A finished upload is sealed: its still-valid upload token cannot rewrite the checked bytes.
+    const sealedBytes = Buffer.concat([Buffer.from('%PDF-1.7\n'), Buffer.alloc(200, 7)]);
+    const sealed = await upload('teacherA', { purpose: 'personal', name: 'sealed.pdf', bytes: sealedBytes });
+    assert.equal(sealed.completed.status, 200);
+    const rewrite = await put(sealed.reserved.data.upload.part_url.replace('{index}', 0), Buffer.alloc(sealedBytes.length, 0));
+    assert.equal(rewrite.status, 409, 'parts cannot be rewritten after complete');
+    assert.equal((await call(`/files/${sealed.id}`, 'teacherA', { method: 'DELETE' })).status, 200);
+
     // Fake PDF: content must match the extension, and the bytes are discarded
     const before = chunkTotal();
     const fake = await upload('teacherA', { purpose: 'personal', name: 'fake.pdf', bytes: Buffer.from('this is not a pdf at all') });

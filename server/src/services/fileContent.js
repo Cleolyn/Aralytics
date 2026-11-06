@@ -40,6 +40,9 @@ async function putPart(request, env, id, indexText, sig) {
   if (Number(request.headers.get('content-length')) !== expected) return problem(400, 'Part size mismatch');
   const bytes = new Uint8Array(await request.arrayBuffer());
   if (bytes.byteLength !== expected) return problem(400, 'Part size mismatch');
+  // A finished upload is sealed: its token must not let anyone rewrite checked bytes.
+  const { rows } = await db.query(`SELECT 1 AS open FROM files WHERE id = ? AND status = 'pending' LIMIT 1`, [id]);
+  if (!rows.length) return problem(409, 'This upload is already finished or was cancelled. Start the upload again.');
   await store.backend(env, claims.s).putChunk(id, index, bytes);
   return new Response(JSON.stringify({ index, size: bytes.byteLength }), {
     status: 200,
