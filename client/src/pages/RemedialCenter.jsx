@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
 import { EmptyState, Loading, Notice, Status } from '../components/ui/Feedback';
-import { cleanText, formatStatus, materialUrl } from '../utils/learning';
+import { cleanText, formatStatus, lessonSource } from '../utils/learning';
 
 export default function RemedialCenter() {
   const { data, loading, error, refresh } = useRemoteData(() => api.getPractice(), []);
@@ -40,7 +40,7 @@ export default function RemedialCenter() {
                 {formatStatus(item.status)}
               </Status>
             </div>
-            {item.remedial_material_title && materialUrl(item.remedial_storage_url) ? (
+            {item.remedial_material_title && lessonSource({ storage_url: item.remedial_storage_url, download_url: item.remedial_download_url }) ? (
               <>
                 <p>
                   Review material: <strong>{cleanText(item.remedial_material_title)}</strong>
@@ -48,7 +48,7 @@ export default function RemedialCenter() {
                 <a
                   className="btn btn-primary"
                   style={{ marginTop: 16 }}
-                  href={materialUrl(item.remedial_storage_url)}
+                  href={lessonSource({ storage_url: item.remedial_storage_url, download_url: item.remedial_download_url })}
                   target="_blank"
                   rel="noreferrer"
                 >

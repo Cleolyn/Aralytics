@@ -12,8 +12,9 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/@') || url.pathname.startsWith('/src/') || url.pathname.startsWith('/node_modules/') || url.searchParams.has('t')) return;
   // Only explicit lesson downloads can be served offline. Never cache account or assessment APIs.
-  if (url.pathname.startsWith('/api/materials/download/')) {
-    event.respondWith(caches.open(MATERIALS_CACHE).then(async cache => (await cache.match(request)) || fetch(request)));
+  // Signed links change (?sig=) while the saved copy is stored under the clean URL, so ignore the query.
+  if (url.pathname.startsWith('/api/materials/download/') || url.pathname.startsWith('/api/files/')) {
+    event.respondWith(caches.open(MATERIALS_CACHE).then(async cache => (await cache.match(request, { ignoreSearch: true })) || fetch(request)));
     return;
   }
   if (url.pathname.startsWith('/api/')) return;

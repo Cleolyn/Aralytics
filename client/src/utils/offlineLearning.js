@@ -218,7 +218,8 @@ export async function downloadMaterial(material) {
   if (!('caches' in window)) throw new Error('Offline downloads are not supported in this browser.');
   const url = materialUrl(material.storage_url);
   if (!url || new URL(url).origin !== window.location.origin) throw new Error('This file is on another website. Open it online or save it in your browser.');
-  const response = await fetch(url);
+  // Fetch through the signed link, but keep the copy under the clean URL so it matches whichever signature opens it later.
+  const response = await fetch(materialUrl(material.download_url) || url);
   if (!response.ok) throw new Error('Could not save this lesson. Please try again.');
   if (response.headers.get('content-type')?.includes('text/html')) throw new Error('This link opens a web page instead of a file. Ask your teacher for the direct file link.');
   const cache = await caches.open(MATERIAL_CACHE);

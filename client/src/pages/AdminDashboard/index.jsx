@@ -7,13 +7,15 @@ import { Loading, Notice } from '../../components/ui/Feedback';
 import { cleanText } from '../../utils/learning';
 import ApplicationsTable from './ApplicationsTable';
 import InstructorsTable from './InstructorsTable';
+import StorageTable from './StorageTable';
 import ReviewDialog from './ReviewDialog';
 
 const TABS = [
   ['pending', 'Waiting for review', 'pending'],
   ['approved', 'Approved', 'approved'],
   ['rejected', 'Returned', 'rejected'],
-  ['instructors', 'Instructors', 'instructors']
+  ['instructors', 'Instructors', 'instructors'],
+  ['storage', 'Storage', null]
 ];
 
 /** Admin workspace: verify instructor applications and see who has instructor access. */
@@ -26,7 +28,7 @@ export default function AdminDashboard() {
 
   const summary = useRemoteData(api.getAdminSummary);
   const list = useRemoteData(
-    () => (tab === 'instructors' ? api.getInstructors() : api.getInstructorApplications({ status: tab.toUpperCase() })),
+    () => (tab === 'storage' ? api.getAdminStorage() : tab === 'instructors' ? api.getInstructors() : api.getInstructorApplications({ status: tab.toUpperCase() })),
     [tab]
   );
   const counts = summary.data?.summary;
@@ -42,6 +44,13 @@ export default function AdminDashboard() {
     summary.refresh();
   });
 
+  const purge = (person, done) => action.run(async () => {
+    requireSuccess(await api.purgeUserFiles(person.user_id));
+    done();
+    action.setMessage(`Deleted the files owned by ${cleanText(person.full_name, 'this account')}.`);
+    list.refresh();
+  });
+
   const openReview = application => {
     action.setError('');
     setReviewing(application);
@@ -52,10 +61,10 @@ export default function AdminDashboard() {
       <div className="page-heading">
         <div>
           <h1>Instructor access</h1>
-          <p>Verify instructor applications. Only approved instructors can create classes and see student records.</p>
+          <p>Verify instructor applications and keep an eye on file storage. Only approved instructors can create classes and see student records.</p>
         </div>
       </div>
-      <Notice error>{summary.error || list.error || (!reviewing && action.error)}</Notice>
+      <Notice error>{summary.error || list.error || (!reviewing && tab !== 'storage' && action.error)}</Notice>
       <Notice success>{action.message}</Notice>
       {(summary.error || list.error) && (
         <button className="text-action" onClick={() => { summary.refresh(); list.refresh(); }}>Try again</button>
@@ -63,12 +72,14 @@ export default function AdminDashboard() {
       <div className="tabs" aria-label="Application views">
         {TABS.map(([key, label, countKey]) => (
           <button key={key} className={tab === key ? 'active' : ''} aria-pressed={tab === key} onClick={() => updateParams({ tab: key === 'pending' ? '' : key })}>
-            {label}{counts ? ` (${counts[countKey]})` : ''}
+            {label}{counts && countKey ? ` (${counts[countKey]})` : ''}
           </button>
         ))}
       </div>
       {list.loading ? (
         <Loading>Loading…</Loading>
+      ) : tab === 'storage' ? (
+        list.data && <StorageTable storage={list.data} saving={Boolean(action.busy)} error={action.error} onPurge={purge} />
       ) : tab === 'instructors' ? (
         <InstructorsTable instructors={list.data?.instructors || []} />
       ) : (

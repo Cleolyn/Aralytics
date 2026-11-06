@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import useRemoteData from '../hooks/useRemoteData';
 import { Loading, Notice, Status } from '../components/ui/Feedback';
 import { cachedMaterials, downloadMaterial, loadMaterials, loadReadingLogs, markRead } from '../utils/offlineLearning';
-import { cleanText, ilawLabels, materialUrl } from '../utils/learning';
+import { cleanText, ilawLabels, lessonSource, materialUrl } from '../utils/learning';
 
 export default function LessonPage() {
   const { id } = useParams();
@@ -31,8 +31,8 @@ export default function LessonPage() {
   }, [id, user.id]);
   const base = isTeacher ? '/teacher/materials' : '/student/materials';
   const m = data?.material;
-  const url = m ? materialUrl(m.storage_url) : null;
-  const cached = data?.cached.has(url);
+  const url = m ? lessonSource(m) : null;
+  const cached = data?.cached.has(m ? materialUrl(m.storage_url) : null);
   async function perform(download) {
     setBusy(true);
     setActionError('');

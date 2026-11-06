@@ -29,6 +29,7 @@ import QuizManager from '../pages/QuizManager';
 import RemedialCenter from '../pages/RemedialCenter';
 import ActivitiesPage from '../pages/ActivitiesPage';
 import ProgressPage from '../pages/ProgressPage';
+import MyFilesPage from '../pages/MyFilesPage';
 import AdminDashboard from '../pages/AdminDashboard';
 import InstructorApplicationPage from '../pages/InstructorApplication';
 
@@ -72,7 +73,7 @@ export default function AppRoutes() {
   const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', files: 'My files', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application' };
     const segments = location.pathname.split('/');
     document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);
@@ -231,6 +232,8 @@ export default function AppRoutes() {
       />
 
       <Route path="/student/activities" element={<ProtectedRoute role="STUDENT"><StudentLayout><ActivitiesPage /></StudentLayout></ProtectedRoute>} />
+      <Route path="/student/files" element={<ProtectedRoute role="STUDENT"><StudentLayout><MyFilesPage /></StudentLayout></ProtectedRoute>} />
+      <Route path="/teacher/files" element={<ProtectedRoute role="TEACHER"><TeacherLayout><MyFilesPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/student/progress" element={<ProtectedRoute role="STUDENT"><StudentLayout><ProgressPage /></StudentLayout></ProtectedRoute>} />
       <Route path="/student/materials/:id" element={<ProtectedRoute role="STUDENT"><StudentLayout><LessonPage /></StudentLayout></ProtectedRoute>} />
       <Route path="/teacher/materials/:id" element={<ProtectedRoute role="TEACHER"><TeacherLayout><LessonPage /></TeacherLayout></ProtectedRoute>} />

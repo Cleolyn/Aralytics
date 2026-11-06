@@ -42,7 +42,7 @@ export default function TaskSubmissionsTable({ task, submissions, onGrade }) {
                       </small>
                     </td>
                     <td>
-                      <a href={api.getSubmissionFileUrl(s.file_url)} target="_blank" rel="noreferrer">
+                      <a href={api.getSubmissionFileUrl(s)} target="_blank" rel="noreferrer">
                         {cleanText(s.file_name)}
                       </a>
                       <small>{formatDate(s.submitted_at, '')}</small>

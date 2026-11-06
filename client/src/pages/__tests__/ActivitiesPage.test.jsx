@@ -1,17 +1,19 @@
 import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { base64, currentLocation, makeFile, renderPage } from '../../test/render';
+import { currentLocation, makeFile, renderPage } from '../../test/render';
 import ActivitiesPage from '../ActivitiesPage';
 import { api } from '../../services/api';
 import useLearnerData from '../../hooks/useLearnerData';
 import { activitiesFrom } from '../../utils/learning';
+import { uploadFile } from '../../utils/upload';
 
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'stu-1' } }) }));
 vi.mock('../../hooks/useLearnerData', () => ({ default: vi.fn() }));
 vi.mock('../../services/api', () => ({
-  api: { submitPerformanceTask: vi.fn(), getSubmissionFileUrl: url => (url ? `${url}?token=t` : null) }
+  api: { submitPerformanceTask: vi.fn(), getSubmissionFileUrl: item => item?.download_url ?? null }
 }));
+vi.mock('../../utils/upload', () => ({ uploadFile: vi.fn() }));
 
 const quizzes = [
   { id: 'qz1', title: 'Quiz_Open', instructions: 'Answer well', due_date: '2026-11-01', total_points: 10, time_limit_minutes: 15 },
@@ -20,7 +22,7 @@ const quizzes = [
 const tasks = [
   { id: 'tk1', title: 'Hazard Map', instructions: 'Draw a map', rubric_criteria: 'Content 50%', due_date: '2026-11-02', total_points: 100 },
   { id: 'tk2', title: 'Photo Essay', instructions: 'Five photos', due_date: '2026-11-04', total_points: 50,
-    my_submission: { status: 'GRADED', score: 45, feedback: 'Great work', file_name: 'essay.pdf', file_url: '/api/performance-tasks/files/e.pdf', submitted_at: '2026-10-30 09:00:00' } }
+    my_submission: { status: 'GRADED', score: 45, feedback: 'Great work', file_name: 'essay.pdf', file_url: '/api/files/e1/content', download_url: '/api/files/e1/content?sig=abc', submitted_at: '2026-10-30 09:00:00' } }
 ];
 
 const refresh = vi.fn();
@@ -34,6 +36,8 @@ beforeEach(() => {
   refresh.mockReset();
   useLearnerData.mockReturnValue(learnerData());
   api.submitPerformanceTask.mockResolvedValue({ success: true });
+  uploadFile.mockReset();
+  uploadFile.mockResolvedValue({ id: 'file-9', name: 'map.pdf' });
 });
 
 describe('ActivitiesPage', () => {
@@ -86,7 +90,7 @@ describe('ActivitiesPage', () => {
   it('shows a graded submission with score and feedback', () => {
     renderPage(<ActivitiesPage />, { route: '/student/activities?task=tk2' });
     expect(aside().getByRole('heading', { name: 'Your submitted work' })).toBeInTheDocument();
-    expect(aside().getByRole('link', { name: 'essay.pdf' })).toHaveAttribute('href', '/api/performance-tasks/files/e.pdf?token=t');
+    expect(aside().getByRole('link', { name: 'essay.pdf' })).toHaveAttribute('href', '/api/files/e1/content?sig=abc');
     expect(aside().getByText('45 / 50')).toBeInTheDocument();
     expect(aside().getByText('Great work')).toBeInTheDocument();
     expect(aside().getByText(/Sending a new file will reset your score/)).toBeInTheDocument();
@@ -100,11 +104,11 @@ describe('ActivitiesPage — task submission', () => {
     const { user } = renderPage(<ActivitiesPage />, { route: '/student/activities?task=tk1' });
     // Drag-and-drop bypasses the input's accept filter, so validation must catch it.
     fireEvent.drop(fileInput().closest('.upload-field'), { dataTransfer: { files: [makeFile('virus.exe', 'x')] } });
-    expect(aside().getByRole('alert')).toHaveTextContent('Please choose a valid file (PDF, DOCX, PPTX, ZIP, MP4, PNG, or JPG) up to 5 MB.');
+    expect(aside().getByRole('alert')).toHaveTextContent('Please choose a valid file (PDF, DOCX, PPTX, ZIP, MP4, PNG, or JPG) up to 10 MB.');
     expect(aside().getByRole('button', { name: /Submit work/ })).toBeDisabled();
 
     const big = makeFile('big.pdf', 'x');
-    Object.defineProperty(big, 'size', { value: 5 * 1024 * 1024 + 1 });
+    Object.defineProperty(big, 'size', { value: 10 * 1024 * 1024 + 1 });
     await user.upload(fileInput(), big);
     expect(aside().getByRole('alert')).toBeInTheDocument();
   });
@@ -116,9 +120,8 @@ describe('ActivitiesPage — task submission', () => {
     await user.type(aside().getByLabelText('Message for your teacher (optional)'), 'Here it is');
     await user.click(aside().getByRole('button', { name: /Submit work/ }));
 
-    await waitFor(() => expect(api.submitPerformanceTask).toHaveBeenCalledWith('tk1', {
-      file_name: 'map.pdf', file_size_bytes: 10, file_content_base64: base64('hazard-map'), notes: 'Here it is'
-    }));
+    await waitFor(() => expect(api.submitPerformanceTask).toHaveBeenCalledWith('tk1', { file_id: 'file-9', notes: 'Here it is' }));
+    expect(uploadFile).toHaveBeenCalledWith(expect.objectContaining({ name: 'map.pdf' }), expect.objectContaining({ purpose: 'submission', taskId: 'tk1' }));
     expect(await screen.findByText('Your work has been sent to your teacher.')).toBeInTheDocument();
     expect(refresh).toHaveBeenCalled();
   });
@@ -129,6 +132,15 @@ describe('ActivitiesPage — task submission', () => {
     await user.upload(fileInput(), makeFile('map.pdf', 'hazard-map'));
     await user.click(aside().getByRole('button', { name: /Submit work/ }));
     expect(await aside().findByRole('alert')).toHaveTextContent('Deadline passed.');
+  });
+
+  it('shows the upload error (for example a full quota) without submitting', async () => {
+    uploadFile.mockRejectedValue(new Error('You\'ve used 50 MB of 50 MB. Delete files in My files to make room.'));
+    const { user } = renderPage(<ActivitiesPage />, { route: '/student/activities?task=tk1' });
+    await user.upload(fileInput(), makeFile('map.pdf', 'hazard-map'));
+    await user.click(aside().getByRole('button', { name: /Submit work/ }));
+    expect(await aside().findByRole('alert')).toHaveTextContent('Delete files in My files to make room.');
+    expect(api.submitPerformanceTask).not.toHaveBeenCalled();
   });
 
   it('saves and restores a note draft per learner and task', async () => {

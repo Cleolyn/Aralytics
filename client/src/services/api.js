@@ -127,10 +127,17 @@ export const api = {
   submitPerformanceTask: (id, payload) => post(`/performance-tasks/${id}/submit`, payload),
   getPerformanceTaskSubmissions: (id) => request(`/performance-tasks/${id}/submissions`),
   gradePerformanceTaskSubmission: (id, payload) => post(`/performance-tasks/submissions/${id}/grade`, payload, 'PATCH'),
-  getSubmissionFileUrl: (url) => {
-    if (!url?.startsWith('/api/performance-tasks/files/')) return null;
-    return `${url}?token=${encodeURIComponent(getTokenSync() || '')}`;
-  },
+  // Submissions and lessons carry a short-lived signed download_url; there is nothing to build client-side.
+  getSubmissionFileUrl: (item) => item?.download_url ?? null,
+
+  // File storage (chunked uploads, My files)
+  createUpload: (payload) => post('/files', payload),
+  completeUpload: (id) => post(`/files/${encodeURIComponent(id)}/complete`, {}),
+  listMyFiles: (purpose = 'personal') => request(withQuery('/files', { purpose })),
+  getFile: (id) => request(`/files/${encodeURIComponent(id)}`),
+  deleteFile: (id) => request(`/files/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  getAdminStorage: () => request('/admin/storage'),
+  purgeUserFiles: (userId) => request(`/admin/users/${encodeURIComponent(userId)}/files`, { method: 'DELETE' }),
 
   // Instructor applications (applicant) and admin review
   getMyInstructorApplication: () => request('/instructor-applications/me'),

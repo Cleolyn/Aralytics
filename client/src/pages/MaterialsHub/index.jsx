@@ -23,6 +23,7 @@ export default function MaterialsHub() {
   // null = closed; { lesson: null } = adding; { lesson } = editing.
   const [dialog, setDialog] = useState(null);
   const action = useAsyncAction();
+  const [progress, setProgress] = useState(0);
 
   const { data, loading, error, refresh } = useRemoteData(async () => {
     await syncReading(user.id);
@@ -62,7 +63,8 @@ export default function MaterialsHub() {
   }, { key: lesson.id, clearMessage: true });
 
   const saveLesson = ({ form, file }) => action.run(async () => {
-    const payload = await buildLessonPayload(form, file);
+    setProgress(0);
+    const payload = await buildLessonPayload(form, file, { onProgress: setProgress });
     const editing = dialog.lesson;
     requireSuccess(editing ? await api.updateMaterial(editing.id, payload) : await api.createMaterial(payload));
     closeDialog();
@@ -120,6 +122,7 @@ export default function MaterialsHub() {
           competencies={data?.competencies || []}
           error={action.error}
           saving={action.busy === 'save'}
+          progress={progress}
           onSubmit={saveLesson}
           onClose={closeDialog}
         />

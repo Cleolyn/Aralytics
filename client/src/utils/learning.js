@@ -115,6 +115,15 @@ export function completedActivity(item) {
   return ['Completed', 'Graded', 'Submitted'].includes(item.state);
 }
 
+/**
+ * Where a lesson file opens from: its signed download_url when the API gave one. Uploaded files
+ * (/api/files/...) are never opened without a signature, so they have no source until one is available.
+ */
+export function lessonSource(material) {
+  if (material?.download_url) return materialUrl(material.download_url);
+  return String(material?.storage_url || '').startsWith('/api/files/') ? null : materialUrl(material?.storage_url);
+}
+
 export function materialUrl(value) {
   try {
     const url = new URL(value, window.location.origin);

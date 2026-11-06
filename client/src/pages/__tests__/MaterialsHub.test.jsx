@@ -1,16 +1,18 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { base64, makeFile, renderPage } from '../../test/render';
+import { makeFile, renderPage } from '../../test/render';
 import MaterialsHub from '../MaterialsHub';
 import { api } from '../../services/api';
 import * as offline from '../../utils/offlineLearning';
+import { uploadFile } from '../../utils/upload';
 
 const auth = vi.hoisted(() => ({ isTeacher: false, user: { id: 'u1' } }));
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => auth }));
 vi.mock('../../services/api', () => ({
   api: { getTaxonomy: vi.fn(), createMaterial: vi.fn(), updateMaterial: vi.fn(), deleteMaterial: vi.fn() }
 }));
+vi.mock('../../utils/upload', () => ({ uploadFile: vi.fn() }));
 vi.mock('../../utils/offlineLearning', () => ({
   syncReading: vi.fn(), loadMaterials: vi.fn(), loadReadingLogs: vi.fn(), cachedMaterials: vi.fn(),
   downloadMaterial: vi.fn(), removeDownload: vi.fn()
@@ -31,6 +33,8 @@ const titles = () => screen.queryAllByRole('row').slice(1).map(r => within(r).ge
 
 beforeEach(() => {
   auth.isTeacher = false;
+  vi.clearAllMocks();
+  uploadFile.mockResolvedValue({ id: 'file-1' });
   offline.syncReading.mockResolvedValue();
   offline.loadMaterials.mockResolvedValue(materials);
   offline.loadReadingLogs.mockResolvedValue([{ material_id: 'm1' }]);
@@ -172,11 +176,25 @@ describe('MaterialsHub (teacher)', () => {
     expect(within(dialog).getByText('flood safety-guide.pptx')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Add lesson' }));
 
+    // The file is uploaded in parts first; the lesson then refers to it by file_id (never base64).
     await waitFor(() => expect(api.createMaterial).toHaveBeenCalled());
+    expect(uploadFile).toHaveBeenCalledWith(expect.objectContaining({ name: 'flood_safety-guide.pptx' }), expect.objectContaining({ purpose: 'material' }));
     expect(api.createMaterial.mock.calls[0][0]).toEqual({
-      competency_id: 'c1', title: 'flood safety guide', description: '', file_type: 'PPTX', storage_url: '',
-      file_name: 'flood_safety-guide.pptx', file_size_bytes: 6, file_content_base64: base64('slides')
+      competency_id: 'c1', title: 'flood safety guide', description: '', file_type: 'PPTX', file_id: 'file-1'
     });
+  });
+
+  it('shows the upload error and keeps the form open', async () => {
+    uploadFile.mockRejectedValue(new Error('Files must be 15 MB or smaller.'));
+    const { user } = renderPage(<MaterialsHub />);
+    await screen.findByText('Climate Change Module');
+    await user.click(screen.getByRole('button', { name: /Add lesson/ }));
+    const dialog = screen.getByRole('dialog');
+    await user.selectOptions(within(dialog).getByLabelText('Topic'), 'c1');
+    await user.upload(within(dialog).getByLabelText('Drag and drop a file here, or click to choose'), makeFile('huge.pdf', 'x'));
+    await user.click(within(dialog).getByRole('button', { name: 'Add lesson' }));
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent('Files must be 15 MB or smaller.');
+    expect(api.createMaterial).not.toHaveBeenCalled();
   });
 
   it('edits an existing lesson', async () => {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Dialog from '../../components/ui/Dialog';
 import FileDropZone from '../../components/ui/FileDropZone';
 import { Notice } from '../../components/ui/Feedback';
+import UploadProgress from '../../components/ui/UploadProgress';
 import { cleanText } from '../../utils/learning';
 import { fileSizeLabel } from '../../utils/files';
 import { EMPTY_LESSON, FILE_TYPES, describeUpload, lessonFormFrom } from './lessons';
@@ -10,7 +11,7 @@ import { EMPTY_LESSON, FILE_TYPES, describeUpload, lessonFormFrom } from './less
  * Add or edit a lesson from an uploaded file or a link.
  * `onSubmit({ form, file })` is called with the raw values; the page builds the payload.
  */
-export default function LessonFormDialog({ lesson, competencies, error, saving, onSubmit, onClose }) {
+export default function LessonFormDialog({ lesson, competencies, error, saving, progress = 0, onSubmit, onClose }) {
   const [form, setForm] = useState(() => (lesson ? lessonFormFrom(lesson, cleanText) : EMPTY_LESSON));
   const [file, setFile] = useState(null);
   const change = e => setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,7 +27,7 @@ export default function LessonFormDialog({ lesson, competencies, error, saving, 
     <Dialog title={lesson ? 'Edit lesson' : 'Add a lesson'} onClose={onClose}>
       <Notice error>{error}</Notice>
       <p className="muted" style={{ marginBottom: 20 }}>
-        Upload a file (PDF, PPTX, MP4, DOCX) or paste a link for your students.
+        Upload a file (PDF, PPTX, MP4, DOCX, up to 15 MB) or paste a link for your students.
       </p>
       <form
         onSubmit={e => {
@@ -62,7 +63,7 @@ export default function LessonFormDialog({ lesson, competencies, error, saving, 
         <FileDropZone
           id="resource-file"
           label="Drag and drop a file here, or click to choose"
-          accept=".pdf,.pptx,.ppt,.mp4,.docx,.doc"
+          accept=".pdf,.pptx,.ppt,.mp4,.docx,.doc,.zip"
           onFile={chooseFile}
         >
           {file && (
@@ -70,6 +71,7 @@ export default function LessonFormDialog({ lesson, competencies, error, saving, 
               Selected file: <strong>{cleanText(file.name)}</strong> ({fileSizeLabel(file)})
             </small>
           )}
+          {saving && file && <UploadProgress value={progress} label="Lesson upload progress" />}
         </FileDropZone>
         <div className="field">
           <label htmlFor="resource-url">Or paste a file link</label>
@@ -84,7 +86,7 @@ export default function LessonFormDialog({ lesson, competencies, error, saving, 
           />
         </div>
         <button className="btn btn-primary" disabled={saving}>
-          {saving ? 'Saving…' : lesson ? 'Save changes' : 'Add lesson'}
+          {saving ? (file && progress ? `Uploading (${Math.round(progress * 100)}%)…` : 'Saving…') : lesson ? 'Save changes' : 'Add lesson'}
         </button>
       </form>
     </Dialog>

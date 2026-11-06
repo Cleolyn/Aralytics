@@ -9,7 +9,7 @@ vi.mock('../../services/api', () => ({
   api: {
     getClasses: vi.fn(), getGradebook: vi.fn(), getPerformanceTasks: vi.fn(), getPerformanceTaskSubmissions: vi.fn(),
     getSubmissionById: vi.fn(), gradePerformanceTaskSubmission: vi.fn(),
-    getSubmissionFileUrl: url => (url ? `${url}?token=t` : null)
+    getSubmissionFileUrl: item => item?.download_url ?? null
   }
 }));
 
@@ -22,8 +22,8 @@ const tasks = [
   { id: 't2', title: 'Photo Essay', rubric_criteria: null, total_points: 50 }
 ];
 const taskSubmissions = [
-  { id: 'p1', student_name: 'Juan Dela Cruz', lrn_or_id: '111', section: '10-Rizal', file_name: 'map.pdf', file_url: '/api/performance-tasks/files/a.pdf', submitted_at: '2026-10-03 10:00:00', status: 'SUBMITTED', score: null, feedback: null, notes: 'Please check' },
-  { id: 'p2', student_name: 'Maria Clara', lrn_or_id: '222', section: '10-Luna', file_name: 'map2.pdf', file_url: '/api/performance-tasks/files/b.pdf', submitted_at: '2026-10-03 11:00:00', status: 'GRADED', score: 88, feedback: 'Good', notes: '' }
+  { id: 'p1', student_name: 'Juan Dela Cruz', lrn_or_id: '111', section: '10-Rizal', file_name: 'map.pdf', file_url: '/api/files/f1/content', download_url: '/api/files/f1/content?sig=s1', submitted_at: '2026-10-03 10:00:00', status: 'SUBMITTED', score: null, feedback: null, notes: 'Please check' },
+  { id: 'p2', student_name: 'Maria Clara', lrn_or_id: '222', section: '10-Luna', file_name: 'map2.pdf', file_url: '/api/files/f2/content', download_url: '/api/files/f2/content?sig=s2', submitted_at: '2026-10-03 11:00:00', status: 'GRADED', score: 88, feedback: 'Good', notes: '' }
 ];
 
 const rowOf = text => screen.getByText(text).closest('tr');
@@ -110,7 +110,7 @@ describe('TeacherDashboard — class tasks', () => {
     expect(screen.getByText('Content 50%')).toBeInTheDocument();
 
     const juan = within(rowOf('Juan Dela Cruz'));
-    expect(juan.getByRole('link', { name: 'map.pdf' })).toHaveAttribute('href', '/api/performance-tasks/files/a.pdf?token=t');
+    expect(juan.getByRole('link', { name: 'map.pdf' })).toHaveAttribute('href', '/api/files/f1/content?sig=s1');
     expect(juan.getByText('Not graded yet')).toBeInTheDocument();
     expect(juan.getByText('Waiting for grade')).toBeInTheDocument();
     expect(within(rowOf('Maria Clara')).getByText('88 / 100')).toBeInTheDocument();

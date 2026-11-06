@@ -67,7 +67,7 @@ api.get('/', wrap(async (req, res) => {
   res.json({
     success: true,
     files: await files.listOwn(files.envOf(req), req.user, purpose),
-    usage: await files.usage(req.user)
+    usage: await files.usage(req.user, purpose)
   });
 }));
 

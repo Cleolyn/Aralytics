@@ -3,7 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Add01Icon, Alert02Icon, AlertCircleIcon, ArrowDown01Icon, ArrowLeft01Icon, ArrowRight01Icon, ArrowUp01Icon,
   BookOpen01Icon, Cancel01Icon, CheckmarkCircle02Icon, ChartColumnIcon, Clock01Icon, DashboardSquare01Icon, Delete02Icon,
-  Download01Icon, Edit02Icon, FileUploadIcon, Flag01Icon, Globe02Icon, HelpCircleIcon, Logout01Icon, Maximize01Icon,
+  Download01Icon, Edit02Icon, FileUploadIcon, Flag01Icon, Folder01Icon, Globe02Icon, HelpCircleIcon, Logout01Icon, Maximize01Icon,
   Menu01Icon, MortarboardIcon, RefreshIcon, Shield01Icon, Task01Icon, TaskDone01Icon, Tick02Icon, UserMultipleIcon,
   Wifi01Icon, WifiOff01Icon, Xls01Icon
 } from '@hugeicons/core-free-icons';
@@ -32,6 +32,7 @@ export const Edit3 = make(Edit02Icon, 'Edit3');
 export const FileSpreadsheet = make(Xls01Icon, 'FileSpreadsheet');
 export const FileUp = make(FileUploadIcon, 'FileUp');
 export const Flag = make(Flag01Icon, 'Flag');
+export const Folder = make(Folder01Icon, 'Folder');
 export const Globe2 = make(Globe02Icon, 'Globe2');
 export const GraduationCap = make(MortarboardIcon, 'GraduationCap');
 export const HelpCircle = make(HelpCircleIcon, 'HelpCircle');

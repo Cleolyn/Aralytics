@@ -5,11 +5,13 @@ import { Notice, Status } from '../../components/ui/Feedback';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { cleanText, formatDate } from '../../utils/learning';
-import { fileSizeLabel, readFileAsBase64 } from '../../utils/files';
+import UploadProgress from '../../components/ui/UploadProgress';
+import { fileSizeLabel } from '../../utils/files';
+import { uploadFile } from '../../utils/upload';
 import { readText, remove, write } from '../../utils/deviceStorage';
 
 const ALLOWED_FILE = /\.(pdf|docx|pptx|zip|mp4|png|jpg|jpeg)$/i;
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 10 * 1024 * 1024;
 const isValidFile = file => ALLOWED_FILE.test(file.name) && file.size > 0 && file.size <= MAX_BYTES;
 
 function PreviousSubmission({ submission, totalPoints }) {
@@ -20,7 +22,7 @@ function PreviousSubmission({ submission, totalPoints }) {
       <p style={{ marginTop: 12 }}>
         <Status tone="good">{graded ? 'Graded' : 'Submitted'}</Status> · {formatDate(submission.submitted_at, '')}
       </p>
-      <a className="text-action" href={api.getSubmissionFileUrl(submission.file_url)} target="_blank" rel="noreferrer">
+      <a className="text-action" href={api.getSubmissionFileUrl(submission)} target="_blank" rel="noreferrer">
         {cleanText(submission.file_name)}
       </a>
       {graded && (
@@ -55,7 +57,7 @@ export default function TaskSubmission({ task, onSubmitted }) {
     setProgress(0);
     if (selected && !isValidFile(selected)) {
       setFile(null);
-      setError('Please choose a valid file (PDF, DOCX, PPTX, ZIP, MP4, PNG, or JPG) up to 5 MB.');
+      setError('Please choose a valid file (PDF, DOCX, PPTX, ZIP, MP4, PNG, or JPG) up to 10 MB.');
       return;
     }
     setFile(selected || null);
@@ -67,14 +69,16 @@ export default function TaskSubmission({ task, onSubmitted }) {
     if (!file || busy) return;
     setBusy(true);
     setError('');
-    setProgress(15);
+    setProgress(1);
     try {
-      const encoded = await readFileAsBase64(file, {
-        onProgress: fraction => setProgress(Math.min(75, Math.round(fraction * 70))),
-        errorMessage: 'Could not read the file. Please choose it again.'
+      // The file goes up in parts first (95% of the bar); the submission then just points at it.
+      const uploaded = await uploadFile(file, {
+        purpose: 'submission',
+        taskId: task.id,
+        onProgress: fraction => setProgress(Math.max(1, Math.round(fraction * 95)))
       });
-      setProgress(80);
-      const res = await api.submitPerformanceTask(task.id, { file_name: file.name, file_size_bytes: file.size, file_content_base64: encoded, notes });
+      setProgress(97);
+      const res = await api.submitPerformanceTask(task.id, { file_id: uploaded.id, notes });
       if (!res.success) throw new Error(res.message || 'Could not submit your work.');
       setProgress(100);
       remove(draftKey);
@@ -116,14 +120,10 @@ export default function TaskSubmission({ task, onSubmitted }) {
             aria-describedby="upload-help"
           >
             <small id="upload-help">
-              PDF, DOCX, PPTX, ZIP, MP4, PNG, JPG · Max 5 MB
+              PDF, DOCX, PPTX, ZIP, MP4, PNG, JPG · Up to 10 MB
               {file ? ` · ${cleanText(file.name)} (${fileSizeLabel(file)})` : ''}
             </small>
-            {progress > 0 && (
-              <div className="progress-track" role="progressbar" aria-label="Upload progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
-                <span style={{ width: `${progress}%` }} />
-              </div>
-            )}
+            <UploadProgress value={progress / 100} />
           </FileDropZone>
           <div className="field">
             <label htmlFor="activity-notes">Message for your teacher (optional)</label>

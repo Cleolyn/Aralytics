@@ -102,13 +102,13 @@ function limitsFor(user) {
   return role ? { max_file: role.maxFile, quota: role.quota } : { max_file: 0, quota: 0 };
 }
 
-async function usage(user) {
+async function usage(user, purpose) {
   const own = limitsFor(user);
   return {
     used: await usedBy(user.id),
     quota: own.quota,
     max_file: own.max_file,
-    allowed_extensions: allowedFor('personal')
+    allowed_extensions: allowedFor(purpose || 'personal')
   };
 }
 

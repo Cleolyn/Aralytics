@@ -1,5 +1,5 @@
 import { materialUrl } from '../../utils/learning';
-import { readFileAsBase64 } from '../../utils/files';
+import { uploadFile } from '../../utils/upload';
 
 export const FILE_TYPES = ['PDF', 'PPTX', 'MP4', 'DOCX'];
 export const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
@@ -24,13 +24,16 @@ export function describeUpload(file) {
   return { file_type: ext, title: file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() };
 }
 
-/** API payload for a lesson form: either an uploaded file or a safe http(s)/same-origin link. */
-export async function buildLessonPayload(form, file) {
+/**
+ * API payload for a lesson form: either an uploaded file (sent in parts first, then referenced by
+ * file_id) or a safe http(s)/same-origin link.
+ */
+export async function buildLessonPayload(form, file, { onProgress, signal } = {}) {
   const payload = { ...form };
   if (file) {
-    payload.file_name = file.name;
-    payload.file_size_bytes = file.size;
-    payload.file_content_base64 = await readFileAsBase64(file);
+    const uploaded = await uploadFile(file, { purpose: 'material', onProgress, signal });
+    payload.file_id = uploaded.id;
+    delete payload.storage_url;
   } else if (!materialUrl(form.storage_url)) {
     throw new Error('Please enter a valid file link or upload a file.');
   }

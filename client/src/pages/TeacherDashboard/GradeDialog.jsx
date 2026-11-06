@@ -12,7 +12,7 @@ export default function GradeDialog({ submission, task, error, saving, onSubmit,
   return (
     <Dialog title={`Grade ${cleanText(submission.student_name)}’s work`} onClose={onClose}>
       <Notice error>{error}</Notice>
-      <a className="text-action" href={api.getSubmissionFileUrl(submission.file_url)} target="_blank" rel="noreferrer">
+      <a className="text-action" href={api.getSubmissionFileUrl(submission)} target="_blank" rel="noreferrer">
         Open {cleanText(submission.file_name)}
         <ArrowRight size={16} />
       </a>
