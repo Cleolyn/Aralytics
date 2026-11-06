@@ -41,10 +41,55 @@
   },
   "d1_databases": [
     {
-      "binding": "UPLOADS_DB",
+      "binding": "FILES_DB_1",
       "database_name": "aralytics-uploads",
       "database_id": "fd2e27f6-d473-4284-a13b-c2a19684574c",
       "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_2",
+      "database_name": "aralytics-files-2",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_3",
+      "database_name": "aralytics-files-3",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_4",
+      "database_name": "aralytics-files-4",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_5",
+      "database_name": "aralytics-files-5",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_6",
+      "database_name": "aralytics-files-6",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_7",
+      "database_name": "aralytics-files-7",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
+    },
+    {
+      "binding": "FILES_DB_8",
+      "database_name": "aralytics-files-8",
+      "database_id": "TODO-create-with-wrangler",
+      "migrations_dir": "server/migrations/uploads"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": ["17 3 * * *"]
+  }
 }

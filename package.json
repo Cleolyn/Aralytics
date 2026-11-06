@@ -24,7 +24,7 @@
     "test:server": "npm run test --workspace server",
     "test:client": "npm run test --workspace client",
     "build:cloudflare": "npm run build && node scripts/prepare-worker.cjs",
-    "deploy:cloudflare": "npm run build:cloudflare && npm run db:init && npx wrangler d1 migrations apply aralytics-uploads --remote && npx wrangler deploy",
+    "deploy:cloudflare": "npm run build:cloudflare && npm run db:init && node scripts/apply-d1-migrations.cjs && npx wrangler deploy",
     "admin:grant": "npm run admin:grant --workspace server --"
   },
   "keywords": [

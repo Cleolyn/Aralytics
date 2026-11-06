@@ -57,8 +57,8 @@ The repository is an **npm workspaces** monorepo: one `npm install` at the root 
 │   ├── test/                  Auth-flow test + optional browser regression harness
 │   └── vite.config.js         Dev server (port 3000) proxies /api → :5001
 ├── server/                    Express REST API
-│   ├── resources/materials/   Public lesson files served at /api/materials/download/:file
-│   ├── uploads/               Learner performance-task uploads (git-ignored, back this up)
+│   ├── resources/materials/   Older lesson files served at /api/materials/download/:file (signed link or sign-in)
+│   ├── uploads/               Local-disk uploads: files/ (current) and performance-tasks/ (older), git-ignored, back this up
 │   ├── src/
 │   │   ├── app.js             Express app (middleware + routes)
 │   │   ├── server.js          Entry point: load .env, init database, listen
@@ -203,7 +203,18 @@ The seed refuses to write to Turso or MySQL unless you pass `--allow-remote` (`n
 
 ### Lesson files
 
-Place shared lesson files in `server/resources/materials/` and link them as `/api/materials/download/<filename>`, or add HTTPS links from **Lessons → Add resource**. These files are public. Learner uploads go to `server/uploads/performance-tasks/` (or the D1 `UPLOADS_DB` binding on Cloudflare) and are only downloadable by the submitting learner and teachers.
+Teachers upload lesson files from **Lessons → Add lesson**, or add HTTPS links instead. Learners upload task submissions from **Activities**, and every teacher and learner has a personal **My files** page.
+
+Uploads are chunked: the browser reserves the file (`POST /api/files`), sends it in 1 MiB parts (`PUT /api/files/:id/parts/:n`), then completes it. Bytes are stored in Cloudflare D1 shards on the Worker, or on local disk (`server/uploads/files/`, or `FILES_LOCAL_ROOT`) in ordinary Node development. Nothing is public: files open from short-lived signed links (`?sig=`, valid six hours) that the API adds to lessons and submissions as `download_url`, only for people allowed to read them (the lesson's teacher and that teacher's approved learners; the submitting learner and their teacher or the task's creator; owner only for personal files; admins can read and delete).
+
+Default limits (override with the `FILES_*` variables in `server/.env.example`, or Worker vars on Cloudflare; all in `server/src/config/fileLimits.js`):
+
+| | Per file | Total per person |
+|---|---|---|
+| Teachers | 15 MB | 1 GB |
+| Learners | 10 MB | 50 MB |
+
+The whole site is capped at the smaller of 3.5 GB and 450 MB times the number of bound D1 shards. Base64 uploads are no longer accepted; older base64 files keep working through signed links. Set `FILE_TOKEN_SECRET` on any production host: the server refuses to sign links in production without it.
 
 ## Testing
 
@@ -246,7 +257,7 @@ Root scripts (run from the repository root):
 | `admin:grant` | Give an existing account the ADMIN role (`-- <email> [--apply]`) |
 | `test` / `test:server` / `test:client` | Test suites |
 | `build:cloudflare` | Client build + Workers module shims (`.cloudflare/`) |
-| `deploy:cloudflare` | Build, init the Turso schema, apply D1 migrations, and deploy the Worker |
+| `deploy:cloudflare` | Build, init the Turso schema, apply D1 migrations to every file shard, and deploy the Worker |
 
 Any workspace script can be run directly with `npm run <script> --workspace server` or `--workspace client`.
 
@@ -254,13 +265,13 @@ Any workspace script can be run directly with `npm run <script> --workspace serv
 
 ### Cloudflare Workers (current production)
 
-The live site runs on Cloudflare Workers: the SPA is served as static assets and Express runs via `nodejs_compat`, with Turso as the database and D1 for uploaded files. After `npm install` and `npx wrangler login`:
+The live site runs on Cloudflare Workers: the SPA is served as static assets and Express runs via `nodejs_compat`, with Turso as the database and sharded D1 databases for uploaded files (no R2 needed). After `npm install` and `npx wrangler login`:
 
 ```bash
 npm run deploy:cloudflare
 ```
 
-Secrets (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`) are set with `npx wrangler secret put NAME`. Free-plan limits, storage details, and post-deploy checks are in [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md). To check the bundle without deploying: `npm run build:cloudflare && npx wrangler deploy --dry-run`.
+Secrets (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `FILE_TOKEN_SECRET`) are set with `npx wrangler secret put NAME`. Free-plan limits, storage details, and post-deploy checks are in [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md). To check the bundle without deploying: `npm run build:cloudflare && npx wrangler deploy --dry-run`.
 
 ### Any Node host
 
@@ -268,7 +279,7 @@ Secrets (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLE
 2. Run the API with `npm start` and production environment variables (use a production Clerk instance, set `NODE_ENV=production` and `CORS_ORIGIN`).
 3. Route `/api/*` on the client's origin to the API (reverse proxy or platform rewrite). The Express app does not serve the client build.
 4. Register the production origin and `/sso-callback` in Clerk.
-5. Persist and back up the database and `server/uploads/`.
+5. Persist and back up the database and `server/uploads/`. Set `FILE_TOKEN_SECRET` (a long random string) so signed file links work in production.
 
 The enrollment code-attempt limiter is in-memory and per process; use a shared limiter before running multiple API instances.
 
@@ -314,12 +325,12 @@ Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
 | An instructor only sees student screens | Their application hasn't been approved yet. An admin approves it at `/admin`. |
 | Nobody can open `/admin` | No admin exists yet (for example after a database reset). Run `npm run admin:grant -- <email> --apply`. |
 | `EADDRINUSE` on 3000 or 5001 | Another process is using the port. Stop it or change `PORT` (and the proxy target in `client/vite.config.js`). |
-| Lesson shows "File missing" | Add the file to `server/resources/materials/` or link an HTTPS resource. |
+| Lesson shows "File missing" | Upload the file again from **Lessons**, or link an HTTPS resource. |
 
 ## Further documentation
 
 - [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md) — Clerk configuration, enrollment flow, rollout notes, verification
-- [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md) — Workers deployment, D1 upload storage, free-plan limits
+- [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md) — Workers deployment, sharded D1 file storage, free-plan limits
 - [docs/brand.md](docs/brand.md) — design system: palette, typography, voice
 - [docs/design/](docs/design/) — design reference screens
 - [docs/sample-outputs/](docs/sample-outputs/) — example XLSX/PDF/JSON outputs
