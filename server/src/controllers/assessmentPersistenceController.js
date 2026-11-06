@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const teaching = require('../services/teachingContentService');
 const { gradeAnswers } = require('../services/gradeAnswers');
 
 /**
@@ -80,7 +81,8 @@ async function submitAssessment(req, res, next) {
       if (!numericTotal) return res.status(400).json({ success: false, message: 'This quiz has no questions.' });
     }
     if (req.user?.role === 'STUDENT') {
-      if (!quiz.is_published) return res.status(404).json({ success: false, message: 'This quiz is not published.' });
+      if (!quiz.is_published || quiz.archived_at) return res.status(404).json({ success: false, message: 'This quiz is not published.' });
+      if (!(await teaching.canSee(req.user, quiz.created_by))) return res.status(404).json({ success: false, message: 'This quiz is not published.' });
       const { rows: existing } = await db.query(`SELECT id FROM quiz_submissions WHERE quiz_id = ? AND student_id = ? AND status = 'SUBMITTED'`, [quiz_id, student_id]);
       if (existing.length) return res.status(409).json({ success: false, message: 'This quiz has already been submitted. View your result in My Progress.' });
     }

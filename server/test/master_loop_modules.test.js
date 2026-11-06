@@ -12,6 +12,7 @@ const analyticsController = require('../src/controllers/analyticsController');
 const performanceTaskController = require('../src/controllers/performanceTaskController');
 const fileService = require('../src/services/fileService');
 const chunkStore = require('../src/services/chunkStore');
+const { enrollDemoStudent } = require('./helpers/enrollDemo');
 
 /** Reserve, upload and complete a small file the way the client does, returning its ready row. */
 async function uploadFixture(user, purpose, name, content, extra = {}) {
@@ -38,6 +39,7 @@ async function testMasterLoopModules() {
   console.log('======================================================================');
 
   await db.initPromise;
+  await enrollDemoStudent(db); // students only reach their adviser's content
 
   // ---------------------------------------------------------------------------
   // MODULE A: Proctoring Telemetry (TAB_SWITCH, WINDOW_MINIMIZE, FULLSCREEN_EXIT)

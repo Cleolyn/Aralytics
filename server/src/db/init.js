@@ -342,6 +342,7 @@ async function initializeDatabase() {
   await require('../services/instructorApplicationService').initializeInstructorApplicationTables();
   await require('../services/fileService').initializeFileTables();
   // [A] teaching content — add below
+  await require('../services/teachingContentService').initializeTeachingContentColumns();
   // ---
   // [B] admin and accounts — add below
   // ---
