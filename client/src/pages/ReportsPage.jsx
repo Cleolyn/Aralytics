@@ -46,24 +46,14 @@ export default function ReportsPage() {
           <p>See how your class is doing by topic, check quiz questions, and download grade sheets.</p>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-          <a
-            className="btn btn-secondary"
-            href={api.getAnalyticsXlsxUrl({ section })}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <button type="button" className="btn btn-secondary" onClick={() => api.openAnalyticsExport('xlsx', section ? { section } : {})}>
             <Download size={16} />
             Download Excel
-          </a>
-          <a
-            className="btn btn-secondary"
-            href={api.getAnalyticsPdfUrl({ section })}
-            target="_blank"
-            rel="noreferrer"
-          >
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => api.openAnalyticsExport('pdf', section ? { section } : {})}>
             <Download size={16} />
             Download PDF
-          </a>
+          </button>
         </div>
       </div>
       <Notice error>{error || analysis.error}</Notice>

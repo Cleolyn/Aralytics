@@ -12,7 +12,7 @@ import RegisterPage from '../pages/RegisterPage';
 import OnboardingPage from '../pages/OnboardingPage';
 import AuthCallbackPage from '../pages/AuthCallbackPage';
 import AuthTaskPage from '../pages/AuthTaskPage';
-import { accountHome as resolveAccountHome, AUTH_TASK_PATHS } from '../utils/authFlow';
+import { accountHome as resolveAccountHome, AUTH_TASK_PATHS, intentFromSearch, readAuthIntent, rememberAuthIntent } from '../utils/authFlow';
 import HelpPage from '../pages/HelpPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import StudentDashboard from '../pages/StudentDashboard';
@@ -96,7 +96,10 @@ export default function AppRoutes() {
   if (splash.show) return <IsoLoader variant="page" progress={splash.progress}>Preparing Aralytics</IsoLoader>;
   if (loading) return <IsoLoader variant="page">Checking your account</IsoLoader>;
 
-  const accountHome = resolveAccountHome(user);
+  // A signed-in person following "I am a Teacher" (/login?role=TEACHER) keeps that choice.
+  const linkIntent = intentFromSearch(location.search);
+  if (linkIntent && user && /^\/(login|register)/.test(location.pathname)) rememberAuthIntent(linkIntent);
+  const accountHome = resolveAccountHome(user, linkIntent || readAuthIntent());
 
   return (
     <Routes>

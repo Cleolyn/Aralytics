@@ -114,6 +114,7 @@ function requireRole(roles) {
     if (!req.user || !allowed.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
+        code: 'ROLE_REQUIRED',
         message: `Forbidden: Requires role [${allowed.join(', ')}]. Current role: ${req.user ? req.user.role : 'None'}.`
       });
     }

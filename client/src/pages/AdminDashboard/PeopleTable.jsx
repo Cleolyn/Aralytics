@@ -12,7 +12,7 @@ const PAGE_SIZE = 50;
 const ROLE_LABELS = { STUDENT: 'Student', TEACHER: 'Teacher', ADMIN: 'Admin' };
 
 /** People directory: search, filter, and account actions (suspend, revoke instructor access, delete). */
-export default function PeopleTable() {
+export default function PeopleTable({ onChanged }) {
   const { user: me } = useAuth();
   const action = useAsyncAction();
   const [draft, setDraft] = useState('');
@@ -32,7 +32,7 @@ export default function PeopleTable() {
   const label = person => cleanText(person.full_name, person.email);
   const open = (kind, person) => { action.setError(''); setDialog({ kind, person }); };
 
-  const done = message => { setDialog(null); action.setMessage(message); people.refresh(); };
+  const done = message => { setDialog(null); action.setMessage(message); people.refresh(); onChanged?.(); };
   const suspend = reason => action.run(async () => {
     requireSuccess(await api.suspendUser(dialog.person.id, { reason }));
     done(`${label(dialog.person)} is suspended.`);

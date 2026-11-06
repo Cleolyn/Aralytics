@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useCallback, useState, use
 import { useUser, useSession, useAuth as useClerkAuth } from '@clerk/react';
 import { setTokenGetter } from '../services/api';
 import { syncVerifiedAccount } from '../services/auth';
+import { clearAuthIntent } from '../utils/authFlow';
 
 const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
@@ -48,7 +49,8 @@ export function AuthProvider({ children }) {
   // An API call was refused because an admin suspended the account: reload the profile so the app routes to /suspended.
   useEffect(() => {
     window.addEventListener('auth:suspended', refreshUser);
-    return () => window.removeEventListener('auth:suspended', refreshUser);
+    window.addEventListener('auth:changed', refreshUser);
+    return () => { window.removeEventListener('auth:suspended', refreshUser); window.removeEventListener('auth:changed', refreshUser); };
   }, [refreshUser]);
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     syncGenerationRef.current++;
     profileRef.current = null; setUser(null); setAuthError(''); setSyncing(false); setRefreshing(false); setTokenGetter(null);
+    clearAuthIntent();
     try { await signOut(); }
     catch { setAuthError('Could not finish signing out. Check your connection and try signing out again.'); }
   }, [signOut]);

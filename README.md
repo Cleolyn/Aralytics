@@ -161,7 +161,7 @@ npm run admin:grant -- admin@example.com --apply   # make the change
 `ADMIN` replaces the account's previous role. Admins verify instructors; they don't use the teacher or student workspaces.
 
 **Instructors apply; the admin approves.**
-1. The instructor creates an account, then opens **Are you an instructor? Apply for access** on the onboarding screen (`/instructor/apply`) and submits their name, school, position, mobile number, and optional employee ID.
+1. The instructor chooses **I am a Teacher** on the home page (`/login?role=TEACHER`). Existing instructors go straight to the teacher workspace; new ones sign up and land on the instructor application (`/instructor/apply`) instead of the class-code screen, where they submit their name, school, position, mobile number, and optional employee ID. (The onboarding screen also links to the application.)
 2. The admin reviews it under **Instructor access** (`/admin`) and either approves it (the account becomes a teacher) or returns it with a reason. A returned applicant can correct the details and resubmit.
 
 Accounts enrolled as students in a class can't apply; instructors should use a separate account.

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HandleSSOCallback } from '@clerk/react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
-import { AUTH_PATHS, AUTH_TASK_PATHS, localAuthPath } from '../utils/authFlow';
+import { AUTH_PATHS, AUTH_TASK_PATHS, afterAuthPath, localAuthPath } from '../utils/authFlow';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
     <h1>Complete your sign-in</h1><p role="status">Finishing your Google sign-in. Complete any security verification that appears.</p>
     <HandleSSOCallback
       navigateToApp={({ session, decorateUrl }) => {
-        const destination = session?.currentTask ? AUTH_TASK_PATHS[session.currentTask.key] : AUTH_PATHS.afterAuth;
+        const destination = session?.currentTask ? AUTH_TASK_PATHS[session.currentTask.key] : afterAuthPath();
         try { navigate(localAuthPath(decorateUrl(destination || '/auth/tasks/unsupported'), window.location.origin), { replace: true }); }
         catch { setError('Could not return to Aralytics. Return to sign-in and try again.'); }
       }}

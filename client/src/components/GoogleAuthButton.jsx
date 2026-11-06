@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSignIn, useSignUp, useUser } from '@clerk/react';
 import { Notice } from './ui/Feedback';
-import { AUTH_PATHS, authErrorMessage } from '../utils/authFlow';
+import { AUTH_PATHS, afterAuthPath, authErrorMessage } from '../utils/authFlow';
 
-export default function GoogleAuthButton({ register = false }) {
+export default function GoogleAuthButton({ register = false, intent }) {
   const { signIn, fetchStatus: signInStatus } = useSignIn();
   const { signUp, fetchStatus: signUpStatus } = useSignUp();
   const { isLoaded } = useUser();
@@ -13,7 +13,7 @@ export default function GoogleAuthButton({ register = false }) {
     setBusy(true); setError('');
     try {
       const result = await (register ? signUp : signIn).sso({ strategy: 'oauth_google',
-        redirectUrl: AUTH_PATHS.afterAuth, redirectCallbackUrl: AUTH_PATHS.callback });
+        redirectUrl: afterAuthPath(intent), redirectCallbackUrl: AUTH_PATHS.callback });
       if (result?.error) setError(authErrorMessage(result.error));
     } catch (err) { setError(authErrorMessage(err, 'Could not connect to Google. Try again.')); }
     finally { setBusy(false); }

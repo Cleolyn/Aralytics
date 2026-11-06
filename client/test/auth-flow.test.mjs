@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { accountHome, AUTH_TASK_PATHS, authErrorMessage, isAuthStart, localAuthPath } from '../src/utils/authFlow.js';
+import { accountHome, afterAuthPath, intentFromSearch, withIntent, AUTH_TASK_PATHS, authErrorMessage, isAuthStart, localAuthPath } from '../src/utils/authFlow.js';
 import { syncVerifiedAccount } from '../src/services/auth.js';
 import { setTokenGetter, getToken, getTokenSync } from '../src/services/api.js';
 
@@ -25,6 +25,21 @@ try {
     [{ role: 'TEACHER', email_verified: false, status: 'SUSPENDED' }, '/onboarding'],
     [{ role: 'TEACHER', email_verified: true, status: 'ACTIVE' }, '/teacher/dashboard']
   ]) assert.equal(accountHome(user), destination);
+  // "I am a Teacher": new accounts go to instructor verification, never the class-code screen.
+  for (const [user, intent, destination] of [
+    [profile, 'TEACHER', '/instructor/apply'],
+    [{ role: 'TEACHER', email_verified: true }, 'TEACHER', '/teacher/dashboard'],
+    [{ role: 'TEACHER', email_verified: false }, 'TEACHER', '/onboarding'],
+    [{ ...profile, enrollment_status: 'PENDING' }, 'TEACHER', '/onboarding'],
+    [{ ...profile, enrollment_status: 'APPROVED' }, 'TEACHER', '/student/dashboard'],
+    [{ ...profile, instructor_application: { status: 'REJECTED' } }, 'STUDENT', '/onboarding'],
+    [profile, 'STUDENT', '/onboarding']
+  ]) assert.equal(accountHome(user, intent), destination, `${intent} ${JSON.stringify(user)}`);
+  assert.equal(afterAuthPath('TEACHER'), '/instructor/apply');
+  assert.equal(afterAuthPath('STUDENT'), '/onboarding');
+  assert.equal(intentFromSearch('?role=teacher'), 'TEACHER');
+  assert.equal(intentFromSearch('?role=ADMIN'), null);
+  assert.equal(withIntent('/register', 'TEACHER'), '/register?role=TEACHER');
   assert.equal(isAuthStart('/register'), true);
   assert.equal(isAuthStart('/register/protect-check'), false);
   assert.equal(isAuthStart('/login/factor-two'), false);

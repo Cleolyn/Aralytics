@@ -81,7 +81,7 @@ export default function AdminDashboard() {
         ))}
       </div>
       {tab === 'people' ? (
-        <PeopleTable />
+        <PeopleTable onChanged={summary.refresh} />
       ) : tab === 'activity' ? (
         <AuditLogTable />
       ) : list.loading ? (

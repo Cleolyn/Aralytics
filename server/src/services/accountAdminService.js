@@ -174,7 +174,10 @@ async function deleteAccount(actor, id, confirmEmail, { env, clerk, invalidateCa
   if (await isLastActiveAdmin(user)) throw fail(409, 'This is the last active admin account, so it cannot be deleted.', 'LAST_ADMIN');
   const content = await ownedContent(id);
   if (content) {
-    throw Object.assign(fail(409, 'This instructor still owns lessons, quizzes, tasks, or classes with students. Revoke instructor access instead.',
+    const message = user.role === 'TEACHER'
+      ? 'This instructor still owns lessons, quizzes, tasks, or classes with students. Revoke instructor access instead.'
+      : 'This account still owns lessons, quizzes, tasks, or class records from when it was an instructor, so deleting it would remove other people’s grades. Suspend the account instead.';
+    throw Object.assign(fail(409, message,
       'ACCOUNT_OWNS_CONTENT'), { content });
   }
 

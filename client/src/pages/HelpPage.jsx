@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { useAuth } from '../context/AuthContext';
+import { accountHome } from '../utils/authFlow';
 
 export default function HelpPage() {
   const { user } = useAuth();
@@ -15,14 +16,14 @@ export default function HelpPage() {
           </div>
         </div>
         {user && (
-          <Link className="text-action" to={user.role === 'TEACHER' ? '/teacher/dashboard' : '/student/dashboard'}>
+          <Link className="text-action" to={accountHome(user)}>
             ← Back to home
           </Link>
         )}
         <section id="login" className="section">
           <h2>Signing in</h2>
           <p style={{ marginTop: 16 }}>
-            Students can sign in using their LRN, class section, and name. Teachers can sign in using their teacher account. If you need help with your account, ask your teacher or school admin.
+            Sign in with Google or your verified email address. Students then enter the class code from their adviser and wait for the adviser to approve them. Teachers choose “I am a Teacher”, submit their instructor details once, and can use the teacher workspace after a school administrator verifies them. If you need help with your account, ask your adviser or school admin.
           </p>
         </section>
         <section className="section">

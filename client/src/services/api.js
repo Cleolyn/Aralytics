@@ -65,6 +65,8 @@ export async function request(endpoint, options = {}) {
     catch { throw new Error('The server returned an unreadable response. Check that the backend is running and try again.'); }
     if (!res.ok) {
       if (data.code === 'ACCOUNT_SUSPENDED') window.dispatchEvent(new CustomEvent('auth:suspended'));
+      // Access changed under us (instructor revoked, class released): reload the profile so routing catches up.
+      else if (data.code === 'ROLE_REQUIRED' || data.code === 'ENROLLMENT_REQUIRED') window.dispatchEvent(new CustomEvent('auth:changed'));
       throw Object.assign(new Error(data.message || `Request failed with status ${res.status}`), { code: data.code, status: res.status });
     }
 
@@ -121,6 +123,13 @@ export const api = {
   // Reports (XLSX / PDF downloads)
   getAnalyticsXlsxUrl: (params) => downloadUrl('/analytics/export/xlsx', params),
   getAnalyticsPdfUrl: (params) => downloadUrl('/analytics/export/pdf', params),
+  // Session tokens last about a minute, so mint a fresh one at click time instead of at render.
+  openAnalyticsExport: async (format, params = {}) => {
+    const tab = window.open('', '_blank');
+    const token = await getToken();
+    const url = withQuery(`${API_BASE}/analytics/export/${format}`, { token: token || '', ...params });
+    if (tab) { tab.opener = null; tab.location.href = url; } else window.location.assign(url);
+  },
 
   // Performance tasks (SRS FR-43, FR-44)
   getPerformanceTasks: (params) => request(withQuery('/performance-tasks', params)),

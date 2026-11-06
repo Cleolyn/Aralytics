@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import useRemoteData from '../../hooks/useRemoteData';
 import useAsyncAction, { requireSuccess } from '../../hooks/useAsyncAction';
-import { AUTH_PATHS, ROLE_HOMES } from '../../utils/authFlow';
+import { AUTH_PATHS, ROLE_HOMES, rememberAuthIntent } from '../../utils/authFlow';
 import { formatDate } from '../../utils/learning';
 import ApplicationForm from './ApplicationForm';
 
@@ -40,6 +40,7 @@ export default function InstructorApplicationPage() {
   if (loading) return <div className="container" role="status">Checking your account…</div>;
   if (!user) return <Navigate to={AUTH_PATHS.signIn} replace />;
   if (!user.email_verified) return <Navigate to={AUTH_PATHS.afterAuth} replace />;
+  if (user.status === 'SUSPENDED') return <Navigate to="/suspended" replace />;
   if (user.role !== 'STUDENT') return <Navigate to={ROLE_HOMES[user.role]} replace />;
 
   const application = data?.application || null;
@@ -63,7 +64,7 @@ export default function InstructorApplicationPage() {
       <>
         <h1>This is a student account</h1>
         <p>This account is enrolled as a student. To apply as an instructor, sign out and create a separate account with your work email.</p>
-        <Link className="btn btn-primary" to={AUTH_PATHS.afterAuth}>Back to my class</Link>
+        <Link className="btn btn-primary" to={AUTH_PATHS.afterAuth} onClick={() => rememberAuthIntent('STUDENT')}>Back to my class</Link>
       </>
     );
   } else if (application?.status === 'PENDING') {
@@ -113,7 +114,7 @@ export default function InstructorApplicationPage() {
           </ol>
           <p className="account-note">Signed in as {user.email}</p>
           <button className="text-action" onClick={logout}>Sign out</button>
-          {!enrolled && <Link className="text-action" to={AUTH_PATHS.afterAuth}>I’m a student joining a class</Link>}
+          {!enrolled && <Link className="text-action" to={AUTH_PATHS.afterAuth} onClick={() => rememberAuthIntent('STUDENT')}>I’m a student joining a class</Link>}
         </aside>
         <section className="join-sheet">
           <Notice error>{error || action.error}</Notice>
