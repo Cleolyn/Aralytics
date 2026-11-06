@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { BookOpen, ClipboardList, Folder, GraduationCap, LayoutDashboard, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from './icons';
+import { BookOpen, ClipboardList, Folder, GraduationCap, LayoutDashboard, Megaphone, ChartNoAxesColumn, Users, FileSpreadsheet, HelpCircle, LogOut, Menu, X } from './icons';
 import { ROLE_HOMES } from '../utils/authFlow';
 import { UserButton } from '@clerk/react';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +11,7 @@ const teacherLinks = [
   ['/teacher/dashboard', 'Overview', LayoutDashboard], ['/teacher/classes', 'Classes', Users],
   ['/teacher/materials', 'Lessons', BookOpen], ['/teacher/assessments', 'Quizzes and Tasks', ClipboardList],
   ['/teacher/gradebook', 'Gradebook', FileSpreadsheet], ['/teacher/reports', 'Reports', ChartNoAxesColumn],
-  ['/teacher/files', 'My files', Folder]
+  ['/teacher/announcements', 'Announcements', Megaphone], ['/teacher/files', 'My files', Folder]
 ];
 const adminLinks = [
   ['/admin', 'Instructor access', Users]
@@ -19,7 +19,7 @@ const adminLinks = [
 const learnerLinks = [
   ['/student/dashboard', 'Overview', LayoutDashboard], ['/student/materials', 'Lessons', BookOpen],
   ['/student/activities', 'Activities', ClipboardList], ['/student/progress', 'My Progress', GraduationCap],
-  ['/student/files', 'My files', Folder]
+  ['/student/announcements', 'Announcements', Megaphone], ['/student/files', 'My files', Folder]
 ];
 
 export default function Navbar() {

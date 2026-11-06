@@ -37,6 +37,7 @@ import InstructorApplicationPage from '../pages/InstructorApplication';
 // [B] admin and accounts — add below
 // ---
 // [C] announcements — add below
+import AnnouncementsPage from '../pages/AnnouncementsPage';
 // ---
 
 export { ProtectedRoute };
@@ -251,6 +252,8 @@ export default function AppRoutes() {
       {/* [B] admin and accounts routes — add below */}
       {/* --- */}
       {/* [C] announcements routes — add below */}
+      <Route path="/teacher/announcements" element={<ProtectedRoute role="TEACHER"><TeacherLayout><AnnouncementsPage /></TeacherLayout></ProtectedRoute>} />
+      <Route path="/student/announcements" element={<ProtectedRoute role="STUDENT"><StudentLayout><AnnouncementsPage /></StudentLayout></ProtectedRoute>} />
       {/* --- */}
       {/* Wildcard Fallback */}
       <Route

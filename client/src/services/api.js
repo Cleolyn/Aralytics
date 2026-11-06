@@ -156,5 +156,11 @@ export const api = {
   // [B] admin and accounts — add below
   // ---
   // [C] announcements — add below
+  getAnnouncements: p => request(withQuery('/announcements', p)),
+  createAnnouncement: p => post('/announcements', p),
+  updateAnnouncement: (id, p) => post(`/announcements/${encodeURIComponent(id)}`, p, 'PUT'),
+  deleteAnnouncement: id => request(`/announcements/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  markAnnouncementRead: id => post(`/announcements/${encodeURIComponent(id)}/read`, {}),
+  markAllAnnouncementsRead: () => post('/announcements/read-all', {}),
   // ---
 };

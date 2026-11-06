@@ -7,6 +7,7 @@ import ActivityTable from '../components/ActivityTable';
 import { HEROES, HeroFigure } from '../components/iso/heroes';
 import { Loading, Notice } from '../components/ui/Feedback';
 import { cleanText, completedActivity } from '../utils/learning';
+import AnnouncementsWidget from './AnnouncementsPage/AnnouncementsWidget';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -76,6 +77,7 @@ export default function StudentDashboard() {
           </section>
         </div>
         <aside className="aside">
+          <AnnouncementsWidget />
           <section>
             <h2>Your progress</h2>
             <p>

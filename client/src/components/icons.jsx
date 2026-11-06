@@ -4,7 +4,7 @@ import {
   Add01Icon, Alert02Icon, AlertCircleIcon, ArrowDown01Icon, ArrowLeft01Icon, ArrowRight01Icon, ArrowUp01Icon,
   BookOpen01Icon, Cancel01Icon, CheckmarkCircle02Icon, ChartColumnIcon, Clock01Icon, DashboardSquare01Icon, Delete02Icon,
   Download01Icon, Edit02Icon, FileUploadIcon, Flag01Icon, Folder01Icon, Globe02Icon, HelpCircleIcon, Logout01Icon, Maximize01Icon,
-  Menu01Icon, MortarboardIcon, RefreshIcon, Shield01Icon, Task01Icon, TaskDone01Icon, Tick02Icon, UserMultipleIcon,
+  Megaphone01Icon, Menu01Icon, MortarboardIcon, RefreshIcon, Shield01Icon, Task01Icon, TaskDone01Icon, Tick02Icon, UserMultipleIcon,
   Wifi01Icon, WifiOff01Icon, Xls01Icon
 } from '@hugeicons/core-free-icons';
 
@@ -39,6 +39,7 @@ export const HelpCircle = make(HelpCircleIcon, 'HelpCircle');
 export const LayoutDashboard = make(DashboardSquare01Icon, 'LayoutDashboard');
 export const LogOut = make(Logout01Icon, 'LogOut');
 export const Maximize2 = make(Maximize01Icon, 'Maximize2');
+export const Megaphone = make(Megaphone01Icon, 'Megaphone');
 export const Menu = make(Menu01Icon, 'Menu');
 export const Plus = make(Add01Icon, 'Plus');
 export const RefreshCw = make(RefreshIcon, 'RefreshCw');
