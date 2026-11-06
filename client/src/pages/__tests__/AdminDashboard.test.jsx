@@ -5,10 +5,13 @@ import { currentLocation, renderPage } from '../../test/render';
 import AdminDashboard from '../AdminDashboard';
 import { api } from '../../services/api';
 
+vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'admin-1', role: 'ADMIN' } }) }));
+
 vi.mock('../../services/api', () => ({
   api: {
     getAdminSummary: vi.fn(), getInstructorApplications: vi.fn(), reviewInstructorApplication: vi.fn(), getInstructors: vi.fn(),
-    getAdminStorage: vi.fn(), purgeUserFiles: vi.fn()
+    getAdminStorage: vi.fn(), purgeUserFiles: vi.fn(),
+    getAdminUsers: vi.fn(), suspendUser: vi.fn(), unsuspendUser: vi.fn(), revokeInstructor: vi.fn(), deleteUser: vi.fn(), getAuditLog: vi.fn()
   }
 }));
 
@@ -42,6 +45,157 @@ beforeEach(() => {
   api.reviewInstructorApplication.mockResolvedValue({ success: true, application: { ...pending, status: 'APPROVED' } });
   api.getAdminStorage.mockResolvedValue(storage);
   api.purgeUserFiles.mockResolvedValue({ success: true, removed: 3 });
+  api.getAdminUsers.mockResolvedValue({ success: true, total: 4, users: people });
+  api.suspendUser.mockResolvedValue({ success: true, user: {} });
+  api.unsuspendUser.mockResolvedValue({ success: true, user: {} });
+  api.revokeInstructor.mockResolvedValue({ success: true, closed_invitations: 2, released_students: 5 });
+  api.deleteUser.mockResolvedValue({ success: true, id: 's1', removed_files: 0 });
+  api.getAuditLog.mockResolvedValue({ success: true, entries: [], next_before: null });
+});
+
+const person = (id, name, role, extra = {}) => ({ id, email: `${id}@school.ph`, full_name: name, role, status: 'ACTIVE',
+  suspended_reason: null, enrollment_status: null, adviser_name: null, created_at: '2026-10-01 08:00:00', ...extra });
+const people = [
+  person('admin-1', 'Eulyn Admin', 'ADMIN'),
+  person('t1', 'Ana Reyes', 'TEACHER'),
+  person('s1', 'Juan Cruz', 'STUDENT', { enrollment_status: 'APPROVED', adviser_name: 'Ana Reyes' }),
+  person('s2', 'Mara Lim', 'STUDENT', { status: 'SUSPENDED', suspended_reason: 'Shared account' })
+];
+
+describe('AdminDashboard people', () => {
+  it('lists people with the right actions per row and none for yourself', async () => {
+    renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    expect(await screen.findByText('Juan Cruz')).toBeInTheDocument();
+    expect(api.getAdminUsers).toHaveBeenCalledWith({});
+    expect(api.getInstructorApplications).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'People' })).toHaveAttribute('aria-pressed', 'true');
+    const self = within(rowOf('Eulyn Admin (you)'));
+    expect(self.queryByRole('button')).not.toBeInTheDocument();
+    const teacher = within(rowOf('Ana Reyes'));
+    expect(teacher.getByRole('button', { name: 'Revoke instructor' })).toBeInTheDocument();
+    expect(teacher.getByRole('button', { name: 'Suspend' })).toBeInTheDocument();
+    expect(teacher.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    const student = within(rowOf('Juan Cruz'));
+    expect(student.queryByRole('button', { name: 'Revoke instructor' })).not.toBeInTheDocument();
+    expect(student.getByText('Adviser: Ana Reyes')).toBeInTheDocument();
+    const suspended = within(rowOf('Mara Lim'));
+    expect(suspended.getByText('Shared account')).toBeInTheDocument();
+    expect(suspended.getByRole('button', { name: 'Unsuspend' })).toBeInTheDocument();
+    expect(suspended.queryByRole('button', { name: 'Suspend' })).not.toBeInTheDocument();
+  });
+
+  it('searches and filters', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Juan Cruz');
+    await user.type(screen.getByLabelText('Search people'), 'juan');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    await waitFor(() => expect(api.getAdminUsers).toHaveBeenLastCalledWith({ q: 'juan' }));
+    await user.selectOptions(screen.getByLabelText('Role'), 'STUDENT');
+    await waitFor(() => expect(api.getAdminUsers).toHaveBeenLastCalledWith({ q: 'juan', role: 'STUDENT' }));
+    await user.selectOptions(screen.getByLabelText('Status'), 'SUSPENDED');
+    await waitFor(() => expect(api.getAdminUsers).toHaveBeenLastCalledWith({ q: 'juan', role: 'STUDENT', status: 'SUSPENDED' }));
+  });
+
+  it('suspends an account only with a reason', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Juan Cruz');
+    await user.click(within(rowOf('Juan Cruz')).getByRole('button', { name: 'Suspend' }));
+    const dialog = screen.getByRole('dialog', { name: 'Suspend Juan Cruz' });
+    expect(within(dialog).getByRole('button', { name: 'Suspend account' })).toBeDisabled();
+    await user.type(within(dialog).getByLabelText('Reason for suspension'), 'Shared a login');
+    await user.click(within(dialog).getByRole('button', { name: 'Suspend account' }));
+    expect(api.suspendUser).toHaveBeenCalledWith('s1', { reason: 'Shared a login' });
+    expect(await screen.findByText('Juan Cruz is suspended.')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(api.getAdminUsers).toHaveBeenCalledTimes(2));
+  });
+
+  it('unsuspends straight from the row', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Mara Lim');
+    await user.click(within(rowOf('Mara Lim')).getByRole('button', { name: 'Unsuspend' }));
+    expect(api.unsuspendUser).toHaveBeenCalledWith('s2');
+    expect(await screen.findByText('Mara Lim can sign in again.')).toBeInTheDocument();
+  });
+
+  it('revokes instructor access with a reason and reports what changed', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Ana Reyes');
+    await user.click(within(rowOf('Ana Reyes')).getByRole('button', { name: 'Revoke instructor' }));
+    const dialog = screen.getByRole('dialog');
+    await user.type(within(dialog).getByLabelText('Reason for revoking access'), 'Left the school');
+    await user.click(within(dialog).getByRole('button', { name: 'Revoke instructor access' }));
+    expect(api.revokeInstructor).toHaveBeenCalledWith('t1', { reason: 'Left the school' });
+    expect(await screen.findByText(/2 class codes closed, 5 students released/)).toBeInTheDocument();
+  });
+
+  it('deletes an account only after typing its email', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Juan Cruz');
+    await user.click(within(rowOf('Juan Cruz')).getByRole('button', { name: 'Delete' }));
+    const dialog = screen.getByRole('dialog', { name: 'Delete Juan Cruz?' });
+    const confirm = within(dialog).getByRole('button', { name: 'Delete account' });
+    expect(confirm).toBeDisabled();
+    await user.type(within(dialog).getByLabelText('Type the email address to confirm'), 's1@school');
+    expect(confirm).toBeDisabled();
+    await user.type(within(dialog).getByLabelText('Type the email address to confirm'), '.PH');
+    expect(confirm).toBeEnabled();
+    await user.click(confirm);
+    expect(api.deleteUser).toHaveBeenCalledWith('s1', { confirm_email: 's1@school.PH' });
+    expect(await screen.findByText('Deleted the account for s1@school.ph.')).toBeInTheDocument();
+  });
+
+  it('shows the server message when deletion is refused', async () => {
+    api.deleteUser.mockResolvedValue({ success: false, message: 'This instructor still owns lessons, quizzes, tasks, or classes with students.' });
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Ana Reyes');
+    await user.click(within(rowOf('Ana Reyes')).getByRole('button', { name: 'Delete' }));
+    const dialog = screen.getByRole('dialog');
+    await user.type(within(dialog).getByLabelText('Type the email address to confirm'), 't1@school.ph');
+    await user.click(within(dialog).getByRole('button', { name: 'Delete account' }));
+    expect(await within(screen.getByRole('dialog')).findByRole('alert')).toHaveTextContent('still owns lessons');
+  });
+
+  it('pages through large directories', async () => {
+    api.getAdminUsers.mockResolvedValue({ success: true, total: 120, users: people });
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    await screen.findByText('Juan Cruz');
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await waitFor(() => expect(api.getAdminUsers).toHaveBeenLastCalledWith({ page: 2 }));
+  });
+
+  it('shows an empty state when nobody matches', async () => {
+    api.getAdminUsers.mockResolvedValue({ success: true, total: 0, users: [] });
+    renderPage(<AdminDashboard />, { route: '/admin?tab=people' });
+    expect(await screen.findByRole('heading', { name: 'No people found' })).toBeInTheDocument();
+  });
+});
+
+describe('AdminDashboard activity', () => {
+  const entry = (id, action, extra = {}) => ({ id, action, actor_email: 'admin@school.ph', target_type: 'USER', target_id: 'x',
+    target_label: 'juan@school.ph', details: null, created_at: '2026-11-03 04:00:00', ...extra });
+
+  it('shows the audit log and loads more', async () => {
+    api.getAuditLog.mockResolvedValueOnce({ success: true, next_before: 'cursor-1', entries: [
+      entry('a1', 'ACCOUNT_SUSPENDED', { details: { reason: 'Shared a login' } }), entry('a2', 'ACCOUNT_DELETED', { details: { removed_files: 2 } })
+    ] }).mockResolvedValueOnce({ success: true, next_before: null, entries: [entry('a3', 'APPLICATION_APPROVED', { target_label: 'maria@school.ph' })] });
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=activity' });
+    expect(await screen.findByText('Suspended account')).toBeInTheDocument();
+    expect(api.getInstructorApplications).not.toHaveBeenCalled();
+    expect(screen.getByText('Reason: Shared a login')).toBeInTheDocument();
+    expect(screen.getByText('2 files removed')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+    expect(api.getAuditLog).toHaveBeenLastCalledWith({ limit: 25, before: 'cursor-1' });
+    expect(await screen.findByText('Approved instructor application')).toBeInTheDocument();
+    expect(screen.getByText('Suspended account')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Load more' })).not.toBeInTheDocument();
+  });
+
+  it('shows an empty state', async () => {
+    renderPage(<AdminDashboard />, { route: '/admin?tab=activity' });
+    expect(await screen.findByRole('heading', { name: 'No activity yet' })).toBeInTheDocument();
+  });
 });
 
 describe('AdminDashboard', () => {

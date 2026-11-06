@@ -30,6 +30,19 @@ describe('ProtectedRoute', () => {
     expect(currentLocation()).toBe(home);
   });
 
+  it.each(['ADMIN', 'TEACHER', 'STUDENT'])('sends a suspended %s to the suspended page', role => {
+    as({ role, email_verified: true, enrollment_status: 'APPROVED', status: 'SUSPENDED' });
+    guarded(role);
+    expect(screen.queryByRole('heading', { name: 'Secret page' })).not.toBeInTheDocument();
+    expect(currentLocation()).toBe('/suspended');
+  });
+
+  it('lets an explicitly active account through', () => {
+    as({ role: 'TEACHER', email_verified: true, status: 'ACTIVE' });
+    guarded('TEACHER');
+    expect(screen.getByRole('heading', { name: 'Secret page' })).toBeInTheDocument();
+  });
+
   it('sends signed-out visitors to sign in', () => {
     as(null);
     guarded('ADMIN');

@@ -7,10 +7,12 @@ export const AUTH_TASK_PATHS = Object.freeze({
 
 export const ROLE_HOMES = Object.freeze({ ADMIN: '/admin', TEACHER: '/teacher/dashboard', STUDENT: '/student/dashboard' });
 export const INSTRUCTOR_APPLICATION_PATH = '/instructor/apply';
+export const SUSPENDED_PATH = '/suspended';
 
 export function accountHome(user) {
   if (!user) return AUTH_PATHS.signIn;
   if (!user.email_verified) return AUTH_PATHS.afterAuth;
+  if (user.status === 'SUSPENDED') return SUSPENDED_PATH;
   if (user.role === 'ADMIN' || user.role === 'TEACHER') return ROLE_HOMES[user.role];
   if (user.enrollment_status === 'APPROVED') return ROLE_HOMES.STUDENT;
   return user.instructor_application ? INSTRUCTOR_APPLICATION_PATH : AUTH_PATHS.afterAuth;

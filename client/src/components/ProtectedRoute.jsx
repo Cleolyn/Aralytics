@@ -23,6 +23,9 @@ export function ProtectedRoute({ role, children }) {
   if (loading) return <IsoLoader variant="page">Checking your session</IsoLoader>;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 
+  // Suspended accounts see only the suspended page.
+  if (user.email_verified && user.status === 'SUSPENDED') return <Navigate to={accountHome(user)} replace />;
+
   // Unverified accounts, and students without an approved class, finish setup first.
   if (!user.email_verified || (user.role === 'STUDENT' && user.enrollment_status !== 'APPROVED')) {
     return <Navigate to={accountHome(user)} replace />;
