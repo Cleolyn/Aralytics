@@ -16,7 +16,7 @@ async function getStudentDashboard(req, res, next) {
     const quizScope = await teaching.adviserFilter(req.user, 'created_by');
     const taskScope = await teaching.adviserFilter(req.user, 'pt.created_by');
     const [quizzesRes, interventionsRes, scoresRes, tasksRes] = await Promise.all([
-      db.query(`SELECT id, quarter, title, description, time_limit_minutes, total_points, passing_score FROM quizzes WHERE is_published = 1 AND is_active = 1 AND archived_at IS NULL${quizScope.sql} ORDER BY quarter ASC, id ASC`, quizScope.params),
+      db.query(`SELECT id, title, instructions AS description, time_limit_minutes, total_points, passing_score FROM quizzes WHERE is_published = 1 AND archived_at IS NULL${quizScope.sql} ORDER BY created_at DESC, id ASC`, quizScope.params),
       db.query(
         `SELECT ri.*, lc.melc_code, lc.description as competency_desc, lc.ilaw_tag,
                 m.title as remedial_material_title, m.file_type as remedial_file_type, m.storage_url as remedial_storage_url

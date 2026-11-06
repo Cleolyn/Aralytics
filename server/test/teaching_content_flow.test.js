@@ -265,6 +265,9 @@ async function run() {
     assert.equal((await call(`/materials/${lesson1.data.materialId}`, 'student1')).status, 200);
     assert.equal((await call(`/materials/${lesson2.data.materialId}`, 'student1')).status, 404);
     assert.ok(!titles(await call('/quizzes', 'student1'), 'quizzes').includes('Quiz T2'));
+    const dashboard = await call('/student/dashboard', 'student1');
+    assert.equal(dashboard.status, 200, 'the student dashboard query runs on the real schema');
+    assert.ok(!JSON.stringify(dashboard.data).includes('Quiz T2'), 'the dashboard is scoped to the adviser');
     assert.equal((await call(`/quizzes/${quiz2.data.quizId}`, 'student1')).status, 404);
     assert.equal((await call('/student/quizzes/start', 'student1', { method: 'POST', body: { quiz_id: quiz2.data.quizId } })).status, 404);
     assert.equal((await call('/submissions/start', 'student1', { method: 'POST', body: { quiz_id: quiz2.data.quizId } })).status, 404);

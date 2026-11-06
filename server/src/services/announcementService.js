@@ -125,7 +125,7 @@ async function list(env, user, query = {}) {
 async function recipientEmails(teacherId) {
   const { rows } = await db.query(`SELECT DISTINCT u.email FROM enrollment_requests e
     JOIN class_invitations i ON i.id = e.invitation_id JOIN users u ON u.id = e.user_id
-    WHERE i.teacher_id = ? AND e.status = 'APPROVED' AND u.email IS NOT NULL`, [teacherId]);
+    WHERE i.teacher_id = ? AND e.status = 'APPROVED' AND u.email IS NOT NULL AND COALESCE(u.status, 'ACTIVE') <> 'SUSPENDED'`, [teacherId]);
   return rows.map(row => row.email).filter(Boolean);
 }
 
