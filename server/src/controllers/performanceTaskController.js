@@ -3,6 +3,8 @@ const db = require('../config/database');
 const path = require('path');
 const storage = require('../services/uploadStorage');
 const files = require('../services/fileService');
+const notifier = require('../services/notifier');
+const { contactOf } = require('../services/accountAdminService');
 const uploadRoot = path.resolve(__dirname, '../../uploads/performance-tasks');
 
 /** Adds download_url to submissions the viewer is allowed to open (null otherwise). */
@@ -335,6 +337,19 @@ async function gradeSubmission(req, res, next) {
       `SELECT * FROM performance_task_submissions WHERE id = ? LIMIT 1`,
       [id]
     );
+
+    try {
+      const student = await contactOf(updated[0].student_id);
+      const { rows: tasks } = await db.query('SELECT title FROM performance_tasks WHERE id = ?', [updated[0].task_id]);
+      if (student) {
+        notifier.notify(req, 'performance_task.graded', {
+          to: student.email, name: student.name, task_title: tasks[0]?.title,
+          score: numericScore, total_points: sub[0].total_points, feedback: feedback || ''
+        });
+      }
+    } catch (notifyErr) {
+      console.error('[NOTIFIER] grade notification skipped:', notifyErr.message);
+    }
 
     res.json({
       success: true,

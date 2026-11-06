@@ -344,6 +344,7 @@ async function initializeDatabase() {
   // [A] teaching content — add below
   // ---
   // [B] admin and accounts — add below
+  await require('../services/accountAdminService').initializeAccountAdminTables();
   // ---
   // [C] announcements — add below
   // ---

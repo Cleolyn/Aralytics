@@ -207,6 +207,22 @@ CREATE INDEX `idx_files_status_created` ON `files` (`status`, `created_at`);
 -- [A] teaching content — add below
 -- ---
 -- [B] admin and accounts — add below
+ALTER TABLE `users` ADD COLUMN `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE';
+ALTER TABLE `users` ADD COLUMN `suspended_reason` VARCHAR(300) NULL;
+ALTER TABLE `users` ADD COLUMN `suspended_at` TIMESTAMP NULL;
+CREATE TABLE IF NOT EXISTS `admin_audit_log` (
+  `id` VARCHAR(36) PRIMARY KEY,
+  `actor_id` VARCHAR(36) NULL,
+  `actor_email` VARCHAR(191) NULL,
+  `action` VARCHAR(40) NOT NULL,
+  `target_type` VARCHAR(20) NOT NULL,
+  `target_id` VARCHAR(64) NULL,
+  `target_label` VARCHAR(191) NULL,
+  `details_json` TEXT NULL,
+  `created_at` TIMESTAMP NOT NULL
+);
+CREATE INDEX `idx_audit_created` ON `admin_audit_log` (`created_at`);
+CREATE INDEX `idx_audit_target` ON `admin_audit_log` (`target_id`);
 -- ---
 -- [C] announcements — add below
 -- ---

@@ -20,7 +20,9 @@ function accountConflict(err) {
 }
 
 // Profile fields and roles are never assigned from sign-in payloads; new accounts are always STUDENT.
-router.post('/sync', verifyIdentity, async (req, res, next) => {
+const allowSuspended = (req, _res, next) => { req.allowSuspended = true; next(); };
+
+router.post('/sync', allowSuspended, verifyIdentity, async (req, res, next) => {
   try {
     const { rows } = await db.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
     let user = rows[0];
@@ -34,7 +36,7 @@ router.post('/sync', verifyIdentity, async (req, res, next) => {
       user = result.rows[0];
     }
     const { password_hash, ...profile } = user;
-    return res.json({ success: true, role: user.role, user: { ...profile, email_verified: true, ...(await accountStatus(user)) } });
+    return res.json({ success: true, role: user.role, user: { ...profile, status: user.status || 'ACTIVE', email_verified: true, ...(await accountStatus(user)) } });
   } catch (err) {
     if (accountConflict(err)) return res.status(409).json({ success: false, code: 'ACCOUNT_LINK_REQUIRED',
       message: 'This email is already connected to another Aralytics profile. Contact your adviser to link the existing account.' });
@@ -46,9 +48,9 @@ router.post('/student-login', (_req, res) => res.status(410).json({
   success: false, message: 'Sign in with Google or your verified email address. LRN sign-in is no longer supported.'
 }));
 
-router.get('/me', verifyIdentity, async (req, res, next) => {
+router.get('/me', allowSuspended, verifyIdentity, async (req, res, next) => {
   try {
-    res.json({ success: true, user: { ...req.user, ...(await accountStatus(req.user)) } });
+    res.json({ success: true, user: { ...req.user, status: req.user.status || 'ACTIVE', ...(await accountStatus(req.user)) } });
   } catch (err) { next(err); }
 });
 module.exports = router;

@@ -24,6 +24,7 @@ async function run() {
   await db.query(`CREATE TABLE users (id TEXT PRIMARY KEY, lrn_or_id TEXT UNIQUE NOT NULL,
     first_name TEXT NOT NULL, last_name TEXT NOT NULL, full_name TEXT, email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL, role TEXT NOT NULL, section TEXT, section_id TEXT,
+    status TEXT NOT NULL DEFAULT 'ACTIVE', suspended_reason TEXT, suspended_at TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
   await initializeEnrollmentTables();
   await initializeInstructorApplicationTables();
