@@ -49,43 +49,43 @@
     {
       "binding": "FILES_DB_2",
       "database_name": "aralytics-files-2",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "fff4aa31-8a1d-401d-aded-15954d0bf1c3",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_3",
       "database_name": "aralytics-files-3",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "564c1cb9-cfde-41a2-bebb-60d7a4a4704b",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_4",
       "database_name": "aralytics-files-4",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "133aea52-6d1c-4a6c-aff0-417d81a33cc8",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_5",
       "database_name": "aralytics-files-5",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "396dd6e7-ba81-4339-a330-6d3ad685da9a",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_6",
       "database_name": "aralytics-files-6",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "0707f68f-0516-4dfe-a09a-cdaea8630e56",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_7",
       "database_name": "aralytics-files-7",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "11af1ea3-edcb-4a1b-b475-4049179e6393",
       "migrations_dir": "server/migrations/uploads"
     },
     {
       "binding": "FILES_DB_8",
       "database_name": "aralytics-files-8",
-      "database_id": "TODO-create-with-wrangler",
+      "database_id": "9fd0f5ac-08ea-4152-b2dd-5182f9133c04",
       "migrations_dir": "server/migrations/uploads"
     }
   ],
