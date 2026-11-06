@@ -346,6 +346,7 @@ async function initializeDatabase() {
   // [B] admin and accounts — add below
   // ---
   // [C] announcements — add below
+  await require('../services/announcementService').initializeAnnouncementTables();
   // ---
 }
 

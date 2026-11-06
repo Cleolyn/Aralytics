@@ -76,6 +76,7 @@ app.use('/api/student', require('./routes/studentRoutes'));
 // [B] admin and accounts — add below
 // ---
 // [C] announcements — add below
+app.use('/api/announcements', require('./routes/announcementRoutes'));
 // ---
 
 app.use(errorHandler);

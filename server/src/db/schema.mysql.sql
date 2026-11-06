@@ -209,4 +209,17 @@ CREATE INDEX `idx_files_status_created` ON `files` (`status`, `created_at`);
 -- [B] admin and accounts — add below
 -- ---
 -- [C] announcements — add below
+CREATE TABLE IF NOT EXISTS `announcements` (
+  `id` VARCHAR(36) PRIMARY KEY, `teacher_id` VARCHAR(36) NOT NULL,
+  `title` VARCHAR(150) NOT NULL, `body` TEXT NOT NULL, `pinned` INTEGER NOT NULL DEFAULT 0, `file_id` VARCHAR(36) NULL,
+  `created_at` TIMESTAMP NOT NULL, `updated_at` TIMESTAMP NULL,
+  FOREIGN KEY (`teacher_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS `announcement_reads` (
+  `announcement_id` VARCHAR(36) NOT NULL, `user_id` VARCHAR(36) NOT NULL, `read_at` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`announcement_id`, `user_id`),
+  FOREIGN KEY (`announcement_id`) REFERENCES `announcements`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+);
+CREATE INDEX `idx_announcements_teacher` ON `announcements` (`teacher_id`, `created_at`);
 -- ---
