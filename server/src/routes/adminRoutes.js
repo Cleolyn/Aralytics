@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { verifyIdentity, requireAdmin } = require('../middleware/auth');
 const service = require('../services/instructorApplicationService');
+const files = require('../services/fileService');
 
 // Every admin endpoint requires a verified session with the ADMIN role.
 router.use(verifyIdentity, requireAdmin);
@@ -19,5 +20,15 @@ router.patch('/applications/:userId', wrap(async (req, res) => {
 }));
 
 router.get('/instructors', wrap(async (_req, res) => res.json({ success: true, instructors: await service.listInstructors() })));
+
+// Storage overview and per-user clean-up (the only admin file actions are read and delete).
+router.get('/storage', wrap(async (req, res) => {
+  res.json({ success: true, ...await files.adminStorage(files.envOf(req)) });
+}));
+
+router.delete('/users/:userId/files', wrap(async (req, res) => {
+  const removed = await files.deleteForOwner(files.envOf(req), req.params.userId);
+  res.json({ success: true, removed });
+}));
 
 module.exports = router;

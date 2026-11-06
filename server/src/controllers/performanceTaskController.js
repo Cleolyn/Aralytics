@@ -2,7 +2,18 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const path = require('path');
 const storage = require('../services/uploadStorage');
+const files = require('../services/fileService');
 const uploadRoot = path.resolve(__dirname, '../../uploads/performance-tasks');
+
+/** Adds download_url to submissions the viewer is allowed to open (null otherwise). */
+function addDownloadUrls(req, submissions) {
+  const legacyAllowed = (item, ctx) => {
+    if (req.user.role === 'ADMIN') return true;
+    if (req.user.role === 'TEACHER') return files.teacherCanReadSubmission(req.user.id, item.student_id, item.task_id, ctx);
+    return item.student_id === req.user.id;
+  };
+  return files.decorateUrls(files.envOf(req), req.user, submissions, { urlKey: 'file_url', legacyKind: 'performance-tasks', legacyAllowed });
+}
 
 /**
  * GET /api/performance-tasks
@@ -40,6 +51,7 @@ async function getAllTasks(req, res, next) {
         `SELECT * FROM performance_task_submissions WHERE student_id = ?`,
         [userId]
       );
+      await addDownloadUrls(req, studentSubmissions);
       const subMap = new Map();
       studentSubmissions.forEach(sub => subMap.set(sub.task_id, sub));
 
@@ -105,6 +117,7 @@ async function getTaskById(req, res, next) {
         `SELECT * FROM performance_task_submissions WHERE task_id = ? AND student_id = ? LIMIT 1`,
         [id, userId]
       );
+      await addDownloadUrls(req, subs);
       task.my_submission = subs[0] || null;
       return res.json({ success: true, task });
     }
@@ -122,6 +135,7 @@ async function getTaskById(req, res, next) {
       [id]
     );
 
+    await addDownloadUrls(req, submissions);
     task.submissions = submissions;
     res.json({ success: true, task });
   } catch (err) {
@@ -175,12 +189,15 @@ async function submitTask(req, res, next) {
   try {
     const { id } = req.params;
     const studentId = req.user.id;
-    const { file_name, file_url, file_size_bytes, notes, file_content_base64 } = req.body;
+    const { file_name, file_url, file_size_bytes, notes, file_id, file_content_base64 } = req.body;
 
-    if (!file_name) {
+    if (file_content_base64 !== undefined) {
+      return res.status(400).json({ success: false, message: 'Upload the file with POST /api/files, then send its file_id.' });
+    }
+    if (!file_id && !file_name) {
       return res.status(400).json({
         success: false,
-        message: 'file_name is required for submission dropzone.'
+        message: 'file_id is required for submission dropzone.'
       });
     }
 
@@ -190,59 +207,49 @@ async function submitTask(req, res, next) {
       return res.status(404).json({ success: false, message: 'Performance task not found.' });
     }
 
-    const subId = `pts-${uuidv4().slice(0, 8)}`;
-    let effectiveFileUrl = file_url || `/api/performance-tasks/files/${encodeURIComponent(file_name)}`;
-    let effectiveSize = Number(file_size_bytes) || 1024 * 500;
-    if (file_content_base64 !== undefined) {
-      const extension = path.extname(file_name).toLowerCase();
-      const allowedExts = ['.pdf', '.docx', '.doc', '.pptx', '.ppt', '.zip', '.mp4', '.png', '.jpg', '.jpeg'];
-      if (!allowedExts.includes(extension) || typeof file_content_base64 !== 'string' ||
-          file_content_base64.length > 7 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(file_content_base64)) {
-        return res.status(400).json({ success: false, message: 'Choose a valid document, media, or archive file up to 5 MB.' });
-      }
-      const content = Buffer.from(file_content_base64, 'base64');
-      const validHeader = extension === '.pdf'
-        ? content.subarray(0, 5).toString() === '%PDF-'
-        : ['.docx', '.pptx', '.zip'].includes(extension)
-        ? content.subarray(0, 2).toString() === 'PK'
-        : content.length > 0;
-      if (!content.length || content.length > 5 * 1024 * 1024 || !validHeader) {
-        return res.status(400).json({ success: false, message: 'The file is invalid or larger than 5 MB.' });
-      }
-      const storedName = `${uuidv4()}${extension}`;
-      await storage.put(req, 'performance-tasks', uploadRoot, storedName, content);
-      effectiveFileUrl = `/api/performance-tasks/files/${storedName}`;
-      effectiveSize = content.length;
+    const upload = file_id ? await files.requireAttachable(file_id, req.user, 'submission') : null;
+    if (upload && upload.task_id !== id) {
+      return res.status(400).json({ success: false, message: 'That upload belongs to a different task. Upload the file again.' });
     }
+    const effectiveName = upload ? upload.original_name : file_name;
+    const effectiveFileUrl = upload ? `/api/files/${upload.id}/content` : (file_url || `/api/performance-tasks/files/${encodeURIComponent(file_name)}`);
+    const effectiveSize = upload ? Number(upload.size_bytes) : (Number(file_size_bytes) || 1024 * 500);
 
     // Upsert submission
     const { rows: existing } = await db.query(
       `SELECT id FROM performance_task_submissions WHERE task_id = ? AND student_id = ? LIMIT 1`,
       [id, studentId]
     );
+    let submissionId = existing[0]?.id;
 
     if (existing.length > 0) {
       await db.query(
-        `UPDATE performance_task_submissions 
-         SET file_name = ?, file_url = ?, file_size_bytes = ?, notes = ?, 
+        `UPDATE performance_task_submissions
+         SET file_name = ?, file_url = ?, file_size_bytes = ?, notes = ?,
              status = 'SUBMITTED', score = NULL, feedback = NULL, graded_at = NULL, submitted_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [file_name, effectiveFileUrl, effectiveSize, notes || null, existing[0].id]
+        [effectiveName, effectiveFileUrl, effectiveSize, notes || null, submissionId]
       );
     } else {
+      submissionId = `pts-${uuidv4().slice(0, 8)}`;
       await db.query(
-        `INSERT INTO performance_task_submissions 
+        `INSERT INTO performance_task_submissions
          (id, task_id, student_id, file_name, file_url, file_size_bytes, notes, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, 'SUBMITTED')`,
-        [subId, id, studentId, file_name, effectiveFileUrl, effectiveSize, notes || null]
+        [submissionId, id, studentId, effectiveName, effectiveFileUrl, effectiveSize, notes || null]
       );
     }
+
+    // The newest upload replaces any earlier file for this submission.
+    if (upload) await files.attach(upload.id, req.user, 'submission', { submissionId, taskId: id });
+    await files.deleteForSubmission(files.envOf(req), submissionId, upload?.id);
 
     const { rows: updated } = await db.query(
       `SELECT * FROM performance_task_submissions WHERE task_id = ? AND student_id = ? LIMIT 1`,
       [id, studentId]
     );
 
+    await addDownloadUrls(req, updated);
     res.json({
       success: true,
       message: 'Performance task output submitted successfully.',
@@ -277,6 +284,7 @@ async function getTaskSubmissions(req, res, next) {
       [id]
     );
 
+    await addDownloadUrls(req, submissions);
     res.json({ success: true, count: submissions.length, submissions });
   } catch (err) {
     next(err);
@@ -349,10 +357,18 @@ async function downloadFile(req, res, next) {
       return res.status(400).json({ success: false, message: 'Invalid file name.' });
     }
     const { rows } = await db.query(
-      `SELECT student_id, file_name FROM performance_task_submissions WHERE file_url = ? LIMIT 1`,
+      `SELECT student_id, task_id, file_name FROM performance_task_submissions WHERE file_url = ? LIMIT 1`,
       [`/api/performance-tasks/files/${filename}`]
     );
-    if (!rows.length || (req.user.role !== 'TEACHER' && rows[0].student_id !== req.user.id)) {
+    // A signed link (req.signedAccess) already proves access; otherwise the viewer must own the
+    // submission, teach the student, or have created the task.
+    let allowed = Boolean(req.signedAccess);
+    if (rows.length && !allowed) {
+      const { role, id: userId } = req.user;
+      allowed = role === 'ADMIN' || rows[0].student_id === userId ||
+        (role === 'TEACHER' && await files.teacherCanReadSubmission(userId, rows[0].student_id, rows[0].task_id));
+    }
+    if (!rows.length || !allowed) {
       return res.status(404).json({ success: false, message: 'Submission file not found.' });
     }
     const object = await storage.get(req, 'performance-tasks', uploadRoot, filename);

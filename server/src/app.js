@@ -17,7 +17,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'If-None-Match']
 }));
 
-app.use(express.json({ limit: '10mb' }));
+// Signed byte routes (file parts and downloads) are streamed, so they sit before body parsing.
+app.use('/api/files', require('./routes/fileRoutes').bytes);
+
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // File-download links pass the session token as ?token=; bridge it into the
@@ -56,6 +59,7 @@ app.use('/api/enrollment', require('./routes/enrollmentRoutes'));
 app.use('/api/instructor-applications', require('./routes/instructorApplicationRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/curriculum', require('./routes/curriculumRoutes'));
+app.use('/api/files', require('./routes/fileRoutes').api);
 app.use('/api/materials', require('./routes/materialsRoutes'));
 app.use('/api/quizzes', require('./routes/quizRoutes'));
 app.use('/api/proctoring', require('./routes/proctoringRoutes'));

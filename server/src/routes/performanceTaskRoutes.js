@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/performanceTaskController');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const { signedOrAuthenticated } = require('../middleware/signedAccess');
 
-// Public/authenticated file stream
-router.get('/files/:filename', verifyToken, controller.downloadFile);
+// Older base64 submissions: signed link or signed-in user
+router.get('/files/:filename', signedOrAuthenticated('performance-tasks'), controller.downloadFile);
 
 // List performance tasks (accessible to both STUDENT and TEACHER)
 router.get('/', verifyToken, controller.getAllTasks);

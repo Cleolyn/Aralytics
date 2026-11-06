@@ -1,10 +1,25 @@
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+// Uploaded files land in a throwaway folder (no D1 bindings in this suite, so shard 0 = disk).
+process.env.FILES_LOCAL_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'aralytics-master-loop-'));
 const db = require('../src/config/database');
 const proctoringController = require('../src/controllers/proctoringController');
 const assessmentPersistenceController = require('../src/controllers/assessmentPersistenceController');
 const materialsController = require('../src/controllers/materialsController');
 const analyticsController = require('../src/controllers/analyticsController');
 const performanceTaskController = require('../src/controllers/performanceTaskController');
+const fileService = require('../src/services/fileService');
+const chunkStore = require('../src/services/chunkStore');
+
+/** Reserve, upload and complete a small file the way the client does, returning its ready row. */
+async function uploadFixture(user, purpose, name, content, extra = {}) {
+  const { file, upload } = await fileService.reserve({}, user, { purpose, name, size: content.length, ...extra });
+  assert.strictEqual(upload.chunk_count, 1);
+  await chunkStore.backend({}, 0).putChunk(file.id, 0, content);
+  return fileService.complete({}, user, file.id);
+}
 
 function createMockRes() {
   return {
@@ -109,7 +124,15 @@ async function testMasterLoopModules() {
     console.log('    [PASS] Teacher Intervention Create & Delete CRUD verified.');
 
     // 3. Create, Update, and Delete Learning Material
-    const samplePdfBase64 = Buffer.from('%PDF-1.4\nSample Module Content\n%%EOF').toString('base64');
+    // Base64 uploads were retired: the API now asks for a file_id from the chunked upload flow.
+    const legacyRes = createMockRes();
+    await materialsController.createMaterial({ user: teacherUser, body: {
+      title: 'Base64', competency_id: 'comp-ap10-q1-001', file_type: 'PDF', file_name: 'slides.pdf',
+      file_content_base64: Buffer.from('%PDF-1.4').toString('base64')
+    } }, legacyRes, (err) => { if (err) throw err; });
+    assert.strictEqual(legacyRes.statusCode, 400);
+
+    const slides = await uploadFixture(teacherUser, 'material', 'slides.pdf', Buffer.from('%PDF-1.4\nSample Module Content\n%%EOF'));
     const createMatReq = {
       user: teacherUser,
       body: {
@@ -117,8 +140,7 @@ async function testMasterLoopModules() {
         description: 'Initial description',
         competency_id: 'comp-ap10-q1-001',
         file_type: 'PDF',
-        file_name: 'slides.pdf',
-        file_content_base64: samplePdfBase64
+        file_id: slides.id
       }
     };
     const createMatRes = createMockRes();
@@ -126,6 +148,8 @@ async function testMasterLoopModules() {
     assert.strictEqual(createMatRes.statusCode, 201);
     const matId = createMatRes.body.materialId;
     assert.ok(matId, 'materialId must be returned');
+    assert.strictEqual(createMatRes.body.storage_url, `/api/files/${slides.id}/content`);
+    assert.strictEqual((await fileService.getFile(slides.id)).material_id, matId, 'the upload is attached to the lesson');
 
     // Update Material
     const updateMatReq = {
@@ -148,7 +172,8 @@ async function testMasterLoopModules() {
     await materialsController.deleteMaterial(deleteMatReq, deleteMatRes, (err) => { if (err) throw err; });
     assert.strictEqual(deleteMatRes.statusCode, 200);
     assert.strictEqual(deleteMatRes.body.materialId, matId);
-    console.log('    [PASS] Learning Materials Create (with file upload), Update, & Delete CRUD verified.');
+    assert.strictEqual(await fileService.getFile(slides.id), null, 'deleting the lesson removes its file');
+    console.log('    [PASS] Learning Materials Create (with chunked file upload), Update, & Delete CRUD verified.');
   }
 
   // ---------------------------------------------------------------------------
@@ -161,14 +186,12 @@ async function testMasterLoopModules() {
     const studentUser = { id: 'usr-student-001', user_id: 'usr-student-001', role: 'STUDENT' };
 
     // Submit a .zip archive deliverable
-    const zipBytes = Buffer.from('PK\x03\x04SampleArchivePayload').toString('base64');
+    const archive = await uploadFixture(studentUser, 'submission', 'project_deliverable.zip', Buffer.from('PK\x03\x04SampleArchivePayload'), { task_id: taskId });
     const subReq = {
       user: studentUser,
       params: { id: taskId },
       body: {
-        file_name: 'project_deliverable.zip',
-        file_size_kb: 24,
-        file_content_base64: zipBytes,
+        file_id: archive.id,
         notes: 'Submitted archive via dropzone'
       }
     };
@@ -176,6 +199,8 @@ async function testMasterLoopModules() {
     await performanceTaskController.submitTask(subReq, subRes, (err) => { if (err) throw err; });
     assert.strictEqual(subRes.statusCode, 200);
     assert.strictEqual(subRes.body.submission.file_name, 'project_deliverable.zip');
+    assert.strictEqual(subRes.body.submission.file_url, `/api/files/${archive.id}/content`);
+    assert.strictEqual((await fileService.getFile(archive.id)).submission_id, subRes.body.submission.id);
     console.log('    [PASS] Student Performance Task accepted archive (.zip) deliverable.');
 
   }

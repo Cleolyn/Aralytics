@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const files = require('../services/fileService');
 const submissionController = require('./submissionController');
 const materialsController = require('./materialsController');
 const performanceTaskController = require('./performanceTaskController');
@@ -40,6 +41,7 @@ async function getStudentDashboard(req, res, next) {
       )
     ]);
 
+    await files.decorateUrls(files.envOf(req), req.user, interventionsRes.rows, { urlKey: 'remedial_storage_url', outKey: 'remedial_download_url' });
     res.json({
       success: true,
       role: 'STUDENT',
@@ -175,6 +177,7 @@ async function getAssignedInterventions(req, res, next) {
       [studentId]
     );
 
+    await files.decorateUrls(files.envOf(req), req.user, interventions, { urlKey: 'remedial_storage_url', outKey: 'remedial_download_url' });
     res.json({ success: true, count: interventions.length, interventions });
   } catch (err) {
     next(err);

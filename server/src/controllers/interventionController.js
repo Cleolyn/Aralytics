@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const files = require('../services/fileService');
 
 async function getInterventions(req, res, next) {
   try {
@@ -41,6 +42,7 @@ async function getInterventions(req, res, next) {
     query += ` ORDER BY ri.assigned_at DESC`;
 
     const { rows: interventions } = await db.query(query, params);
+    await files.decorateUrls(files.envOf(req), req.user, interventions, { urlKey: 'remedial_storage_url', outKey: 'remedial_download_url' });
 
     res.json({
       success: true,

@@ -1,9 +1,29 @@
 const path = require('node:path');
 const crypto = require('node:crypto');
 const storage = require('../services/uploadStorage');
+const files = require('../services/fileService');
 const materialRoot = path.resolve(__dirname, '../../resources/materials');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+
+/**
+ * Adds download_url (signed, only when the viewer may read the file) and resource_available.
+ * Uploaded files are looked up in the files table; older base64 uploads are probed in legacy storage.
+ */
+async function decorateMaterials(req, materials, markAvailable) {
+  await files.decorateUrls(files.envOf(req), req.user, materials, { markAvailable });
+  for (const material of materials) {
+    if (!material.storage_url?.startsWith('/api/materials/download/')) continue;
+    const filename = material.storage_url.split('/').pop();
+    try {
+      if (filename !== path.basename(filename)) throw new Error('Invalid name');
+      if (!await storage.exists(req, 'materials', materialRoot, filename)) throw new Error('Missing file');
+      material.resource_available = true;
+    } catch { material.resource_available = false; }
+  }
+}
+
+const mayManage = (req, material) => req.user.role === 'ADMIN' || material.created_by === req.user.id;
 
 async function getAllMaterials(req, res, next) {
   try {
@@ -36,13 +56,7 @@ async function getAllMaterials(req, res, next) {
 
     const { rows: materials } = await db.query(query, params);
 
-    for (const material of materials) {
-      if (material.storage_url?.startsWith('/api/materials/download/')) {
-        const filename = material.storage_url.split('/').pop();
-        try { if (filename !== path.basename(filename)) throw new Error('Invalid name'); if (!await storage.exists(req, 'materials', materialRoot, filename)) throw new Error('Missing file'); material.resource_available = true; }
-        catch { material.resource_available = false; }
-      }
-    }
+    await decorateMaterials(req, materials, true);
     res.json({
       success: true,
       count: materials.length,
@@ -68,6 +82,7 @@ async function getMaterialById(req, res, next) {
       return res.status(404).json({ success: false, message: 'Material not found.' });
     }
 
+    await decorateMaterials(req, rows, true);
     res.json({ success: true, material: rows[0] });
   } catch (err) {
     next(err);
@@ -76,8 +91,11 @@ async function getMaterialById(req, res, next) {
 
 async function createMaterial(req, res, next) {
   try {
-    const { competency_id, title, description, file_type, storage_url, file_size_bytes, file_name, file_content_base64 } = req.body;
+    const { competency_id, title, description, file_type, storage_url, file_size_bytes, file_id, file_content_base64 } = req.body;
 
+    if (file_content_base64 !== undefined) {
+      return res.status(400).json({ success: false, message: 'Upload the file with POST /api/files, then send its file_id.' });
+    }
     if (!competency_id || !title || !file_type) {
       return res.status(400).json({
         success: false,
@@ -85,22 +103,9 @@ async function createMaterial(req, res, next) {
       });
     }
 
-    let effectiveUrl = storage_url ? storage_url.trim() : '';
-    let effectiveSize = Number(file_size_bytes) || 1024;
-
-    if (file_content_base64 && file_name) {
-      const ext = path.extname(file_name).toLowerCase() || `.${file_type.toLowerCase()}`;
-      const allowedExts = ['.pdf', '.pptx', '.ppt', '.mp4', '.docx', '.doc', '.zip'];
-      if (!allowedExts.includes(ext)) {
-        return res.status(400).json({ success: false, message: 'Unsupported file format.' });
-      }
-      const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
-      const storedFilename = `${safeBase}-${Date.now()}${ext}`;
-      const buffer = Buffer.from(file_content_base64, 'base64');
-      await storage.put(req, 'materials', materialRoot, storedFilename, buffer);
-      effectiveUrl = `/api/materials/download/${storedFilename}`;
-      effectiveSize = buffer.length;
-    }
+    const upload = file_id ? await files.requireAttachable(file_id, req.user, 'material') : null;
+    const effectiveUrl = upload ? `/api/files/${upload.id}/content` : (storage_url ? storage_url.trim() : '');
+    const effectiveSize = upload ? Number(upload.size_bytes) : (Number(file_size_bytes) || 1024);
 
     if (!effectiveUrl) {
       return res.status(400).json({
@@ -113,7 +118,7 @@ async function createMaterial(req, res, next) {
     const contentHash = crypto.createHash('sha256').update(title + effectiveUrl).digest('hex');
 
     await db.query(
-      `INSERT INTO instructional_materials 
+      `INSERT INTO instructional_materials
        (id, competency_id, title, description, file_type, storage_url, file_size_bytes, content_hash, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -128,6 +133,13 @@ async function createMaterial(req, res, next) {
         req.user.id
       ]
     );
+    if (upload) {
+      try { await files.attach(upload.id, req.user, 'material', { materialId }); }
+      catch (error) {
+        await db.query('DELETE FROM instructional_materials WHERE id = ?', [materialId]);
+        throw error;
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -143,26 +155,24 @@ async function createMaterial(req, res, next) {
 async function updateMaterial(req, res, next) {
   try {
     const { id } = req.params;
-    const { competency_id, title, description, file_type, storage_url, file_name, file_content_base64 } = req.body;
+    const { competency_id, title, description, file_type, storage_url, file_id, file_content_base64 } = req.body;
 
+    if (file_content_base64 !== undefined) {
+      return res.status(400).json({ success: false, message: 'Upload the file with POST /api/files, then send its file_id.' });
+    }
     const { rows: existing } = await db.query(`SELECT * FROM instructional_materials WHERE id = ? LIMIT 1`, [id]);
     if (existing.length === 0) {
       return res.status(404).json({ success: false, message: 'Material not found.' });
     }
 
     const current = existing[0];
-    let effectiveUrl = storage_url ? storage_url.trim() : current.storage_url;
-    let effectiveSize = current.file_size_bytes;
-
-    if (file_content_base64 && file_name) {
-      const ext = path.extname(file_name).toLowerCase() || `.${(file_type || current.file_type).toLowerCase()}`;
-      const safeBase = path.basename(file_name, ext).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'material';
-      const storedFilename = `${safeBase}-${Date.now()}${ext}`;
-      const buffer = Buffer.from(file_content_base64, 'base64');
-      await storage.put(req, 'materials', materialRoot, storedFilename, buffer);
-      effectiveUrl = `/api/materials/download/${storedFilename}`;
-      effectiveSize = buffer.length;
+    if (!mayManage(req, current)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who added this lesson can change it.' });
     }
+    const upload = file_id ? await files.requireAttachable(file_id, req.user, 'material') : null;
+    const newLink = storage_url ? storage_url.trim() : '';
+    const effectiveUrl = upload ? `/api/files/${upload.id}/content` : (newLink || current.storage_url);
+    const effectiveSize = upload ? Number(upload.size_bytes) : current.file_size_bytes;
 
     const nextTitle = title ? title.trim() : current.title;
     const nextComp = competency_id || current.competency_id;
@@ -176,6 +186,14 @@ async function updateMaterial(req, res, next) {
        WHERE id = ?`,
       [nextComp, nextTitle, nextDesc, nextType, effectiveUrl, effectiveSize, contentHash, id]
     );
+    const env = files.envOf(req);
+    if (upload) {
+      await files.attach(upload.id, req.user, 'material', { materialId: id });
+      await files.deleteForMaterial(env, id, upload.id);
+    } else if (effectiveUrl !== current.storage_url) {
+      // Switching to a link retires the previously uploaded file.
+      await files.deleteForMaterial(env, id);
+    }
 
     res.json({
       success: true,
@@ -196,10 +214,14 @@ async function deleteMaterial(req, res, next) {
     }
 
     const current = existing[0];
+    if (!mayManage(req, current)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who added this lesson can remove it.' });
+    }
     if (current.storage_url && current.storage_url.startsWith('/api/materials/download/')) {
       const fname = path.basename(current.storage_url);
       await storage.remove(req, 'materials', materialRoot, fname);
     }
+    await files.deleteForMaterial(files.envOf(req), id);
 
     await db.query(`DELETE FROM instructional_materials WHERE id = ?`, [id]);
 
@@ -213,7 +235,7 @@ async function deleteMaterial(req, res, next) {
   }
 }
 
-// Download/Content Stream endpoint providing deterministic sample payloads with ETags
+// Older base64 uploads. The route requires a signed ?sig= or a signed-in user.
 async function streamMaterialFile(req, res, next) {
   const { filename } = req.params;
   if (!/^[a-zA-Z0-9._-]+$/.test(filename) || filename.includes('..')) return res.status(400).json({ success: false, message: 'Invalid resource name.' });
@@ -221,6 +243,7 @@ async function streamMaterialFile(req, res, next) {
     const object = await storage.get(req, 'materials', materialRoot, filename);
     if (!object) return res.status(404).json({ success: false, message: 'This lesson file has not been provided yet. Ask your teacher for a working resource link.' });
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-store');
     res.type(path.extname(filename));
     res.send(object);
   } catch (error) { next(error); }
