@@ -12,10 +12,14 @@ const PUBLISHABLE_KEY =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
   import.meta.env.CLERK_PUBLISHABLE_KEY;
 
+// Hide Clerk's "Development mode" badges on every sign-in, sign-up, and account component.
+const CLERK_APPEARANCE = { options: { unsafe_disableDevelopmentModeWarnings: true } };
+
 function ConnectedApp() {
   const navigate = useNavigate();
   if (!PUBLISHABLE_KEY) return <div className="container" role="alert"><h1>Sign-in is unavailable</h1><p>The application’s Clerk publishable key is missing. Configure VITE_CLERK_PUBLISHABLE_KEY and restart the frontend.</p></div>;
   return <ClerkProvider publishableKey={PUBLISHABLE_KEY}
+    appearance={CLERK_APPEARANCE}
     signInUrl={AUTH_PATHS.signIn} signUpUrl={AUTH_PATHS.signUp}
     signInForceRedirectUrl={AUTH_PATHS.afterAuth} signUpForceRedirectUrl={AUTH_PATHS.afterAuth}
     signInFallbackRedirectUrl={AUTH_PATHS.afterAuth} signUpFallbackRedirectUrl={AUTH_PATHS.afterAuth}
