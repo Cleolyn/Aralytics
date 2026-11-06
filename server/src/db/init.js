@@ -341,6 +341,12 @@ async function initializeDatabase() {
   await require('../services/enrollmentService').initializeEnrollmentTables();
   await require('../services/instructorApplicationService').initializeInstructorApplicationTables();
   await require('../services/fileService').initializeFileTables();
+  // [A] teaching content — add below
+  // ---
+  // [B] admin and accounts — add below
+  // ---
+  // [C] announcements — add below
+  // ---
 }
 
 if (require.main === module) {

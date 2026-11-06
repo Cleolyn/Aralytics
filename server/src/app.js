@@ -71,6 +71,12 @@ app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/performance-tasks', require('./routes/performanceTaskRoutes'));
 app.use('/api/teacher', require('./routes/teacherRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
+// [A] teaching content — add below
+// ---
+// [B] admin and accounts — add below
+// ---
+// [C] announcements — add below
+// ---
 
 app.use(errorHandler);
 

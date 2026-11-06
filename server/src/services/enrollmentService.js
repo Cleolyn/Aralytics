@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const db = require('../config/database');
 
 const hashCode = code => crypto.createHash('sha256').update(String(code || '').trim().toUpperCase()).digest('hex');
-const fail = (status, message) => Object.assign(new Error(message), { status });
+const fail = (status, message, code) => Object.assign(new Error(message), { status, ...(code && { code }) });
 
 async function initializeEnrollmentTables() {
   await db.query(`CREATE TABLE IF NOT EXISTS class_invitations (

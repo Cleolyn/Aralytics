@@ -64,7 +64,7 @@ export async function request(endpoint, options = {}) {
     try { data = await res.json(); }
     catch { throw new Error('The server returned an unreadable response. Check that the backend is running and try again.'); }
     if (!res.ok) {
-      throw new Error(data.message || `Request failed with status ${res.status}`);
+      throw Object.assign(new Error(data.message || `Request failed with status ${res.status}`), { code: data.code, status: res.status });
     }
 
     return data;
@@ -149,5 +149,12 @@ export const api = {
 
   // Offline reading sync (SRS FR-50)
   syncOfflineReadLogs: (logs) => post('/materials/sync-read-logs', { logs }),
-  getReadLogs: () => request('/materials/read-logs')
+  getReadLogs: () => request('/materials/read-logs'),
+
+  // [A] teaching content — add below
+  // ---
+  // [B] admin and accounts — add below
+  // ---
+  // [C] announcements — add below
+  // ---
 };

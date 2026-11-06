@@ -32,6 +32,12 @@ import ProgressPage from '../pages/ProgressPage';
 import MyFilesPage from '../pages/MyFilesPage';
 import AdminDashboard from '../pages/AdminDashboard';
 import InstructorApplicationPage from '../pages/InstructorApplication';
+// [A] teaching content — add below
+// ---
+// [B] admin and accounts — add below
+// ---
+// [C] announcements — add below
+// ---
 
 export { ProtectedRoute };
 
@@ -73,7 +79,7 @@ export default function AppRoutes() {
   const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', files: 'My files', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', files: 'My files', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application', announcements: 'Announcements', suspended: 'Account suspended' };
     const segments = location.pathname.split('/');
     document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);
@@ -240,6 +246,12 @@ export default function AppRoutes() {
       <Route path="/teacher/classes" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ClassesPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/teacher/assessments" element={<ProtectedRoute role="TEACHER"><TeacherLayout><AssessmentsPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/teacher/reports" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ReportsPage /></TeacherLayout></ProtectedRoute>} />
+      {/* [A] teaching content routes — add below */}
+      {/* --- */}
+      {/* [B] admin and accounts routes — add below */}
+      {/* --- */}
+      {/* [C] announcements routes — add below */}
+      {/* --- */}
       {/* Wildcard Fallback */}
       <Route
         path="*"

@@ -203,3 +203,10 @@ CREATE INDEX `idx_files_owner` ON `files` (`owner_id`, `status`);
 CREATE INDEX `idx_files_material` ON `files` (`material_id`);
 CREATE INDEX `idx_files_submission` ON `files` (`submission_id`);
 CREATE INDEX `idx_files_status_created` ON `files` (`status`, `created_at`);
+
+-- [A] teaching content — add below
+-- ---
+-- [B] admin and accounts — add below
+-- ---
+-- [C] announcements — add below
+-- ---
