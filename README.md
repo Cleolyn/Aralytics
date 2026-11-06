@@ -2,9 +2,10 @@
 
 A web-based LMS, assessment engine, and automated intervention system for **DepEd Araling Panlipunan 10 (Kontemporaryong Isyu)**, aligned with the **ILAW Framework** — *Intentions, Learning Experiences, Assessment, Ways Forward*.
 
-- **Teachers** manage classes and enrollment codes, publish lessons and quizzes, grade performance tasks, review proctoring flags, act on remediation recommendations, and export gradebooks (XLSX) and DepEd monitoring reports (PDF).
-- **Learners** join a class with an adviser-issued code, read lessons (with offline downloads), take proctored quizzes, submit performance tasks, and follow suggested practice.
-- **The admin** approves instructor applications and watches file storage. Instructors and learners each have a private **My files** space.
+- **Teachers** manage classes and enrollment codes, publish, edit, archive and delete lessons, quizzes and performance tasks, post class announcements, grade performance tasks, review proctoring flags, act on remediation recommendations, and export gradebooks (XLSX) and DepEd monitoring reports (PDF).
+- **Learners** join a class with an adviser-issued code, see their adviser's lessons (with offline downloads), quizzes, tasks and announcements, take proctored quizzes, submit performance tasks, and follow suggested practice.
+- **The admin** approves instructor applications, manages people (suspend, revoke instructor access, delete accounts), reviews an activity log, and watches file storage. Instructors and learners each have a private **My files** space.
+- **Email notifications** (optional, free Resend plan) tell people about application decisions, enrollment decisions, grades, suspensions and announcements. Email stays off until a key is configured.
 
 Every quiz submission is graded against the server answer key and immediately updates the gradebook, competency mastery, and remediation queue.
 
@@ -289,10 +290,15 @@ The enrollment code-attempt limiter is in-memory and per process; use a shared l
 
 ### Access boundaries
 
-- **Admin:** reviews instructor applications, sees who has instructor access, and manages file storage (`/admin`, **Storage** tab).
-- **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals.
-- **Student:** enrolled class content only. Students can read only their own records; every learning API requires an approved enrollment.
+- **Admin** (`/admin`): reviews instructor applications; the **People** tab suspends and unsuspends accounts, revokes instructor access and deletes accounts (typed-email confirmation; accounts that still own lessons, quizzes or tasks cannot be deleted); the **Activity** tab is a read-only audit log of every admin action; the **Storage** tab shows file usage. See [docs/admin-and-accounts.md](docs/admin-and-accounts.md).
+- **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals, and class announcements. Only the creator (or an admin) can edit, archive or delete a quiz or task. Graded work is never destroyed: quizzes that students have taken can only be archived. See [docs/teaching-content.md](docs/teaching-content.md).
+- **Student:** sees only the lessons, quizzes, tasks and announcements of their approved adviser. Students can read only their own records; every learning API requires an approved enrollment.
+- **Suspended accounts** get `403 ACCOUNT_SUSPENDED` from every private API and see an "Account suspended" page with the admin's reason.
 - Every private API verifies the Clerk session and requires a verified primary email.
+
+### Announcements
+
+Teachers post from **Announcements**: title, message, optional pin, an optional attachment from **My files**, and an optional email to the class. Learners see the latest three on their dashboard and the full list with unread markers on their Announcements page. See [docs/announcements.md](docs/announcements.md).
 
 ### Offline behavior (PWA)
 
@@ -328,20 +334,27 @@ Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
 | Nobody can open `/admin` | No admin exists yet (for example after a database reset). Run `npm run admin:grant -- <email> --apply`. |
 | `EADDRINUSE` on 3000 or 5001 | Another process is using the port. Stop it or change `PORT` (and the proxy target in `client/vite.config.js`). |
 | Lesson shows "File missing" | Upload the file again from **Lessons**, or link an HTTPS resource. |
+| A learner sees no lessons, quizzes or tasks | Their class request isn't approved yet, or their adviser has no content yet. Learners only see their own adviser's content. |
+| "Account suspended" | An admin suspended the account. An admin can unsuspend it from **People**. |
+| A quiz can't be deleted | Students have already taken it. Archive it instead; grades are kept. |
+| No emails arrive | Email is off until `RESEND_API_KEY` and `MAIL_FROM` are set. See [docs/admin-and-accounts.md](docs/admin-and-accounts.md). |
 
 ## Project status
 
 The full feature list, a done/missing checklist, and prioritized recommendations are in **[docs/project-status.pdf](docs/project-status.pdf)** (November 2026). The main gaps right now:
 
 - Clerk still uses development (test) keys; move to a production instance.
+- Email notifications are built but off until a Resend key and a verified sending domain are set up.
+- A learner can belong to only one class, and the interface is English only.
 - No CI, lint, rate limiting, automated backups, or end-to-end tests yet.
-- Quizzes and performance tasks cannot be edited or deleted after publishing.
-- The admin cannot revoke instructor access or delete accounts, and there are no email notifications.
 - File storage is capped at about 3.5 GB by the free Cloudflare plan.
 
 ## Further documentation
 
 - [docs/project-status.pdf](docs/project-status.pdf) — feature list, checklist, gaps and recommendations
+- [docs/teaching-content.md](docs/teaching-content.md) — editing, archiving and deleting quizzes and tasks; adviser-scoped student content
+- [docs/admin-and-accounts.md](docs/admin-and-accounts.md) — People and Activity tabs, suspension, revoking access, account deletion, email notifications
+- [docs/announcements.md](docs/announcements.md) — class announcements, attachments, read markers
 - [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md) — Clerk configuration, enrollment flow, rollout notes, verification
 - [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md) — Workers deployment, sharded D1 file storage, free-plan limits
 - [docs/brand.md](docs/brand.md) — design system: palette, typography, voice

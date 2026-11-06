@@ -99,6 +99,15 @@ The required secrets are set in Cloudflare: `TURSO_DATABASE_URL`,
 `TURSO_AUTH_TOKEN`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and
 `FILE_TOKEN_SECRET`. (`JWT_SECRET` is no longer read by the server and can be deleted.)
 Use `npx wrangler secret put NAME` to update them. Never commit their values.
+
+Optional email notifications need the secret `RESEND_API_KEY` plus the plain vars
+`MAIL_FROM` and `APP_URL` (in `wrangler.jsonc` under `vars`). Without them the
+notifier does nothing. Setup steps are in [admin-and-accounts.md](admin-and-accounts.md).
+
+Each deploy runs `db:init` before the new Worker goes live. That adds the
+`users.status`, `archived_at`, announcement and audit-log columns and tables, which
+the new code needs. Never deploy the Worker on its own (`npx wrangler deploy`)
+after a schema change.
 The current Clerk keys belong to a development instance. Changing to a Clerk
 production instance requires updating both the server secrets and the frontend
 publishable key, then rebuilding.
