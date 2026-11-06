@@ -6,7 +6,10 @@ import AdminDashboard from '../AdminDashboard';
 import { api } from '../../services/api';
 
 vi.mock('../../services/api', () => ({
-  api: { getAdminSummary: vi.fn(), getInstructorApplications: vi.fn(), reviewInstructorApplication: vi.fn(), getInstructors: vi.fn() }
+  api: {
+    getAdminSummary: vi.fn(), getInstructorApplications: vi.fn(), reviewInstructorApplication: vi.fn(), getInstructors: vi.fn(),
+    getAdminStorage: vi.fn(), purgeUserFiles: vi.fn()
+  }
 }));
 
 const pending = {
@@ -17,6 +20,15 @@ const rejected = { ...pending, user_id: 'u-jose', full_name: 'Jose Cruz', email:
   reason: 'Use your DepEd ID.', reviewed_by_name: 'Eulyn Admin', reviewed_at: '2026-11-02 10:00:00' };
 
 const rowOf = text => screen.getByText(text).closest('tr');
+const MB = 1024 * 1024;
+const storage = {
+  success: true, used: 600 * MB, cap: 900 * MB, file_count: 12, by_purpose: {},
+  shards: [{ shard: 1, used: 450 * MB, cap: 450 * MB }, { shard: 2, used: 150 * MB, cap: 450 * MB }],
+  users: [
+    { user_id: 't1', full_name: 'Ana Reyes', email: 'ana@school.ph', role: 'TEACHER', used: 500 * MB, quota: 1024 * MB, files: 9 },
+    { user_id: 's1', full_name: 'Juan_Cruz', email: 'juan@school.ph', role: 'STUDENT', used: 40 * MB, quota: 50 * MB, files: 3 }
+  ]
+};
 
 beforeEach(() => {
   api.getAdminSummary.mockResolvedValue({ success: true, summary: { pending: 1, approved: 0, rejected: 1, instructors: 2 } });
@@ -28,6 +40,8 @@ beforeEach(() => {
     { id: 't2', full_name: '', first_name: 'Old', last_name: 'Teacher', email: 'old@school.ph', school: null, position: null, approved_at: null, active_class_codes: 0, students: 0 }
   ] });
   api.reviewInstructorApplication.mockResolvedValue({ success: true, application: { ...pending, status: 'APPROVED' } });
+  api.getAdminStorage.mockResolvedValue(storage);
+  api.purgeUserFiles.mockResolvedValue({ success: true, removed: 3 });
 });
 
 describe('AdminDashboard', () => {
@@ -106,6 +120,42 @@ describe('AdminDashboard', () => {
     const legacy = within(rowOf('Old Teacher'));
     expect(legacy.getByText('Not recorded')).toBeInTheDocument();
     expect(legacy.getByText('Before admin review')).toBeInTheDocument();
+  });
+
+  it('shows storage use by site, shard and person (the tab has no count)', async () => {
+    renderPage(<AdminDashboard />, { route: '/admin?tab=storage' });
+    expect(await screen.findByText('Ana Reyes')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Storage' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('progressbar', { name: 'All files' })).toHaveAttribute('aria-valuenow', '67');
+    expect(screen.getByText((_, el) => el.tagName === 'P' && el.textContent === 'All files · 600 MB of 900 MB')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Shard 1' })).toHaveAttribute('aria-valuenow', '100');
+    expect(screen.getByRole('progressbar', { name: 'Shard 2' })).toHaveAttribute('aria-valuenow', '33');
+    const ana = within(rowOf('Ana Reyes'));
+    expect(ana.getByText('500 MB')).toBeInTheDocument();
+    expect(ana.getByText('of 1 GB')).toBeInTheDocument();
+    expect(within(rowOf('Juan Cruz')).getByText('Student')).toBeInTheDocument();
+  });
+
+  it('deletes a person’s files only after confirmation', async () => {
+    const { user } = renderPage(<AdminDashboard />, { route: '/admin?tab=storage' });
+    await screen.findByText('Juan Cruz');
+    await user.click(within(rowOf('Juan Cruz')).getByRole('button', { name: 'Delete user’s files' }));
+    const dialog = screen.getByRole('dialog');
+    expect(api.purgeUserFiles).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(api.purgeUserFiles).not.toHaveBeenCalled();
+
+    await user.click(within(rowOf('Juan Cruz')).getByRole('button', { name: 'Delete user’s files' }));
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete all files' }));
+    expect(api.purgeUserFiles).toHaveBeenCalledWith('s1');
+    expect(await screen.findByText('Deleted the files owned by Juan Cruz.')).toBeInTheDocument();
+    await waitFor(() => expect(api.getAdminStorage).toHaveBeenCalledTimes(2));
+  });
+
+  it('shows an empty storage state', async () => {
+    api.getAdminStorage.mockResolvedValue({ ...storage, used: 0, file_count: 0, users: [] });
+    renderPage(<AdminDashboard />, { route: '/admin?tab=storage' });
+    expect(await screen.findByRole('heading', { name: 'No files stored yet' })).toBeInTheDocument();
   });
 
   it('shows an empty state when nothing is waiting', async () => {
