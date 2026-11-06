@@ -4,13 +4,16 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const storage = require('../src/services/uploadStorage');
+const { createFakeD1 } = require('./helpers/fakeD1');
 
-test('local uploads persist, round trip, and handle missing files', async () => {
+// Legacy storage is read and delete only: new uploads go through fileService.
+test('legacy disk uploads are read, checked, and removed', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'aralytics-storage-'));
   const req = { app: { locals: {} } };
   try {
     assert.equal(await storage.get(req, 'materials', root, 'missing.pdf'), null);
-    await storage.put(req, 'materials', root, 'test.pdf', Buffer.from('%PDF-test'));
+    assert.equal(storage.put, undefined, 'the legacy store no longer accepts new files');
+    await fs.writeFile(path.join(root, 'test.pdf'), '%PDF-test');
     assert.equal(await storage.exists(req, 'materials', root, 'test.pdf'), true);
     assert.equal((await storage.get(req, 'materials', root, 'test.pdf')).toString(), '%PDF-test');
     await storage.remove(req, 'materials', root, 'test.pdf');
@@ -19,52 +22,22 @@ test('local uploads persist, round trip, and handle missing files', async () => 
   } finally { await fs.rm(root, { recursive: true, force: true }); }
 });
 
-test('R2 uploads use isolated prefixes without touching the local filesystem', async () => {
-  const objects = new Map();
-  const req = { app: { locals: { env: { UPLOADS: {
-    async put(key, value) { objects.set(key, Buffer.from(value)); },
-    async get(key) { return objects.has(key) ? { async arrayBuffer() { return objects.get(key); } } : null; },
-    async head(key) { return objects.has(key) ? {} : null; },
-    async delete(key) { objects.delete(key); }
-  } } } } };
-  const root = '/unwritable-upload-root';
-  await storage.put(req, 'performance-tasks', root, 'file.pdf', Buffer.from('student work'));
-  await storage.put(req, 'materials', root, 'file.pdf', Buffer.from('lesson'));
-  assert.equal((await storage.get(req, 'performance-tasks', root, 'file.pdf')).toString(), 'student work');
-  assert.equal((await storage.get(req, 'materials', root, 'file.pdf')).toString(), 'lesson');
-  await storage.remove(req, 'performance-tasks', root, 'file.pdf');
-  assert.equal(await storage.get(req, 'performance-tasks', root, 'file.pdf'), null);
-  assert.equal(await storage.exists(req, 'materials', root, 'file.pdf'), true);
-});
-
-test('D1 chunk storage round trips 5 MB and atomically replaces existing files', async () => {
-  const { DatabaseSync } = require('node:sqlite');
-  const sql = new DatabaseSync(':memory:');
-  sql.exec(await fs.readFile(path.join(__dirname, '../migrations/uploads/0001_upload_chunks.sql'), 'utf8'));
-  const database = {
-    prepare(query) {
-      return { bind(...args) { return {
-        async all() { return { results: sql.prepare(query).all(...args) }; },
-        async first() { return sql.prepare(query).get(...args) || null; },
-        async run() { return sql.prepare(query).run(...args); }
-      }; } };
-    },
-    async batch(statements) {
-      sql.exec('BEGIN');
-      try { for (const statement of statements) await statement.run(); sql.exec('COMMIT'); }
-      catch (error) { sql.exec('ROLLBACK'); throw error; }
-    }
-  };
-  const req = { app: { locals: { env: { UPLOADS_DB: database } } } };
+test('legacy base64 rows are read from FILES_DB_1 (or the old UPLOADS_DB binding) and removed', async () => {
+  const database = createFakeD1();
+  const content = Buffer.alloc(300 * 1024, 123);
+  const encoded = content.toString('base64');
+  const rows = [encoded.slice(0, 262144), encoded.slice(262144)];
+  rows.forEach((part, index) => database.sql.prepare('INSERT INTO upload_chunks (object_key, chunk_index, content) VALUES (?, ?, ?)').run('materials/lesson.pdf', index, part));
   try {
-    const content = Buffer.alloc(5 * 1024 * 1024, 123);
-    await storage.put(req, 'materials', '/invalid', 'lesson.pdf', content);
-    assert.deepEqual(await storage.get(req, 'materials', '/invalid', 'lesson.pdf'), content);
-    assert.equal(await storage.exists(req, 'materials', '/invalid', 'lesson.pdf'), true);
-    await storage.put(req, 'materials', '/invalid', 'lesson.pdf', Buffer.from('replacement'));
-    assert.equal((await storage.get(req, 'materials', '/invalid', 'lesson.pdf')).toString(), 'replacement');
+    for (const binding of ['FILES_DB_1', 'UPLOADS_DB']) {
+      const req = { app: { locals: { env: { [binding]: database } } } };
+      assert.deepEqual(await storage.get(req, 'materials', '/invalid', 'lesson.pdf'), content);
+      assert.equal(await storage.exists(req, 'materials', '/invalid', 'lesson.pdf'), true);
+      assert.equal(await storage.get(req, 'performance-tasks', '/invalid', 'lesson.pdf'), null, 'prefixes are isolated');
+    }
+    const req = { app: { locals: { env: { FILES_DB_1: database } } } };
     await storage.remove(req, 'materials', '/invalid', 'lesson.pdf');
     assert.equal(await storage.get(req, 'materials', '/invalid', 'lesson.pdf'), null);
     assert.equal(await storage.exists(req, 'materials', '/invalid', 'lesson.pdf'), false);
-  } finally { sql.close(); }
+  } finally { database.close(); }
 });

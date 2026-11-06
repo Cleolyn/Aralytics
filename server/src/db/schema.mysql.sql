@@ -181,3 +181,25 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- Uploaded files (bytes live in chunk storage; see server/src/services/fileService.js).
+CREATE TABLE IF NOT EXISTS `files` (
+  `id` VARCHAR(36) PRIMARY KEY,
+  `storage_key` VARCHAR(255) NOT NULL UNIQUE,
+  `shard` INTEGER NOT NULL DEFAULT 0,
+  `chunk_count` INTEGER NOT NULL DEFAULT 0,
+  `owner_id` VARCHAR(36) NOT NULL,
+  `purpose` VARCHAR(20) NOT NULL,
+  `material_id` VARCHAR(36) NULL,
+  `task_id` VARCHAR(36) NULL,
+  `submission_id` VARCHAR(36) NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `content_type` VARCHAR(100) NOT NULL,
+  `size_bytes` BIGINT NOT NULL,
+  `status` VARCHAR(10) NOT NULL DEFAULT 'pending',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX `idx_files_owner` ON `files` (`owner_id`, `status`);
+CREATE INDEX `idx_files_material` ON `files` (`material_id`);
+CREATE INDEX `idx_files_submission` ON `files` (`submission_id`);
+CREATE INDEX `idx_files_status_created` ON `files` (`status`, `created_at`);
