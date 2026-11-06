@@ -1,8 +1,8 @@
 import React from 'react';
 import { cleanText } from '../../utils/learning';
 
-/** Title, topic, instructions, timing, passing score, and screen-monitor limit. */
-export default function QuizInfoFields({ form, competencies, total, onChange }) {
+/** Title, topic, instructions, timing, passing score, and screen-monitor limit. `locked` freezes topic and passing score. */
+export default function QuizInfoFields({ form, competencies, total, onChange, locked = false }) {
   return (
     <section>
       <h2 style={{ marginBottom: 24 }}>Quiz info</h2>
@@ -12,7 +12,7 @@ export default function QuizInfoFields({ form, competencies, total, onChange }) 
       </div>
       <div className="field">
         <label htmlFor="quiz-goal">Topic</label>
-        <select id="quiz-goal" name="competency_id" className="form-input" value={form.competency_id} onChange={onChange} required>
+        <select id="quiz-goal" name="competency_id" className="form-input" value={form.competency_id} onChange={onChange} required disabled={locked}>
           <option value="">Choose a topic</option>
           {competencies.map(c => (
             <option key={c.id} value={c.id}>
@@ -32,7 +32,7 @@ export default function QuizInfoFields({ form, competencies, total, onChange }) 
         </div>
         <div className="field">
           <label htmlFor="quiz-pass">Passing score (out of {total})</label>
-          <input id="quiz-pass" className="form-input" type="number" name="passing_score" min={1} max={total} value={form.passing_score} onChange={onChange} required />
+          <input id="quiz-pass" className="form-input" type="number" name="passing_score" min={1} max={total} value={form.passing_score} onChange={onChange} required disabled={locked} />
         </div>
       </div>
       <details className="section" style={{ paddingTop: 16 }}>

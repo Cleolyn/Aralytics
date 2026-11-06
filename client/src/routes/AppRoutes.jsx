@@ -247,6 +247,7 @@ export default function AppRoutes() {
       <Route path="/teacher/assessments" element={<ProtectedRoute role="TEACHER"><TeacherLayout><AssessmentsPage /></TeacherLayout></ProtectedRoute>} />
       <Route path="/teacher/reports" element={<ProtectedRoute role="TEACHER"><TeacherLayout><ReportsPage /></TeacherLayout></ProtectedRoute>} />
       {/* [A] teaching content routes — add below */}
+      <Route path="/teacher/quizzes/:id/edit" element={<ProtectedRoute role="TEACHER"><TeacherLayout currentTab="quiz_creator"><QuizManager onQuizCreated={() => navigate('/teacher/assessments')} /></TeacherLayout></ProtectedRoute>} />
       {/* --- */}
       {/* [B] admin and accounts routes — add below */}
       {/* --- */}

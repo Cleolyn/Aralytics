@@ -27,6 +27,24 @@ export const emptyQuiz = () => ({
   questions: [newQuestion()]
 });
 
+/** Turn a quiz returned by GET /quizzes/:id into editable form state. */
+export const quizToForm = quiz => ({
+  competency_id: quiz.competency_id,
+  title: quiz.title || '',
+  instructions: quiz.instructions || '',
+  time_limit_minutes: quiz.time_limit_minutes,
+  passing_score: quiz.passing_score,
+  max_blur_limit: quiz.max_blur_limit,
+  questions: (quiz.questions || []).map(q => ({
+    key: q.id || crypto.randomUUID(),
+    question_text: q.question_text || '',
+    question_type: q.question_type || 'MULTIPLE_CHOICE',
+    points: q.points,
+    options: Array.isArray(q.options) && q.options.length === 4 ? q.options : blankChoices(),
+    correct_answer: q.correct_answer || 'A'
+  }))
+});
+
 export const totalPoints = questions => questions.reduce((sum, q) => sum + Number(q.points || 0), 0);
 
 /**
