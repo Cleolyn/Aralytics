@@ -36,8 +36,10 @@ function verify(env, sig, { a, f }) {
   if (!payload || !signature || extra !== undefined) return null;
   try {
     const expected = mac(env, payload);
-    const given = Buffer.from(signature, 'base64url');
-    if (given.length !== expected.length || !crypto.timingSafeEqual(given, expected)) return null;
+    // Compare the canonical text form, so a re-spelled (non-canonical) base64 signature is rejected too.
+    const given = Buffer.from(signature);
+    const wanted = Buffer.from(b64(expected));
+    if (given.length !== wanted.length || !crypto.timingSafeEqual(given, wanted)) return null;
     const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
     if (!claims || claims.e < Date.now() / 1000 || claims.a !== a || claims.f !== f) return null;
     return claims;
