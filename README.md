@@ -4,6 +4,7 @@ A web-based LMS, assessment engine, and automated intervention system for **DepE
 
 - **Teachers** manage classes and enrollment codes, publish lessons and quizzes, grade performance tasks, review proctoring flags, act on remediation recommendations, and export gradebooks (XLSX) and DepEd monitoring reports (PDF).
 - **Learners** join a class with an adviser-issued code, read lessons (with offline downloads), take proctored quizzes, submit performance tasks, and follow suggested practice.
+- **The admin** approves instructor applications and watches file storage. Instructors and learners each have a private **My files** space.
 
 Every quiz submission is graded against the server answer key and immediately updates the gradebook, competency mastery, and remediation queue.
 
@@ -22,6 +23,7 @@ Every quiz submission is graded against the server answer key and immediately up
 - [Deploying](#deploying)
 - [How it works](#how-it-works)
 - [Troubleshooting](#troubleshooting)
+- [Project status](#project-status)
 - [Further documentation](#further-documentation)
 
 ---
@@ -287,7 +289,7 @@ The enrollment code-attempt limiter is in-memory and per process; use a shared l
 
 ### Access boundaries
 
-- **Admin:** reviews instructor applications and sees who has instructor access (`/admin`).
+- **Admin:** reviews instructor applications, sees who has instructor access, and manages file storage (`/admin`, **Storage** tab).
 - **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals.
 - **Student:** enrolled class content only. Students can read only their own records; every learning API requires an approved enrollment.
 - Every private API verifies the Clerk session and requires a verified primary email.
@@ -327,8 +329,19 @@ Example outputs are in [docs/sample-outputs/](docs/sample-outputs/).
 | `EADDRINUSE` on 3000 or 5001 | Another process is using the port. Stop it or change `PORT` (and the proxy target in `client/vite.config.js`). |
 | Lesson shows "File missing" | Upload the file again from **Lessons**, or link an HTTPS resource. |
 
+## Project status
+
+The full feature list, a done/missing checklist, and prioritized recommendations are in **[docs/project-status.pdf](docs/project-status.pdf)** (November 2026). The main gaps right now:
+
+- Clerk still uses development (test) keys; move to a production instance.
+- No CI, lint, rate limiting, automated backups, or end-to-end tests yet.
+- Quizzes and performance tasks cannot be edited or deleted after publishing.
+- The admin cannot revoke instructor access or delete accounts, and there are no email notifications.
+- File storage is capped at about 3.5 GB by the free Cloudflare plan.
+
 ## Further documentation
 
+- [docs/project-status.pdf](docs/project-status.pdf) — feature list, checklist, gaps and recommendations
 - [docs/enrollment-and-auth.md](docs/enrollment-and-auth.md) — Clerk configuration, enrollment flow, rollout notes, verification
 - [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md) — Workers deployment, sharded D1 file storage, free-plan limits
 - [docs/brand.md](docs/brand.md) — design system: palette, typography, voice

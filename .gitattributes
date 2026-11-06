@@ -1,0 +1,7 @@
+# Binary documents must never get line-ending conversion
+*.pdf binary
+*.xlsx binary
+*.docx binary
+*.zip binary
+*.png binary
+*.jpg binary
