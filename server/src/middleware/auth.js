@@ -60,7 +60,14 @@ async function verifyIdentity(req, res, next) {
     if (primaryEmail?.verification?.status !== 'verified') {
       return res.status(403).json({ success: false, code: 'EMAIL_UNVERIFIED', message: 'Verify your email address before continuing.' });
     }
-    const { rows } = await db.query('SELECT id, role, full_name, first_name, last_name, section, section_id, lrn_or_id FROM users WHERE id = ?', [userId]);
+    const { rows } = await db.query('SELECT id, role, full_name, first_name, last_name, section, section_id, lrn_or_id, status, suspended_reason FROM users WHERE id = ?', [userId]);
+    if (rows[0]?.status === 'SUSPENDED' && !req.allowSuspended) {
+      return res.status(403).json({
+        success: false, code: 'ACCOUNT_SUSPENDED',
+        message: 'Your account is suspended. Contact your school administrator.',
+        suspended_reason: rows[0].suspended_reason || null
+      });
+    }
     req.user = {
       user_id: userId,
       id: userId,

@@ -18,7 +18,12 @@ try {
     [{ role: 'ADMIN', email_verified: true }, '/admin'], [{ role: 'ADMIN', email_verified: false }, '/onboarding'],
     [{ ...profile, instructor_application: { status: 'PENDING' } }, '/instructor/apply'],
     [{ ...profile, instructor_application: { status: 'REJECTED' } }, '/instructor/apply'],
-    [{ ...profile, enrollment_status: 'APPROVED', instructor_application: { status: 'PENDING' } }, '/student/dashboard']
+    [{ ...profile, enrollment_status: 'APPROVED', instructor_application: { status: 'PENDING' } }, '/student/dashboard'],
+    [{ ...profile, enrollment_status: 'APPROVED', status: 'SUSPENDED' }, '/suspended'],
+    [{ role: 'TEACHER', email_verified: true, status: 'SUSPENDED' }, '/suspended'],
+    [{ role: 'ADMIN', email_verified: true, status: 'SUSPENDED' }, '/suspended'],
+    [{ role: 'TEACHER', email_verified: false, status: 'SUSPENDED' }, '/onboarding'],
+    [{ role: 'TEACHER', email_verified: true, status: 'ACTIVE' }, '/teacher/dashboard']
   ]) assert.equal(accountHome(user), destination);
   assert.equal(isAuthStart('/register'), true);
   assert.equal(isAuthStart('/register/protect-check'), false);

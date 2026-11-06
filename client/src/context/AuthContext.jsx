@@ -45,6 +45,12 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('auth:expired', expired);
   }, [refreshUser]);
 
+  // An API call was refused because an admin suspended the account: reload the profile so the app routes to /suspended.
+  useEffect(() => {
+    window.addEventListener('auth:suspended', refreshUser);
+    return () => window.removeEventListener('auth:suspended', refreshUser);
+  }, [refreshUser]);
+
   useEffect(() => {
     if (!isLoaded) return;
     const generation = ++syncGenerationRef.current;

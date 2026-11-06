@@ -1,10 +1,11 @@
-import { env } from 'cloudflare:workers';
+import { env, waitUntil } from 'cloudflare:workers';
 import { httpServerHandler } from 'cloudflare:node';
 import app from './app.js';
 import fileContent from './services/fileContent.js';
 import { cleanupStale } from './services/fileService.js';
 
 app.locals.env = env;
+app.locals.waitUntil = waitUntil;
 app.listen(5001);
 const handler = httpServerHandler({ port: 5001 });
 

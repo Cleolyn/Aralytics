@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const db = require('../config/database');
 const { verifyIdentity, requireTeacher, requireStudent } = require('../middleware/auth');
 const { getEnrollment, findInvitation, submitEnrollment, reviewEnrollment, hashCode, fail } = require('../services/enrollmentService');
+const { contactOf } = require('../services/accountAdminService');
+const notifier = require('../services/notifier');
 router.use(verifyIdentity);
 router.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res)).catch(next);
@@ -55,6 +57,14 @@ router.patch('/invitations/:id/close', requireTeacher, wrap(async (req, res) => 
   res.json({ success: true });
 }));
 router.patch('/requests/:userId', requireTeacher, wrap(async (req, res) => {
-  res.json({ enrollment: await reviewEnrollment(req.user.id, req.params.userId, req.body.status, req.body.reason) });
+  const enrollment = await reviewEnrollment(req.user.id, req.params.userId, req.body.status, req.body.reason);
+  try {
+    const student = await contactOf(req.params.userId);
+    if (student) {
+      notifier.notify(req, enrollment.status === 'APPROVED' ? 'enrollment.approved' : 'enrollment.rejected',
+        { to: student.email, name: enrollment.full_name, adviser_name: enrollment.adviser_name, reason: enrollment.reason });
+    }
+  } catch (err) { console.error('[NOTIFIER] enrollment lookup failed:', err.message); }
+  res.json({ enrollment });
 }));
 module.exports = router;

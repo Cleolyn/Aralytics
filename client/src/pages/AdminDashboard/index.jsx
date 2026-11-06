@@ -9,13 +9,17 @@ import ApplicationsTable from './ApplicationsTable';
 import InstructorsTable from './InstructorsTable';
 import StorageTable from './StorageTable';
 import ReviewDialog from './ReviewDialog';
+import PeopleTable from './PeopleTable';
+import AuditLogTable from './AuditLogTable';
 
 const TABS = [
   ['pending', 'Waiting for review', 'pending'],
   ['approved', 'Approved', 'approved'],
   ['rejected', 'Returned', 'rejected'],
   ['instructors', 'Instructors', 'instructors'],
-  ['storage', 'Storage', null]
+  ['storage', 'Storage', null],
+  ['people', 'People', null],
+  ['activity', 'Activity', null]
 ];
 
 /** Admin workspace: verify instructor applications and see who has instructor access. */
@@ -28,7 +32,7 @@ export default function AdminDashboard() {
 
   const summary = useRemoteData(api.getAdminSummary);
   const list = useRemoteData(
-    () => (tab === 'storage' ? api.getAdminStorage() : tab === 'instructors' ? api.getInstructors() : api.getInstructorApplications({ status: tab.toUpperCase() })),
+    () => (tab === 'people' || tab === 'activity' ? null : tab === 'storage' ? api.getAdminStorage() : tab === 'instructors' ? api.getInstructors() : api.getInstructorApplications({ status: tab.toUpperCase() })),
     [tab]
   );
   const counts = summary.data?.summary;
@@ -64,7 +68,7 @@ export default function AdminDashboard() {
           <p>Verify instructor applications and keep an eye on file storage. Only approved instructors can create classes and see student records.</p>
         </div>
       </div>
-      <Notice error>{summary.error || list.error || (!reviewing && tab !== 'storage' && action.error)}</Notice>
+      <Notice error>{summary.error || list.error || (!reviewing && tab !== 'storage' && tab !== 'people' && action.error)}</Notice>
       <Notice success>{action.message}</Notice>
       {(summary.error || list.error) && (
         <button className="text-action" onClick={() => { summary.refresh(); list.refresh(); }}>Try again</button>
@@ -76,7 +80,11 @@ export default function AdminDashboard() {
           </button>
         ))}
       </div>
-      {list.loading ? (
+      {tab === 'people' ? (
+        <PeopleTable />
+      ) : tab === 'activity' ? (
+        <AuditLogTable />
+      ) : list.loading ? (
         <Loading>Loading…</Loading>
       ) : tab === 'storage' ? (
         list.data && <StorageTable storage={list.data} saving={Boolean(action.busy)} error={action.error} onPurge={purge} />

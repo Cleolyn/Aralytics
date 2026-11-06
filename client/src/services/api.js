@@ -64,6 +64,7 @@ export async function request(endpoint, options = {}) {
     try { data = await res.json(); }
     catch { throw new Error('The server returned an unreadable response. Check that the backend is running and try again.'); }
     if (!res.ok) {
+      if (data.code === 'ACCOUNT_SUSPENDED') window.dispatchEvent(new CustomEvent('auth:suspended'));
       throw Object.assign(new Error(data.message || `Request failed with status ${res.status}`), { code: data.code, status: res.status });
     }
 
@@ -154,6 +155,12 @@ export const api = {
   // [A] teaching content — add below
   // ---
   // [B] admin and accounts — add below
+  getAdminUsers: p => request(withQuery('/admin/users', p)),
+  suspendUser: (id, p) => post(`/admin/users/${encodeURIComponent(id)}/suspend`, p),
+  unsuspendUser: id => post(`/admin/users/${encodeURIComponent(id)}/unsuspend`, {}),
+  revokeInstructor: (id, p) => post(`/admin/users/${encodeURIComponent(id)}/revoke-instructor`, p),
+  deleteUser: (id, p) => post(`/admin/users/${encodeURIComponent(id)}`, p, 'DELETE'),
+  getAuditLog: p => request(withQuery('/admin/audit', p)),
   // ---
   // [C] announcements — add below
   getAnnouncements: p => request(withQuery('/announcements', p)),

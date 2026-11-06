@@ -35,6 +35,7 @@ import InstructorApplicationPage from '../pages/InstructorApplication';
 // [A] teaching content — add below
 // ---
 // [B] admin and accounts — add below
+import SuspendedPage from '../pages/SuspendedPage';
 // ---
 // [C] announcements — add below
 import AnnouncementsPage from '../pages/AnnouncementsPage';
@@ -250,6 +251,7 @@ export default function AppRoutes() {
       {/* [A] teaching content routes — add below */}
       {/* --- */}
       {/* [B] admin and accounts routes — add below */}
+      <Route path="/suspended" element={<SuspendedPage />} />
       {/* --- */}
       {/* [C] announcements routes — add below */}
       <Route path="/teacher/announcements" element={<ProtectedRoute role="TEACHER"><TeacherLayout><AnnouncementsPage /></TeacherLayout></ProtectedRoute>} />
