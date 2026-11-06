@@ -1,70 +1,73 @@
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Plus } from '../components/icons';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import useRemoteData from '../hooks/useRemoteData';
+import useAsyncAction, { requireSuccess } from '../hooks/useAsyncAction';
 import Dialog from '../components/ui/Dialog';
 import { EmptyState, Loading, Notice, Status } from '../components/ui/Feedback';
 import { cleanText, formatDate } from '../utils/learning';
+import TaskFormDialog from './Assessments/TaskFormDialog';
+import ConfirmDeleteDialog from './Assessments/ConfirmDeleteDialog';
 
 export default function AssessmentsPage() {
+  const { user } = useAuth();
   const { data, loading, error, refresh } = useRemoteData(async () => {
     const [q, t, c] = await Promise.all([api.getQuizzes(), api.getPerformanceTasks(), api.getTaxonomy()]);
     return { quizzes: q.quizzes, tasks: t.tasks, competencies: c.flatCompetencies };
   });
   const [tab, setTab] = useState('Quizzes');
   const [search, setSearch] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState('');
-  const [message, setMessage] = useState('');
-  const [form, setForm] = useState({
-    title: '',
-    instructions: '',
-    competency_id: '',
-    quarter: 'Q1',
-    due_date: '',
-    total_points: 40,
-    rubric_criteria: ''
-  });
+  const [taskDialog, setTaskDialog] = useState(null); // null | { task? }
+  const [deleting, setDeleting] = useState(null); // null | { kind, item }
+  const action = useAsyncAction();
   const closePreview = useCallback(() => setPreview(null), []);
-  const closeCreate = useCallback(() => setShowCreate(false), []);
+  const closeTaskDialog = useCallback(() => setTaskDialog(null), []);
+  const closeDelete = useCallback(() => setDeleting(null), []);
+
+  const canManage = a => user?.role === 'ADMIN' || a.created_by === user?.id;
+  const isQuizzes = tab === 'Quizzes';
   const items =
-    (tab === 'Quizzes' ? data?.quizzes : data?.tasks)?.filter(a =>
-      a.title.toLowerCase().includes(search.toLowerCase())
+    (isQuizzes ? data?.quizzes : data?.tasks)?.filter(
+      a => a.title.toLowerCase().includes(search.toLowerCase()) && (showArchived || !a.archived_at)
     ) || [];
-  async function view(id) {
-    setBusy(true);
-    setActionError('');
-    try {
+
+  const view = id =>
+    action.run(async () => {
       setPreview((await api.getQuizById(id)).quiz);
-    } catch (err) {
-      setActionError(err.message);
-    } finally {
-      setBusy(false);
-    }
+    }, { key: id, clearMessage: true });
+
+  const toggleArchive = a =>
+    action.run(
+      async () => {
+        const archiving = !a.archived_at;
+        if (isQuizzes) requireSuccess(await (archiving ? api.archiveQuiz(a.id) : api.restoreQuiz(a.id)));
+        else requireSuccess(await (archiving ? api.archivePerformanceTask(a.id) : api.restorePerformanceTask(a.id)));
+        action.setMessage(archiving ? 'Archived. Students no longer see it.' : 'Restored. Students can see it again.');
+        refresh();
+      },
+      { key: a.id, clearMessage: true }
+    );
+
+  const finish = message => {
+    setTaskDialog(null);
+    setDeleting(null);
+    action.setMessage(message);
+    refresh();
+  };
+
+  function statusOf(a) {
+    if (a.archived_at) return <Status>Archived</Status>;
+    return (
+      <Status tone="good">
+        {isQuizzes ? (a.is_published ? 'Active' : 'Draft') : `${a.stats?.pending_count || 0} to grade`}
+      </Status>
+    );
   }
-  async function create(e) {
-    e.preventDefault();
-    setBusy(true);
-    setActionError('');
-    try {
-      const res = await api.createPerformanceTask({
-        ...form,
-        total_points: Number(form.total_points),
-        due_date: form.due_date ? `${form.due_date}T23:59:59+08:00` : null
-      });
-      if (!res.success) throw new Error(res.message);
-      setShowCreate(false);
-      setMessage('Class task saved. Students can now see it in Activities.');
-      refresh();
-    } catch (err) {
-      setActionError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
+
   return (
     <div className="container">
       <div className="page-heading">
@@ -73,7 +76,7 @@ export default function AssessmentsPage() {
           <p>Create and manage quizzes and class tasks for your students.</p>
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => setShowCreate(true)}>
+          <button className="btn btn-secondary" onClick={() => setTaskDialog({})}>
             <Plus size={17} />
             Create task
           </button>
@@ -83,8 +86,8 @@ export default function AssessmentsPage() {
           </Link>
         </div>
       </div>
-      <Notice error>{error || (!showCreate && actionError)}</Notice>
-      <Notice success>{message}</Notice>
+      <Notice error>{error || action.error}</Notice>
+      <Notice success>{action.message}</Notice>
       {error && (
         <button className="text-action" onClick={refresh}>
           Try again
@@ -109,6 +112,10 @@ export default function AssessmentsPage() {
             placeholder="Type a title…"
           />
         </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
+          Show archived
+        </label>
       </div>
       {loading ? (
         <Loading>Loading quizzes and tasks…</Loading>
@@ -120,7 +127,7 @@ export default function AssessmentsPage() {
             <thead>
               <tr>
                 <th>Title</th>
-                <th>{tab === 'Quizzes' ? 'Time limit' : 'Due date'}</th>
+                <th>{isQuizzes ? 'Time limit' : 'Due date'}</th>
                 <th>Points</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -133,30 +140,40 @@ export default function AssessmentsPage() {
                     <strong>{cleanText(a.title)}</strong>
                     <small>{cleanText(a.melc_code || a.topic_title)}</small>
                   </td>
-                  <td>{tab === 'Quizzes' ? `${a.time_limit_minutes} min` : formatDate(a.due_date)}</td>
+                  <td>{isQuizzes ? `${a.time_limit_minutes} min` : formatDate(a.due_date)}</td>
                   <td>{a.total_points}</td>
+                  <td>{statusOf(a)}</td>
                   <td>
-                    <Status tone="good">
-                      {tab === 'Quizzes'
-                        ? a.is_published
-                          ? 'Active'
-                          : 'Draft'
-                        : `${a.stats?.pending_count || 0} to grade`}
-                    </Status>
-                  </td>
-                  <td>
-                    {tab === 'Quizzes' ? (
-                      <button className="text-action" disabled={busy} onClick={() => view(a.id)}>
-                        View questions <ArrowRight size={15} />
-                      </button>
-                    ) : (
-                      <Link
-                        className="text-action"
-                        to={`/teacher/gradebook?view=tasks&task=${encodeURIComponent(a.id)}`}
-                      >
-                        Check submissions <ArrowRight size={15} />
-                      </Link>
-                    )}
+                    <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {isQuizzes ? (
+                        <button className="text-action" disabled={Boolean(action.busy)} onClick={() => view(a.id)}>
+                          View questions <ArrowRight size={15} />
+                        </button>
+                      ) : (
+                        <Link className="text-action" to={`/teacher/gradebook?view=tasks&task=${encodeURIComponent(a.id)}`}>
+                          Check submissions <ArrowRight size={15} />
+                        </Link>
+                      )}
+                      {canManage(a) && (
+                        <>
+                          {isQuizzes ? (
+                            <Link className="text-action" to={`/teacher/quizzes/${encodeURIComponent(a.id)}/edit`}>
+                              Edit
+                            </Link>
+                          ) : (
+                            <button className="text-action" onClick={() => setTaskDialog({ task: a })}>
+                              Edit
+                            </button>
+                          )}
+                          <button className="text-action" disabled={action.busy === a.id} onClick={() => toggleArchive(a)}>
+                            {a.archived_at ? 'Restore' : 'Archive'}
+                          </button>
+                          <button className="text-action" onClick={() => setDeleting({ kind: isQuizzes ? 'quiz' : 'task', item: a })}>
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -187,93 +204,10 @@ export default function AssessmentsPage() {
           </ul>
         </Dialog>
       )}
-      {showCreate && (
-        <Dialog title="Create a class task" onClose={closeCreate}>
-          <Notice error>{actionError}</Notice>
-          <form onSubmit={create}>
-            <div className="field">
-              <label htmlFor="task-title">Title</label>
-              <input
-                id="task-title"
-                className="form-input"
-                value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="task-goal">Topic</label>
-              <select
-                id="task-goal"
-                className="form-input"
-                value={form.competency_id}
-                onChange={e => {
-                  const c = data?.competencies.find(c => c.id === e.target.value);
-                  setForm({ ...form, competency_id: e.target.value, quarter: c?.quarter_code || 'Q1' });
-                }}
-                required
-              >
-                <option value="">Choose a topic</option>
-                {data?.competencies.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {cleanText(c.melc_code)} · {cleanText(c.description)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="task-instructions">Instructions</label>
-              <textarea
-                id="task-instructions"
-                className="form-input"
-                value={form.instructions}
-                onChange={e => setForm({ ...form, instructions: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-grid">
-              <div className="field">
-                <label htmlFor="task-due">Due date</label>
-                <input
-                  id="task-due"
-                  className="form-input"
-                  type="date"
-                  value={form.due_date}
-                  onChange={e => setForm({ ...form, due_date: e.target.value })}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="task-points">Total points</label>
-                <input
-                  id="task-points"
-                  className="form-input"
-                  type="number"
-                  min={1}
-                  max={1000}
-                  value={form.total_points}
-                  onChange={e => setForm({ ...form, total_points: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-            <div className="field">
-              <label htmlFor="task-rubric">Grading guide (optional)</label>
-              <textarea
-                id="task-rubric"
-                className="form-input"
-                value={form.rubric_criteria}
-                onChange={e => setForm({ ...form, rubric_criteria: e.target.value })}
-              />
-            </div>
-            <p className="muted" style={{ marginBottom: 20 }}>
-              Saving this task makes it visible to your students.
-            </p>
-            <button className="btn btn-primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save task'}
-            </button>
-          </form>
-        </Dialog>
+      {taskDialog && (
+        <TaskFormDialog task={taskDialog.task} competencies={data?.competencies || []} onClose={closeTaskDialog} onSaved={finish} />
       )}
+      {deleting && <ConfirmDeleteDialog kind={deleting.kind} item={deleting.item} onClose={closeDelete} onDone={finish} />}
     </div>
   );
 }

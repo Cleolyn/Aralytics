@@ -17,6 +17,8 @@ function addDownloadUrls(req, submissions) {
   return files.decorateUrls(files.envOf(req), req.user, submissions, { urlKey: 'file_url', legacyKind: 'performance-tasks', legacyAllowed });
 }
 
+const teaching = require('../services/teachingContentService');
+
 /**
  * GET /api/performance-tasks
  * Retrieve performance tasks with optional quarter filtering.
@@ -38,6 +40,12 @@ async function getAllTasks(req, res, next) {
     `;
     const params = [];
 
+    if (isStudent) {
+      // Students see un-archived tasks made by their approved adviser only.
+      const scope = await teaching.adviserFilter(req.user, 'pt.created_by');
+      query += ` AND pt.archived_at IS NULL${scope.sql}`;
+      params.push(...scope.params);
+    }
     if (quarter) {
       query += ` AND pt.quarter = ?`;
       params.push(quarter);
@@ -113,6 +121,10 @@ async function getTaskById(req, res, next) {
     }
 
     const task = tasks[0];
+
+    if (isStudent && (task.archived_at || !(await teaching.canSee(req.user, task.created_by)))) {
+      return res.status(404).json({ success: false, message: 'Performance task not found.' });
+    }
 
     if (isStudent) {
       const { rows: subs } = await db.query(
@@ -204,9 +216,12 @@ async function submitTask(req, res, next) {
     }
 
     // Verify task exists
-    const { rows: tasks } = await db.query(`SELECT id FROM performance_tasks WHERE id = ? LIMIT 1`, [id]);
-    if (tasks.length === 0) {
+    const { rows: tasks } = await db.query(`SELECT id, created_by, archived_at FROM performance_tasks WHERE id = ? LIMIT 1`, [id]);
+    if (tasks.length === 0 || !(await teaching.canSee(req.user, tasks[0].created_by))) {
       return res.status(404).json({ success: false, message: 'Performance task not found.' });
+    }
+    if (tasks[0].archived_at) {
+      return res.status(409).json({ success: false, code: 'TASK_ARCHIVED', message: 'This task has been archived and no longer accepts submissions.' });
     }
 
     const upload = file_id ? await files.requireAttachable(file_id, req.user, 'submission') : null;
@@ -395,7 +410,19 @@ async function downloadFile(req, res, next) {
   } catch (err) { next(err); }
 }
 
+const updateTask = async (req, res) => res.json({ success: true, task: await teaching.updateTask(req.user, req.params.id, req.body || {}) });
+const deleteTask = async (req, res) => {
+  const force = ['1', 'true'].includes(String(req.query.force));
+  res.json({ success: true, ...(await teaching.deleteTask(files.envOf(req), req.user, req.params.id, { force })) });
+};
+const archiveTask = async (req, res) => res.json({ success: true, task: await teaching.setTaskArchived(req.user, req.params.id, true) });
+const restoreTask = async (req, res) => res.json({ success: true, task: await teaching.setTaskArchived(req.user, req.params.id, false) });
+
 module.exports = {
+  updateTask,
+  deleteTask,
+  archiveTask,
+  restoreTask,
   getAllTasks,
   getTaskById,
   createTask,

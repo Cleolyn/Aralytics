@@ -5,6 +5,7 @@ const files = require('../services/fileService');
 const materialRoot = path.resolve(__dirname, '../../resources/materials');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const teaching = require('../services/teachingContentService');
 
 /**
  * Adds download_url (signed, only when the viewer may read the file) and resource_available.
@@ -39,6 +40,12 @@ async function getAllMaterials(req, res, next) {
     const params = [];
 
     const conditions = [];
+    // Students only see lessons from their approved adviser.
+    const scope = await teaching.adviserFilter(req.user, 'm.created_by');
+    if (scope.sql) {
+      conditions.push(scope.sql.replace(/^ AND /, ''));
+      params.push(...scope.params);
+    }
     if (competency_id) {
       conditions.push(`m.competency_id = ?`);
       params.push(competency_id);
@@ -79,6 +86,9 @@ async function getMaterialById(req, res, next) {
     );
 
     if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Material not found.' });
+    }
+    if (!(await teaching.canSee(req.user, rows[0].created_by))) {
       return res.status(404).json({ success: false, message: 'Material not found.' });
     }
 

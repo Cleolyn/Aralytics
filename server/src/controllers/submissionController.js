@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const teaching = require('../services/teachingContentService');
 
 async function startQuiz(req, res, next) {
   try {
@@ -16,7 +17,7 @@ async function startQuiz(req, res, next) {
       [quiz_id]
     );
 
-    if (quizRows.length === 0) {
+    if (quizRows.length === 0 || (req.user.role === 'STUDENT' && (quizRows[0].archived_at || !(await teaching.canSee(req.user, quizRows[0].created_by))))) {
       return res.status(404).json({ success: false, message: 'Active quiz not found or not published.' });
     }
 
@@ -75,7 +76,8 @@ async function submitQuiz(req, res, next) {
 
     // 1. Fetch submission and quiz
     const { rows: subRows } = await db.query(
-      `SELECT s.*, q.competency_id, q.total_points, q.passing_score, q.max_blur_limit, q.is_post_test, q.intervention_id
+      `SELECT s.*, q.competency_id, q.total_points, q.passing_score, q.max_blur_limit, q.is_post_test, q.intervention_id,
+              q.is_published, q.archived_at, q.created_by AS quiz_created_by
        FROM quiz_submissions s
        JOIN quizzes q ON s.quiz_id = q.id
        WHERE s.id = ? AND s.student_id = ? LIMIT 1`,
@@ -87,6 +89,12 @@ async function submitQuiz(req, res, next) {
     }
 
     const submission = subRows[0];
+    if (!(await teaching.canSee(req.user, submission.quiz_created_by))) {
+      return res.status(404).json({ success: false, message: 'Valid submission session not found.' });
+    }
+    if (submission.status !== 'SUBMITTED' && (submission.archived_at || !submission.is_published)) {
+      return res.status(409).json({ success: false, code: 'QUIZ_ARCHIVED', message: 'This quiz has been archived by your teacher and can no longer be submitted.' });
+    }
     if (submission.status === 'SUBMITTED') {
       return res.status(400).json({ success: false, message: 'Quiz has already been submitted.' });
     }

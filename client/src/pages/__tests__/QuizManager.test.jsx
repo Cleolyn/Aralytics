@@ -6,7 +6,17 @@ import QuizManager from '../QuizManager';
 import { api } from '../../services/api';
 
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'teach-1' } }) }));
-vi.mock('../../services/api', () => ({ api: { getTaxonomy: vi.fn(), createQuiz: vi.fn() } }));
+vi.mock('../../services/api', () => ({ api: { getTaxonomy: vi.fn(), createQuiz: vi.fn(), getQuizById: vi.fn(), updateQuiz: vi.fn() } }));
+
+const opts = (...texts) => ['A', 'B', 'C', 'D'].map((id, i) => ({ id, text: texts[i] }));
+const savedQuiz = (attempts = 0) => ({
+  id: 'quiz-9', competency_id: 'c1', title: 'Saved quiz', instructions: 'Old notes', time_limit_minutes: 30, passing_score: 2, max_blur_limit: 4,
+  attempt_count: attempts,
+  questions: [
+    { id: 'qa', question_text: 'First?', question_type: 'MULTIPLE_CHOICE', points: 1, options: opts('a1', 'a2', 'a3', 'a4'), correct_answer: 'B' },
+    { id: 'qb', question_text: 'Second?', question_type: 'SITUATIONAL', points: 2, options: opts('b1', 'b2', 'b3', 'b4'), correct_answer: 'D' }
+  ]
+});
 
 const DRAFT_KEY = 'aralytics:quiz-draft:teach-1';
 const questionSection = n => screen.getByRole('heading', { name: `Question ${n}` }).closest('section');
@@ -31,6 +41,66 @@ async function fillQuizInfo(user) {
 beforeEach(() => {
   api.getTaxonomy.mockResolvedValue({ flatCompetencies: [{ id: 'c1', melc_code: 'AP10_1', description: 'Climate topic' }] });
   api.createQuiz.mockResolvedValue({ success: true });
+  api.updateQuiz.mockResolvedValue({ success: true });
+  api.getQuizById.mockResolvedValue({ success: true, quiz: savedQuiz() });
+});
+
+describe('QuizManager edit mode', () => {
+  const renderEdit = onQuizCreated => renderPage(<QuizManager onQuizCreated={onQuizCreated} />, { route: '/teacher/quizzes/quiz-9/edit', path: '/teacher/quizzes/:id/edit' });
+
+  it('loads the quiz, ignores device drafts, and saves a full update', async () => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ title: 'Stale draft', questions: [{ key: 'x', question_text: 'Stale', question_type: 'MULTIPLE_CHOICE', points: 1, options: opts('1', '2', '3', '4'), correct_answer: 'A' }] }));
+    const onSaved = vi.fn();
+    const { user } = renderEdit(onSaved);
+    expect(await screen.findByRole('heading', { name: 'Edit quiz' })).toBeInTheDocument();
+    expect(api.getQuizById).toHaveBeenCalledWith('quiz-9');
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue('Saved quiz'));
+    expect(screen.getByRole('heading', { name: 'Questions (2)' })).toBeInTheDocument();
+    expect(within(questionSection(2)).getByLabelText('Choice D')).toHaveValue('b4');
+    expect(screen.queryByRole('button', { name: 'Save draft' })).not.toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText('Title'));
+    await user.type(screen.getByLabelText('Title'), 'Renamed quiz');
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
+    await waitFor(() => expect(api.updateQuiz).toHaveBeenCalledTimes(1));
+    const [id, payload] = api.updateQuiz.mock.calls[0];
+    expect(id).toBe('quiz-9');
+    expect(payload).toMatchObject({ title: 'Renamed quiz', competency_id: 'c1', passing_score: 2, time_limit_minutes: 30, max_blur_limit: 4 });
+    expect(payload.questions).toHaveLength(2);
+    expect(payload.questions[1]).toMatchObject({ question_text: 'Second?', correct_answer: 'D', points: 2 });
+    expect(api.createQuiz).not.toHaveBeenCalled();
+    expect(localStorage.getItem(DRAFT_KEY)).not.toBeNull(); // editing never touches the new-quiz draft
+    expect(onSaved).toHaveBeenCalled();
+  });
+
+  it('locks questions, topic and passing score once students have attempted it', async () => {
+    api.getQuizById.mockResolvedValue({ success: true, quiz: savedQuiz(3) });
+    const { user } = renderEdit();
+    expect(await screen.findByText(/Students have already taken this quiz/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue('Saved quiz'));
+    expect(screen.getByLabelText('Topic')).toBeDisabled();
+    expect(screen.getByLabelText('Passing score (out of 3)')).toBeDisabled();
+    expect(within(questionSection(1)).getByLabelText('Question')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Add question/ })).toBeDisabled();
+
+    await user.clear(screen.getByLabelText('Time limit (minutes)'));
+    await user.type(screen.getByLabelText('Time limit (minutes)'), '45');
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
+    await waitFor(() => expect(api.updateQuiz).toHaveBeenCalledTimes(1));
+    const payload = api.updateQuiz.mock.calls[0][1];
+    expect(payload).toMatchObject({ title: 'Saved quiz', instructions: 'Old notes', time_limit_minutes: 45, max_blur_limit: 4 });
+    expect(payload).not.toHaveProperty('questions');
+    expect(payload).not.toHaveProperty('competency_id');
+    expect(payload).not.toHaveProperty('passing_score');
+  });
+
+  it('shows the server message when saving fails', async () => {
+    api.updateQuiz.mockRejectedValue(Object.assign(new Error('Students have already taken this quiz.'), { code: 'QUIZ_LOCKED' }));
+    const { user } = renderEdit();
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue('Saved quiz'));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Students have already taken this quiz.');
+  });
 });
 
 describe('QuizManager', () => {

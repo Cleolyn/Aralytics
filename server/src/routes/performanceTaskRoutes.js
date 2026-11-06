@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/performanceTaskController');
+const { wrap } = require('../services/teachingContentService');
 const { verifyToken, requireRole } = require('../middleware/auth');
 const { signedOrAuthenticated } = require('../middleware/signedAccess');
 
@@ -24,5 +25,12 @@ router.get('/:id/submissions', verifyToken, requireRole('TEACHER'), controller.g
 
 // Teacher grade submission (TEACHER only - FR-44)
 router.patch('/submissions/:id/grade', verifyToken, requireRole('TEACHER'), controller.gradeSubmission);
+
+// Edit, delete and archive tasks (creator or ADMIN)
+const staff = requireRole(['TEACHER', 'ADMIN']);
+router.put('/:id', verifyToken, staff, wrap(controller.updateTask));
+router.delete('/:id', verifyToken, staff, wrap(controller.deleteTask));
+router.post('/:id/archive', verifyToken, staff, wrap(controller.archiveTask));
+router.post('/:id/restore', verifyToken, staff, wrap(controller.restoreTask));
 
 module.exports = router;

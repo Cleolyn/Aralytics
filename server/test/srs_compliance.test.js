@@ -6,6 +6,7 @@ const analyticsController = require('../src/controllers/analyticsController');
 const performanceTaskController = require('../src/controllers/performanceTaskController');
 const materialsController = require('../src/controllers/materialsController');
 const submissionController = require('../src/controllers/submissionController');
+const { enrollDemoStudent } = require('./helpers/enrollDemo');
 
 async function testSRSCompliance() {
   console.log('======================================================================');
@@ -13,6 +14,7 @@ async function testSRSCompliance() {
   console.log('======================================================================');
 
   await initializeDatabase();
+  await enrollDemoStudent(db); // students only reach their adviser's tasks
 
   const createMockRes = () => ({
     statusCode: 200,
@@ -175,6 +177,7 @@ async function testSRSCompliance() {
      VALUES (?, 'LRN-POST-999', 'Post', 'Student', 'post.test@student.deped.gov.ph', 'hash', 'STUDENT', '10-Rizal')`,
     [postStudentId]
   );
+  await enrollDemoStudent(db, postStudentId);
   await db.query(`DELETE FROM quiz_submission_answers WHERE submission_id IN (SELECT id FROM quiz_submissions WHERE student_id = ?)`, [postStudentId]);
   await db.query(`DELETE FROM quiz_submissions WHERE student_id = ?`, [postStudentId]);
 

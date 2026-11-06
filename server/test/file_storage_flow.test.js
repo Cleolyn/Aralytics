@@ -70,7 +70,7 @@ async function run() {
   await enroll('studentA', 'teacherA', 'APPROVED');
   await enroll('studentP', 'teacherA', 'PENDING');
   await enroll('studentB', 'teacherB', 'APPROVED');
-  for (const [id, owner] of [['task-a', 'teacherA'], ['task-b', 'teacherB']]) {
+  for (const [id, owner] of [['task-a', 'teacherA'], ['task-a2', 'teacherA'], ['task-b', 'teacherB']]) {
     await db.query(`INSERT INTO performance_tasks (id, quarter, competency_id, title, instructions, created_by)
       VALUES (?, 'Q1', ?, ?, 'Do it', ?)`, [id, COMPETENCY, id, owner]);
   }
@@ -219,7 +219,7 @@ async function run() {
     // Materials list: download_url only where the viewer may read the file
     const listed = async user => (await call('/materials', user)).data.materials.find(m => m.id === materialId);
     assert.match((await listed('studentA')).download_url, /\/content\?sig=/);
-    assert.equal((await listed('studentB')).download_url, null);
+    assert.equal(await listed('studentB'), undefined, "students only see their adviser's lessons");
     assert.equal((await listed('teacherB')).download_url, null);
     assert.equal((await listed('studentA')).resource_available, true);
     assert.equal((await listed('studentA')).storage_url, `/api/files/${fileId}/content`);
@@ -289,8 +289,8 @@ async function run() {
     const unattachedDelete = await call(`/files/${submission.id}`, 'studentA', { method: 'DELETE' });
     assert.equal(unattachedDelete.status, 409, 'submission files go away with the submission');
     // Wrong task, or someone else's upload, cannot be submitted
-    assert.equal((await call('/performance-tasks/task-b/submit', 'studentA', { method: 'POST', body: { file_id: submission.id } })).status, 400);
-    assert.equal((await call('/performance-tasks/task-a/submit', 'studentB', { method: 'POST', body: { file_id: submission.id } })).status, 400);
+    assert.equal((await call('/performance-tasks/task-a2/submit', 'studentA', { method: 'POST', body: { file_id: submission.id } })).status, 400);
+    assert.equal((await call('/performance-tasks/task-a/submit', 'studentB', { method: 'POST', body: { file_id: submission.id } })).status, 404, "another adviser's task is hidden");
     const submitted = await call('/performance-tasks/task-a/submit', 'studentA', { method: 'POST', body: { file_id: submission.id, notes: 'hello' } });
     assert.equal(submitted.status, 200);
     assert.equal(submitted.data.submission.file_name, 'work.pdf');
@@ -307,7 +307,10 @@ async function run() {
 
     // The teacher who set the task can read submissions from outside their class
     const outside = await upload('studentA', { purpose: 'submission', name: 'other.pdf', bytes: pdf(1000), task_id: 'task-b' });
+    // (the student briefly sits in teacherB's class, so the submit is allowed; then moves back)
+    await db.query("UPDATE enrollment_requests SET invitation_id = 'inv-teacherB' WHERE user_id = 'studentA'");
     await call('/performance-tasks/task-b/submit', 'studentA', { method: 'POST', body: { file_id: outside.id } });
+    await db.query("UPDATE enrollment_requests SET invitation_id = 'inv-teacherA' WHERE user_id = 'studentA'");
     assert.equal((await call(`/files/${outside.id}`, 'teacherB')).status, 200, 'task creator');
     assert.equal((await call(`/files/${outside.id}`, 'teacherA')).status, 200, 'class adviser');
 
@@ -474,7 +477,7 @@ async function run() {
 
     // Materials pointing at legacy files get signed legacy links; availability is probed
     await db.query(`INSERT INTO instructional_materials (id, competency_id, title, file_type, storage_url, file_size_bytes, content_hash, created_by)
-      VALUES ('mat-legacy', ?, 'Legacy', 'PDF', '/api/materials/download/x.pdf', 10, 'hash', 'teacherB')`, [COMPETENCY]);
+      VALUES ('mat-legacy', ?, 'Legacy', 'PDF', '/api/materials/download/x.pdf', 10, 'hash', 'teacherA')`, [COMPETENCY]);
     const legacyListed = (await call('/materials', 'studentA')).data.materials.find(m => m.id === 'mat-legacy');
     assert.equal(legacyListed.resource_available, true);
     assert.equal((await raw(legacyListed.download_url)).status, 200);

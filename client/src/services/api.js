@@ -153,6 +153,14 @@ export const api = {
   getReadLogs: () => request('/materials/read-logs'),
 
   // [A] teaching content — add below
+  updateQuiz: (id, p) => post(`/quizzes/${id}`, p, 'PUT'),
+  deleteQuiz: id => request(`/quizzes/${id}`, { method: 'DELETE' }),
+  archiveQuiz: id => post(`/quizzes/${id}/archive`, {}),
+  restoreQuiz: id => post(`/quizzes/${id}/restore`, {}),
+  updatePerformanceTask: (id, p) => post(`/performance-tasks/${id}`, p, 'PUT'),
+  deletePerformanceTask: (id, { force } = {}) => request(withQuery(`/performance-tasks/${id}`, force ? { force: 1 } : {}), { method: 'DELETE' }),
+  archivePerformanceTask: id => post(`/performance-tasks/${id}/archive`, {}),
+  restorePerformanceTask: id => post(`/performance-tasks/${id}/restore`, {}),
   // ---
   // [B] admin and accounts — add below
   getAdminUsers: p => request(withQuery('/admin/users', p)),

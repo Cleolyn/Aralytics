@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const files = require('../services/fileService');
+const teaching = require('../services/teachingContentService');
 const submissionController = require('./submissionController');
 const materialsController = require('./materialsController');
 const performanceTaskController = require('./performanceTaskController');
@@ -12,8 +13,10 @@ async function getStudentDashboard(req, res, next) {
   try {
     const studentId = req.user.id;
 
+    const quizScope = await teaching.adviserFilter(req.user, 'created_by');
+    const taskScope = await teaching.adviserFilter(req.user, 'pt.created_by');
     const [quizzesRes, interventionsRes, scoresRes, tasksRes] = await Promise.all([
-      db.query(`SELECT id, quarter, title, description, time_limit_minutes, total_points, passing_score FROM quizzes WHERE is_published = 1 AND is_active = 1 ORDER BY quarter ASC, id ASC`),
+      db.query(`SELECT id, quarter, title, description, time_limit_minutes, total_points, passing_score FROM quizzes WHERE is_published = 1 AND is_active = 1 AND archived_at IS NULL${quizScope.sql} ORDER BY quarter ASC, id ASC`, quizScope.params),
       db.query(
         `SELECT ri.*, lc.melc_code, lc.description as competency_desc, lc.ilaw_tag,
                 m.title as remedial_material_title, m.file_type as remedial_file_type, m.storage_url as remedial_storage_url
@@ -36,8 +39,9 @@ async function getStudentDashboard(req, res, next) {
         `SELECT pt.*, pts.id as submission_id, pts.status as submission_status, pts.score, pts.feedback, pts.submitted_at as my_submitted_at
          FROM performance_tasks pt
          LEFT JOIN performance_task_submissions pts ON pt.id = pts.task_id AND pts.student_id = ?
+         WHERE pt.archived_at IS NULL${taskScope.sql}
          ORDER BY pt.created_at DESC`,
-        [studentId]
+        [studentId, ...taskScope.params]
       )
     ]);
 
@@ -73,6 +77,9 @@ async function getStudentLessons(req, res, next) {
       WHERE 1=1
     `;
     const params = [];
+    const scope = await teaching.adviserFilter(req.user, 'm.created_by');
+    query += scope.sql;
+    params.push(...scope.params);
     if (competency_id) {
       query += ` AND m.competency_id = ?`;
       params.push(competency_id);

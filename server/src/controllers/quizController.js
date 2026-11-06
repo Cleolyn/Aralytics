@@ -1,9 +1,10 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const teaching = require('../services/teachingContentService');
 
 async function getAllQuizzes(req, res, next) {
   try {
-    const isTeacher = req.user.role === 'TEACHER';
+    const isTeacher = req.user.role !== 'STUDENT';
     const studentId = req.user.id;
 
     let query = `
@@ -14,13 +15,17 @@ async function getAllQuizzes(req, res, next) {
       JOIN users u ON q.created_by = u.id
     `;
 
+    let params = [];
     if (!isTeacher) {
-      query += ` WHERE q.is_published = 1`;
+      // Students only see published, un-archived quizzes made by their approved adviser.
+      const scope = await teaching.adviserFilter(req.user, 'q.created_by');
+      query += ` WHERE q.is_published = 1 AND q.archived_at IS NULL${scope.sql}`;
+      params = scope.params;
     }
 
     query += ` ORDER BY q.created_at DESC`;
 
-    const { rows: quizzes } = await db.query(query);
+    const { rows: quizzes } = await db.query(query, params);
 
     // If student, attach submission status for each quiz
     if (!isTeacher) {
@@ -41,7 +46,8 @@ async function getAllQuizzes(req, res, next) {
       return res.json({ success: true, quizzes: enriched });
     }
 
-    res.json({ success: true, quizzes });
+    const counts = await teaching.attemptCounts();
+    res.json({ success: true, quizzes: quizzes.map((quiz) => ({ ...quiz, attempt_count: counts.get(quiz.id) || 0 })) });
   } catch (err) {
     next(err);
   }
@@ -50,7 +56,7 @@ async function getAllQuizzes(req, res, next) {
 async function getQuizById(req, res, next) {
   try {
     const { id } = req.params;
-    const isTeacher = req.user.role === 'TEACHER';
+    const isTeacher = req.user.role !== 'STUDENT';
 
     const { rows: quizRows } = await db.query(
       `SELECT q.*, lc.melc_code, lc.ilaw_tag, lc.description as competency_desc
@@ -65,6 +71,9 @@ async function getQuizById(req, res, next) {
     }
 
     const quiz = quizRows[0];
+    if (!isTeacher && (!quiz.is_published || quiz.archived_at || !(await teaching.canSee(req.user, quiz.created_by)))) {
+      return res.status(404).json({ success: false, message: 'Quiz not found.' });
+    }
 
     const { rows: questionRows } = await db.query(
       `SELECT id, quiz_id, question_text, question_type, options_json, points, order_index
@@ -97,7 +106,8 @@ async function getQuizById(req, res, next) {
       quiz: {
         ...quiz,
         questions,
-        currentSubmission
+        currentSubmission,
+        ...(isTeacher ? { attempt_count: await teaching.attemptCount(id) } : {})
       }
     });
   } catch (err) {
@@ -177,8 +187,17 @@ async function createQuiz(req, res, next) {
   }
 }
 
+const updateQuiz = async (req, res) => res.json({ success: true, quiz: await teaching.updateQuiz(req.user, req.params.id, req.body || {}) });
+const deleteQuiz = async (req, res) => res.json({ success: true, ...(await teaching.deleteQuiz(req.user, req.params.id)) });
+const archiveQuiz = async (req, res) => res.json({ success: true, quiz: await teaching.setQuizArchived(req.user, req.params.id, true) });
+const restoreQuiz = async (req, res) => res.json({ success: true, quiz: await teaching.setQuizArchived(req.user, req.params.id, false) });
+
 module.exports = {
   getAllQuizzes,
   getQuizById,
-  createQuiz
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  archiveQuiz,
+  restoreQuiz
 };
