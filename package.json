@@ -20,6 +20,7 @@
     "db:init": "npm run db:init --workspace server",
     "db:seed": "npm run db:seed --workspace server",
     "db:samples": "npm run db:samples --workspace server",
+    "demo:accounts": "npm run demo:accounts --workspace server",
     "test": "npm run test --workspace server && npm run test --workspace client",
     "test:server": "npm run test --workspace server",
     "test:client": "npm run test --workspace client",

@@ -14,6 +14,7 @@
     "db:init": "node src/db/init.js",
     "db:seed": "node src/db/seeds",
     "db:samples": "node src/db/seeds --outputs",
+    "demo:accounts": "node src/db/seeds/demoAccounts.js --allow-remote",
     "test": "node test/run.js",
     "test:enrollment": "node test/run.js enrollment_flow",
     "test:redesign": "node test/run.js redesign_flow offline_policy",
