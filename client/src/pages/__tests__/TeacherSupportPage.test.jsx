@@ -125,6 +125,22 @@ describe('TeacherSupportPage', () => {
     expect(await screen.findByText('Practice plan removed.')).toBeInTheDocument();
   });
 
+  it('assigns custom practice to a learner with an optional review material', async () => {
+    api.getMaterials.mockResolvedValue({ materials: [{ id: 'm-c1', competency_id: 'c1', title: 'Topic_One_Reviewer' }] });
+    const { user } = renderPage(<TeacherSupportPage />);
+    await screen.findByText('Jose Rizal');
+    await user.click(screen.getByRole('button', { name: /Assign practice/ }));
+    const dialog = screen.getByRole('dialog', { name: 'Assign extra practice' });
+    expect(within(dialog).getByRole('option', { name: 'Juan Cruz (10-Rizal)' })).toBeInTheDocument();
+    await user.selectOptions(within(dialog).getByLabelText('Student'), 'u1');
+    await user.selectOptions(within(dialog).getByLabelText('Topic'), 'c1');
+    await user.selectOptions(within(dialog).getByLabelText('Review material (optional)'), 'm-c1');
+    await user.click(within(dialog).getByRole('button', { name: 'Assign practice' }));
+    expect(api.createIntervention).toHaveBeenCalledWith({ student_id: 'u1', competency_id: 'c1', material_id: 'm-c1', status: 'ASSIGNED' });
+    expect(await screen.findByText('Practice plan assigned to student.')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('assigns custom practice to a learner', async () => {
     const { user } = renderPage(<TeacherSupportPage />);
     await screen.findByText('Jose Rizal');

@@ -133,6 +133,7 @@ export default function TeacherSupportPage() {
         <AssignPracticeDialog
           learners={data?.learners || []}
           competencies={data?.competencies || []}
+          materials={data?.materials || []}
           error={action.error}
           saving={action.busy}
           onSubmit={createPlan}

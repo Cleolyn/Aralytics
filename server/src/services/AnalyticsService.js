@@ -188,10 +188,10 @@ class AnalyticsService {
         c.quarter,
         c.topic_title,
         c.ilaw_category,
-        m.id as assigned_material_id,
-        m.title as assigned_material_title,
-        m.file_type as assigned_material_type,
-        m.file_path as assigned_material_path,
+        COALESCE(m.id, im.id) as assigned_material_id,
+        COALESCE(m.title, im.title) as assigned_material_title,
+        COALESCE(m.file_type, im.file_type) as assigned_material_type,
+        COALESCE(m.file_path, im.storage_url) as assigned_material_path,
         qa.id as trigger_attempt_id,
         qa.score,
         qa.total_points,
@@ -201,6 +201,7 @@ class AnalyticsService {
       JOIN users u ON i.student_id = u.id
       JOIN competencies c ON i.competency_id = c.id
       LEFT JOIN materials m ON i.recommended_material_id = m.id
+      LEFT JOIN instructional_materials im ON i.recommended_material_id = im.id
       LEFT JOIN (
         SELECT qa.*, q.competency_id,
                ROW_NUMBER() OVER (PARTITION BY qa.student_id, q.competency_id ORDER BY qa.submitted_at DESC, qa.rowid DESC) as rn
@@ -231,8 +232,23 @@ class AnalyticsService {
        WHERE is_remedial = 1`
     );
 
+    let instCatalog = [];
+    try {
+      const { rows: instRows } = await db.query(
+        `SELECT id, competency_id, title, storage_url AS file_path, file_type FROM instructional_materials`
+      );
+      instCatalog = instRows;
+    } catch { /* instructional_materials may not exist in isolated unit tests */ }
     const catalogMap = new Map();
-    remedialCatalog.forEach(mat => {
+    const seenIds = new Set();
+    for (const mat of [...remedialCatalog, ...instCatalog]) {
+      if (!mat.competency_id || seenIds.has(mat.id)) continue;
+      seenIds.add(mat.id);
+      if (!catalogMap.has(mat.competency_id)) catalogMap.set(mat.competency_id, []);
+      catalogMap.get(mat.competency_id).push(mat);
+    }
+    // Catalog populated above from materials and instructional_materials.
+    if (false) remedialCatalog.forEach(mat => {
       if (!catalogMap.has(mat.competency_id)) catalogMap.set(mat.competency_id, []);
       catalogMap.get(mat.competency_id).push(mat);
     });
@@ -366,13 +382,14 @@ class AnalyticsService {
         ROUND((CAST(qa.score AS REAL) / CAST(qa.total_points AS REAL)) * 100, 2) as percentage,
         i.id as intervention_id,
         i.status as intervention_status,
-        m.title as remedial_material_title
+        COALESCE(m.title, im.title) as remedial_material_title
       FROM quiz_attempts qa
       JOIN quizzes q ON qa.quiz_id = q.id
       JOIN competencies c ON q.competency_id = c.id
       JOIN users u ON qa.student_id = u.id
       LEFT JOIN interventions i ON i.student_id = u.id AND i.competency_id = c.id
       LEFT JOIN materials m ON i.recommended_material_id = m.id
+      LEFT JOIN instructional_materials im ON i.recommended_material_id = im.id
       WHERE 1=1
     `;
     const params = [];

@@ -166,7 +166,7 @@ async function submitAssessment(req, res, next) {
       const isProctoringFlagged = Number(tab_switch_count) >= 3 || (Array.isArray(security_events) && security_events.length >= 3);
       if (ratio < 0.75 || isProctoringFlagged) {
         // Query materials matching competency_id where is_remedial = true
-        const { rows: matRows } = await tx.query(
+        let { rows: matRows } = await tx.query(
           `SELECT id, title, file_path, file_type 
            FROM materials 
            WHERE competency_id = ? AND is_remedial = 1
@@ -174,6 +174,15 @@ async function submitAssessment(req, res, next) {
           [quiz.comp_id]
         );
 
+        if (matRows.length === 0) {
+          try {
+            const { rows: instRows } = await tx.query(
+              `SELECT id, title, storage_url AS file_path, file_type FROM instructional_materials WHERE competency_id = ? ORDER BY created_at ASC LIMIT 1`,
+              [quiz.comp_id]
+            );
+            matRows = instRows;
+          } catch { /* instructional_materials may not exist in isolated unit tests */ }
+        }
         const materialId = matRows.length > 0 ? matRows[0].id : null;
         if (matRows.length > 0) {
           recommendedMaterial = matRows[0];
@@ -258,10 +267,10 @@ async function getFlaggedInterventions(req, res, next) {
         c.topic_title,
         c.ilaw_category,
         c.description as competency_description,
-        m.id as material_id,
-        m.title as material_title,
-        m.file_path as material_file_path,
-        m.file_type as material_file_type,
+        COALESCE(m.id, im.id) as material_id,
+        COALESCE(m.title, im.title) as material_title,
+        COALESCE(m.file_path, im.storage_url) as material_file_path,
+        COALESCE(m.file_type, im.file_type) as material_file_type,
         qa.id as latest_attempt_id,
         qa.score as latest_score,
         qa.total_points as latest_total_points,
@@ -272,6 +281,7 @@ async function getFlaggedInterventions(req, res, next) {
       JOIN users u ON i.student_id = u.id
       JOIN competencies c ON i.competency_id = c.id
       LEFT JOIN materials m ON i.recommended_material_id = m.id
+      LEFT JOIN instructional_materials im ON i.recommended_material_id = im.id
       LEFT JOIN (
         SELECT qa.*, q.competency_id,
                ROW_NUMBER() OVER (PARTITION BY qa.student_id, q.competency_id ORDER BY qa.submitted_at DESC, qa.rowid DESC) as rn

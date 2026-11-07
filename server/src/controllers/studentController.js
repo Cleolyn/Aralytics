@@ -210,10 +210,12 @@ module.exports = {
 module.exports.getPractice = async (req, res, next) => {
   try {
     const result = await db.query(`SELECT i.id, i.status, i.updated_at, c.topic_title AS competency_desc,
-      m.title AS remedial_material_title, m.file_path AS remedial_storage_url
+      COALESCE(m.title, im.title) AS remedial_material_title, COALESCE(m.file_path, im.storage_url) AS remedial_storage_url
       FROM interventions i JOIN competencies c ON c.id = i.competency_id
       LEFT JOIN materials m ON m.id = i.recommended_material_id
+      LEFT JOIN instructional_materials im ON im.id = i.recommended_material_id
       WHERE i.student_id = ? ORDER BY i.updated_at DESC`, [req.user.id]);
+    await files.decorateUrls(files.envOf(req), req.user, result.rows, { urlKey: 'remedial_storage_url', outKey: 'remedial_download_url' });
     res.json({ success: true, interventions: result.rows });
   } catch (err) { next(err); }
 };
