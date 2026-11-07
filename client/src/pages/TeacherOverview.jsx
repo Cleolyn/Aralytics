@@ -20,11 +20,13 @@ export default function TeacherOverview() {
     ]);
     return { classes: classes.classes, tasks: tasks.tasks, queue: queue.queue, quizzes: quizzes.quizzes };
   }, [user.id]);
-  const pending = data?.tasks.reduce((n, t) => n + Number(t.stats?.pending_count || 0), 0) || 0;
+  const ownTasks = data?.tasks.filter(t => !t.created_by || t.created_by === user?.id) || [];
+  const ownQuizzes = data?.quizzes.filter(q => !q.created_by || q.created_by === user?.id) || [];
+  const pending = ownTasks.reduce((n, t) => n + Number(t.stats?.pending_count || 0), 0) || 0;
   const support = data?.queue.filter(q => ['RECOMMENDED', 'ASSIGNED'].includes(q.status)) || [];
   const learners = new Set(support.map(q => q.student.id)).size;
   const dueTasks =
-    data?.tasks
+    ownTasks
       .filter(t => t.due_date && new Date(t.due_date.replace(' ', 'T')) >= new Date())
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
       .slice(0, 3) || [];
@@ -32,7 +34,7 @@ export default function TeacherOverview() {
     <div className="container">
       <div className="page-heading">
         <div>
-          <h1>Hello, Teacher {user?.first_name}!</h1>
+          <h1>Hello, Teacher {user?.first_name || user?.full_name || 'Instructor'}!</h1>
           <p>Here is a quick summary of your classes today.</p>
         </div>
         <Link className="btn btn-primary" to="/teacher/quizzes/create">
@@ -81,7 +83,7 @@ export default function TeacherOverview() {
                 <div className="action-row">
                   <BookOpen size={24} aria-hidden="true" />
                   <div>
-                    <strong>{data.quizzes.length} quizzes in your class</strong>
+                    <strong>{ownQuizzes.length} quizzes in your class</strong>
                     <p>View your quizzes or create a new activity.</p>
                   </div>
                   <Link className="text-action" to="/teacher/assessments">

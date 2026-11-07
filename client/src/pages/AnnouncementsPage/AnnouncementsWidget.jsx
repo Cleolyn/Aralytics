@@ -21,7 +21,7 @@ export default function AnnouncementsWidget() {
         <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 8px', display: 'grid', gap: 10 }}>
           {items.map(item => (
             <li key={item.id}>
-              <strong>{cleanText(item.title)}</strong> {!item.read && <Status tone="good">New</Status>}
+              <Link className="text-action" to="/student/announcements"><strong>{cleanText(item.title)}</strong></Link> {!item.read && <Status tone="good">New</Status>}
               <br />
               <small>{formatDate(item.created_at, '')}</small>
             </li>

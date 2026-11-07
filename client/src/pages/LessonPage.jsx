@@ -22,7 +22,7 @@ export default function LessonPage() {
     const material = materials.find(m => m.id === id);
     if (!material) throw new Error('This lesson could not be found. Go back to Lessons or reconnect to load it.');
     const targetUrl = materialUrl(material.storage_url);
-    if (navigator.onLine && targetUrl && !cached.has(targetUrl) && material.resource_available !== false) {
+    if (navigator.onLine && lessonSource(material) && targetUrl && !cached.has(targetUrl) && material.resource_available !== false) {
       downloadMaterial(material)
         .then(() => cached.add(targetUrl))
         .catch(() => {});
@@ -80,7 +80,7 @@ export default function LessonPage() {
               </div>
               <button
                 className="btn btn-secondary"
-                disabled={busy || cached || m.resource_available === false}
+                disabled={busy || cached || !url || m.resource_available === false}
                 onClick={() => perform(true)}
               >
                 <Download size={17} />
@@ -123,7 +123,7 @@ export default function LessonPage() {
                   {m.resource_available === false ? (
                     <Notice>This lesson file is not uploaded yet. Please ask your teacher for the file.</Notice>
                   ) : !url ? (
-                    <Notice error>This lesson link is not working. Please ask your teacher for a new link.</Notice>
+                    <Notice error>{isTeacher && m.created_by && m.created_by !== user.id ? 'Only the instructor who uploaded this lesson file can open or download it.' : 'This lesson link is not working. Please ask your teacher for a new link.'}</Notice>
                   ) : ['MP4', 'VIDEO'].includes(m.file_type) ? (
                     <video
                       controls

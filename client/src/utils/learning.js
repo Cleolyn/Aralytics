@@ -86,6 +86,18 @@ export const ilawLabels = {
   WAYS_FORWARD: 'Practice'
 };
 
+function hasLocalQuizSession(quizId) {
+  if (!quizId || typeof window === 'undefined' || !window.localStorage) return false;
+  try {
+    const prefix = `aralytics:quiz-session:${quizId}:`;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key && key.startsWith(prefix)) return true;
+    }
+  } catch { /* ignore storage errors */ }
+  return false;
+}
+
 export function activitiesFrom(quizzes = [], tasks = []) {
   const activities = [
     ...quizzes.map(q => ({
@@ -95,7 +107,7 @@ export function activitiesFrom(quizzes = [], tasks = []) {
       kind: 'quiz',
       type: 'Quiz',
       submission: q.submission,
-      state: q.submission?.status === 'SUBMITTED' ? 'Completed' : q.submission?.status === 'IN_PROGRESS' ? 'In progress' : 'Not started'
+      state: q.submission?.status === 'SUBMITTED' ? 'Completed' : q.submission?.status === 'IN_PROGRESS' || hasLocalQuizSession(q.id) ? 'In progress' : 'Not started'
     })),
     ...tasks.map(t => ({
       ...t,

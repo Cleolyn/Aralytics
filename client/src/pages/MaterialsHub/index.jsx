@@ -22,6 +22,11 @@ export default function MaterialsHub() {
   }));
   // null = closed; { lesson: null } = adding; { lesson } = editing.
   const [dialog, setDialog] = useState(null);
+  const stageParam = params.get('stage') || '';
+  const downloadedParam = params.get('downloaded') === 'true';
+  useEffect(() => {
+    setFilters(prev => (prev.phase === stageParam && prev.savedOnly === downloadedParam ? prev : { ...prev, phase: stageParam, savedOnly: downloadedParam }));
+  }, [stageParam, downloadedParam]);
   const action = useAsyncAction();
   const [progress, setProgress] = useState(0);
 
@@ -110,6 +115,7 @@ export default function MaterialsHub() {
           competencyById={competencyById}
           basePath={isTeacher ? '/teacher/materials' : '/student/materials'}
           isTeacher={isTeacher}
+          canManage={m => user?.role === 'ADMIN' || !m.created_by || m.created_by === user?.id}
           busyId={action.busy}
           onToggleOffline={toggleOffline}
           onEdit={openDialog}

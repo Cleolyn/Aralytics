@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanText, formatStatus } from './learning';
+import { activitiesFrom, cleanText, formatStatus } from './learning';
 
 describe('cleanText', () => {
   it('normalizes underscores, dashes, and whitespace', () => {
@@ -21,5 +21,18 @@ describe('formatStatus', () => {
     expect(formatStatus('RECOMMENDED')).toBe('Suggested');
     expect(formatStatus('waiting_room')).toBe('Waiting room');
     expect(formatStatus('')).toBe('Pending');
+  });
+});
+
+describe('activitiesFrom', () => {
+  it('detects a local in-progress quiz session on the device', () => {
+    window.localStorage.setItem('aralytics:quiz-session:qz-local:u1', JSON.stringify({ startedAt: 1000 }));
+    try {
+      const items = activitiesFrom([{ id: 'qz-local', title: 'Local Quiz' }, { id: 'qz-fresh', title: 'Fresh Quiz' }], []);
+      expect(items.find(i => i.id === 'qz-local')?.state).toBe('In progress');
+      expect(items.find(i => i.id === 'qz-fresh')?.state).toBe('Not started');
+    } finally {
+      window.localStorage.removeItem('aralytics:quiz-session:qz-local:u1');
+    }
   });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Brand from '../components/Brand';
@@ -100,6 +100,11 @@ export default function AppRoutes() {
   const linkIntent = intentFromSearch(location.search);
   if (linkIntent && user && /^\/(login|register)/.test(location.pathname)) rememberAuthIntent(linkIntent);
   const accountHome = resolveAccountHome(user, linkIntent || readAuthIntent());
+  const fromPath = location.state?.from?.pathname;
+  const workspacePrefix = accountHome.startsWith('/teacher/') ? '/teacher/' : accountHome.startsWith('/student/') ? '/student/' : accountHome === '/admin' ? '/admin' : null;
+  const loginRedirect = workspacePrefix && fromPath?.startsWith(workspacePrefix)
+    ? fromPath + (location.state?.from?.search || '')
+    : accountHome;
 
   return (
     <Routes>
@@ -116,7 +121,7 @@ export default function AppRoutes() {
         element={
           user ? (
             <Navigate
-              to={accountHome}
+              to={loginRedirect}
               replace
             />
           ) : (
@@ -237,7 +242,7 @@ export default function AppRoutes() {
         path="/student/quizzes/:id"
         element={
           <ProtectedRoute role="STUDENT">
-            <div><header className="workspace-header"><Brand to="/student/dashboard" /><OfflineStatus /></header><main id="main-content"><QuizRunnerRoute /></main></div>
+            <div><header className="workspace-header"><Brand to="/student/dashboard" /><div style={{ display: 'flex', alignItems: 'center', gap: 16 }}><Link className="text-action" to="/student/activities">← Back to activities</Link><OfflineStatus /></div></header><main id="main-content"><QuizRunnerRoute /></main></div>
           </ProtectedRoute>
         }
       />

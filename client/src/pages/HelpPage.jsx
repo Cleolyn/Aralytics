@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { useAuth } from '../context/AuthContext';
 import { accountHome } from '../utils/authFlow';
@@ -7,7 +6,7 @@ import { accountHome } from '../utils/authFlow';
 export default function HelpPage() {
   const { user } = useAuth();
   return (
-    <PublicLayout simple>
+    <PublicLayout simple homeTo={user ? accountHome(user) : '/'}>
       <article className="container" style={{ maxWidth: 880, paddingInline: 0 }}>
         <div className="page-heading">
           <div>
@@ -15,11 +14,6 @@ export default function HelpPage() {
             <p>Simple tips for using Aralytics.</p>
           </div>
         </div>
-        {user && (
-          <Link className="text-action" to={accountHome(user)}>
-            ← Back to home
-          </Link>
-        )}
         <section id="login" className="section">
           <h2>Signing in</h2>
           <p style={{ marginTop: 16 }}>

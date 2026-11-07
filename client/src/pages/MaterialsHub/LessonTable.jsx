@@ -2,24 +2,25 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, Edit3, Trash2 } from '../../components/icons';
 import { Status } from '../../components/ui/Feedback';
-import { cleanText, ilawLabels, materialUrl } from '../../utils/learning';
+import { cleanText, ilawLabels, lessonSource, materialUrl } from '../../utils/learning';
 
 function OfflineButton({ material, saved, saving, onToggle }) {
   const missing = material.resource_available === false;
+  const noAccess = !lessonSource(material) && !saved;
   let label;
   if (saving) label = 'Saving…';
   else if (saved) label = 'Remove save';
   else if (missing) label = 'File missing';
   else label = <><Download size={15} />Save offline</>;
   return (
-    <button className="text-action" disabled={saving || missing} onClick={onToggle}>
+    <button className="text-action" disabled={saving || missing || noAccess} onClick={onToggle}>
       {label}
     </button>
   );
 }
 
 /** Lesson list with read/offline status and per-row actions. */
-export default function LessonTable({ lessons, cached, readIds, competencyById, basePath, isTeacher, busyId, onToggleOffline, onEdit, onDelete }) {
+export default function LessonTable({ lessons, cached, readIds, competencyById, basePath, isTeacher, canManage = () => true, busyId, onToggleOffline, onEdit, onDelete }) {
   return (
     <div className="table-responsive" tabIndex={0} role="region" aria-label="Lesson resources">
       <table className="data-table">
@@ -61,7 +62,7 @@ export default function LessonTable({ lessons, cached, readIds, competencyById, 
                       Open <ArrowRight size={15} />
                     </Link>
                     <OfflineButton material={m} saved={saved} saving={busyId === m.id} onToggle={() => onToggleOffline(m, saved)} />
-                    {isTeacher && (
+                    {isTeacher && canManage(m) && (
                       <>
                         <button type="button" className="text-action" onClick={() => onEdit(m)}>
                           <Edit3 size={15} />

@@ -32,7 +32,7 @@ async function getAllMaterials(req, res, next) {
 
     let query = `
       SELECT m.*, lc.melc_code, lc.ilaw_tag, lc.description as competency_description,
-             u.first_name as author_first_name, u.last_name as author_last_name
+             u.first_name as author_first_name, u.last_name as author_last_name, u.full_name as author_full_name
       FROM instructional_materials m
       JOIN learning_competencies lc ON m.competency_id = lc.id
       JOIN users u ON m.created_by = u.id

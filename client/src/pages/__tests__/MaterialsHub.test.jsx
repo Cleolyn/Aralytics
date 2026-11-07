@@ -214,6 +214,18 @@ describe('MaterialsHub (teacher)', () => {
     expect(await screen.findByText('Lesson updated.')).toBeInTheDocument();
   });
 
+  it('hides Edit and Delete on lessons created by another teacher', async () => {
+    offline.loadMaterials.mockResolvedValue([
+      { ...materials[0], created_by: 'u1' },
+      { ...materials[1], created_by: 'other-teacher' }
+    ]);
+    renderPage(<MaterialsHub />);
+    await screen.findByText('Climate Change Module');
+    expect(within(row('Climate Change Module')).getByRole('button', { name: /Edit/ })).toBeInTheDocument();
+    expect(within(row('Disaster Slides')).queryByRole('button', { name: /Edit/ })).not.toBeInTheDocument();
+    expect(within(row('Disaster Slides')).queryByRole('button', { name: /Delete/ })).not.toBeInTheDocument();
+  });
+
   it('deletes a lesson', async () => {
     const { user } = renderPage(<MaterialsHub />);
     await screen.findByText('Climate Change Module');

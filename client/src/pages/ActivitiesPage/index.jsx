@@ -26,7 +26,7 @@ export default function ActivitiesPage() {
 
   const activities = data?.activities || [];
   const items = activities.filter(item => item.title.toLowerCase().includes(search.toLowerCase()) && inTab(item, tab));
-  const selected = activities.find(item => params.get(item.kind) === item.id) || items[0];
+  const selected = (search ? items : activities).find(item => params.get(item.kind) === item.id) || items[0];
 
   return (
     <div className="container">
@@ -52,7 +52,8 @@ export default function ActivitiesPage() {
                 aria-pressed={tab === t}
                 onClick={() => {
                   setTab(t);
-                  setParams({});
+                  const current = activities.find(item => params.get(item.kind) === item.id);
+                  if (!current || !inTab(current, t)) setParams({});
                 }}
               >
                 {t}

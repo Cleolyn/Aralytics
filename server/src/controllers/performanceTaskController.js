@@ -32,7 +32,7 @@ async function getAllTasks(req, res, next) {
 
     let query = `
       SELECT pt.*, c.topic_title, c.ilaw_category, c.description as competency_desc,
-             u.first_name || ' ' || u.last_name as teacher_name
+             COALESCE(NULLIF(TRIM(u.first_name || ' ' || u.last_name), ''), u.full_name) as teacher_name
       FROM performance_tasks pt
       JOIN competencies c ON pt.competency_id = c.id
       JOIN users u ON pt.created_by = u.id
@@ -108,7 +108,7 @@ async function getTaskById(req, res, next) {
 
     const { rows: tasks } = await db.query(
       `SELECT pt.*, c.topic_title, c.ilaw_category, c.description as competency_desc,
-              u.first_name || ' ' || u.last_name as teacher_name
+              COALESCE(NULLIF(TRIM(u.first_name || ' ' || u.last_name), ''), u.full_name) as teacher_name
        FROM performance_tasks pt
        JOIN competencies c ON pt.competency_id = c.id
        JOIN users u ON pt.created_by = u.id
