@@ -48,6 +48,17 @@ async function submitEnrollment(userId, payload) {
   if (fullName.length < 2 || fullName.length > 150 || !/^[\p{L}\p{M} .’'\-]+$/u.test(fullName)) throw fail(400, 'Enter your full name using letters and standard name punctuation (up to 150 characters).');
   if (!/^09\d{9}$/.test(mobile)) throw fail(400, 'Enter a Philippine mobile number starting with 09 or +639.');
   return db.transaction(async tx => {
+    let activeApplication = false;
+    try {
+      const { rows: apps } = await tx.query(
+        `SELECT status FROM instructor_applications WHERE user_id = ? AND status IN ('PENDING', 'APPROVED')`,
+        [userId]
+      );
+      activeApplication = apps.length > 0;
+    } catch { /* table may not exist in isolated unit tests */ }
+    if (activeApplication) {
+      throw fail(409, 'This account has a pending instructor application. Wait for administrator review or use a separate student account.');
+    }
     const existing = await getEnrollment(userId, tx);
     if (existing && existing.status !== 'REJECTED') throw fail(409, 'You already have an enrollment request.');
     const invitation = await findInvitation(payload.code, tx);

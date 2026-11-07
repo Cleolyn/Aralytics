@@ -58,7 +58,10 @@ export function AuthProvider({ children }) {
     const generation = ++syncGenerationRef.current;
     let cancelled = false;
     const active = () => !cancelled && generation === syncGenerationRef.current;
-    if (!clerkUser || sessionTask) { profileRef.current = null; setUser(null); setSyncing(false); setRefreshing(false); setTokenGetter(null); return; }
+    if (!clerkUser || sessionTask) {
+      if (!clerkUser && profileRef.current) clearAuthIntent();
+      profileRef.current = null; setUser(null); setSyncing(false); setRefreshing(false); setTokenGetter(null); return;
+    }
     if (profileRef.current?.id !== clerkUser.id) { setUser(null); setSyncing(true); }
     setRefreshing(true);
     const sync = async () => {

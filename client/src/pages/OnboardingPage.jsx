@@ -48,7 +48,7 @@ export default function OnboardingPage() {
     <aside className="join-context"><h2>Your place in Aralytics</h2><p>Araling Panlipunan 10</p>
       <ol className="enrollment-journey"><li>Verified account</li><li aria-current={!enrollment && !invitation ? 'step' : undefined}>Class code</li><li aria-current={invitation && enrollment?.status !== 'PENDING' ? 'step' : undefined}>Student details</li><li aria-current={enrollment?.status === 'PENDING' ? 'step' : undefined}>Adviser approval</li></ol>
       <p className="account-note">Signed in as {user.email}</p><button className="text-action" onClick={logout}>Sign out</button>
-      {user.email_verified && !enrollment && <Link className="text-action" to={INSTRUCTOR_APPLICATION_PATH} onClick={() => rememberAuthIntent('TEACHER')}>{user.instructor_application ? 'View my instructor application' : 'Are you an instructor? Apply for access'}</Link>}
+      {user.email_verified && (!enrollment || enrollment.status === 'REJECTED') && <Link className="text-action" to={INSTRUCTOR_APPLICATION_PATH} onClick={() => rememberAuthIntent('TEACHER')}>{user.instructor_application ? 'View my instructor application' : 'Are you an instructor? Apply for access'}</Link>}
     </aside>
     <section className="join-sheet"><Notice error>{error}</Notice>
       {!user.email_verified ? <><h1>Verify your email</h1><p>Verify your email address before continuing.</p><button className="btn btn-primary" onClick={() => clerk.openUserProfile()}>Manage email address</button><button className="text-action" onClick={refreshUser}>I’ve verified my email</button></> :

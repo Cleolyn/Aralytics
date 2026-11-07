@@ -105,12 +105,19 @@ async function reviewApplication(adminId, userId, status, reason) {
   return db.transaction(async tx => {
     const application = await getApplication(userId, tx);
     if (!application) throw fail(404, 'Application not found.');
+    if (status === 'APPROVED') {
+      const enrollment = await getEnrollment(userId, tx);
+      if (enrollment && enrollment.status !== 'REJECTED') {
+        throw fail(409, 'This account is enrolled as a student and cannot be approved as an instructor.');
+      }
+    }
     const result = await tx.query(`UPDATE instructor_applications SET status = ?, reason = ?, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP
       WHERE user_id = ? AND status = 'PENDING'`, [status, cleanReason || null, adminId, userId]);
     if (!result.affectedRows) throw fail(409, 'This application has already been reviewed.');
     if (status === 'APPROVED') {
-      const promoted = await tx.query(`UPDATE users SET role = 'TEACHER', full_name = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ? AND role = 'STUDENT'`, [application.full_name, userId]);
+      const names = application.full_name.split(' ');
+      const promoted = await tx.query(`UPDATE users SET role = 'TEACHER', full_name = ?, first_name = ?, last_name = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND role = 'STUDENT'`, [application.full_name, names[0], names.slice(1).join(' ') || names[0], userId]);
       if (!promoted.affectedRows) throw fail(409, 'This account can no longer be made an instructor.');
     }
     return getApplication(userId, tx);

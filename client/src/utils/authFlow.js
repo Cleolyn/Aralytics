@@ -47,7 +47,7 @@ export function accountHome(user, intent = readAuthIntent()) {
   if (user.role === 'ADMIN' || user.role === 'TEACHER') return ROLE_HOMES[user.role];
   if (user.enrollment_status === 'APPROVED') return ROLE_HOMES.STUDENT;
   // A student account mid-enrollment stays on the class flow even if it once clicked "I am a Teacher".
-  if (user.enrollment_status === 'PENDING') return AUTH_PATHS.afterAuth;
+  if (user.enrollment_status === 'PENDING' || (user.enrollment_status === 'REJECTED' && !user.instructor_application)) return AUTH_PATHS.afterAuth;
   if (intent === 'TEACHER') return INSTRUCTOR_APPLICATION_PATH;
   return user.instructor_application && intent !== 'STUDENT' ? INSTRUCTOR_APPLICATION_PATH : AUTH_PATHS.afterAuth;
 }

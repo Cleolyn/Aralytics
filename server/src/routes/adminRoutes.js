@@ -20,6 +20,7 @@ router.get('/applications', wrap(async (req, res) => {
 
 router.patch('/applications/:userId', wrap(async (req, res) => {
   const application = await service.reviewApplication(req.user.id, req.params.userId, req.body.status, req.body.reason);
+  invalidateUserCache(req.params.userId);
   const approved = application.status === 'APPROVED';
   await audit.record(null, { actor: req.user, action: approved ? 'APPLICATION_APPROVED' : 'APPLICATION_RETURNED', targetType: 'USER',
     targetId: application.user_id, targetLabel: application.email, details: approved ? null : { reason: application.reason } });
@@ -51,16 +52,20 @@ router.get('/users', wrap(async (req, res) => {
 
 router.post('/users/:id/suspend', wrap(async (req, res) => {
   const user = await accounts.suspend(req.user, req.params.id, req.body.reason);
+  invalidateUserCache(req.params.id);
   notifier.notify(req, 'account.suspended', { to: user.email, name: user.full_name, reason: user.suspended_reason });
   res.json({ success: true, user });
 }));
 
 router.post('/users/:id/unsuspend', wrap(async (req, res) => {
-  res.json({ success: true, user: await accounts.unsuspend(req.user, req.params.id) });
+  const user = await accounts.unsuspend(req.user, req.params.id);
+  invalidateUserCache(req.params.id);
+  res.json({ success: true, user });
 }));
 
 router.post('/users/:id/revoke-instructor', wrap(async (req, res) => {
   const result = await accounts.revokeInstructor(req.user, req.params.id, req.body.reason);
+  invalidateUserCache(req.params.id);
   notifier.notify(req, 'instructor.revoked', { to: result.user.email, name: result.user.full_name, reason: String(req.body.reason).trim() });
   res.json({ success: true, ...result });
 }));

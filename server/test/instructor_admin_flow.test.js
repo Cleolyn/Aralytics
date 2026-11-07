@@ -141,6 +141,8 @@ async function run() {
     const synced = await call('/auth/sync', 'applicant', {});
     assert.equal(synced.data.role, 'TEACHER');
     assert.equal(synced.data.user.full_name, 'Maria Santos');
+    assert.equal(synced.data.user.first_name, 'Maria');
+    assert.equal(synced.data.user.last_name, 'Santos');
     assert.equal(synced.data.user.instructor_application, null);
     assert.equal((await call('/teacher-only', 'applicant')).status, 200);
     assert.equal((await call('/instructor-applications', 'applicant', application)).status, 409, 'Teachers cannot re-apply');
@@ -164,6 +166,16 @@ async function run() {
     const blocked = await call('/instructor-applications', 'enrolled-student', application);
     assert.equal(blocked.status, 409);
     assert.match(blocked.data.message, /separate account/);
+
+    // Conversely, an account with a pending instructor application cannot submit a student enrollment request.
+    identity('pending-applicant');
+    await call('/auth/sync', 'pending-applicant', {});
+    assert.equal((await call('/instructor-applications', 'pending-applicant', application)).status, 201);
+    const blockedEnroll = await call('/enrollment/request', 'pending-applicant', {
+      code: invitation.data.code, lrn: '987654321098', full_name: 'Maria Santos', mobile: '09171234567', section: '10-Rizal'
+    });
+    assert.equal(blockedEnroll.status, 409);
+    assert.match(blockedEnroll.data.message, /pending instructor application/);
 
     console.log('PASS: role isolation, admin bootstrap, metadata ignored, validation, pending/rejected/resubmitted/approved lifecycle, single review, no self-review, staff and enrolled-student application limits.');
   } finally {

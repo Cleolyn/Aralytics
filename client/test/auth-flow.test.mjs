@@ -31,6 +31,8 @@ try {
     [{ role: 'TEACHER', email_verified: true }, 'TEACHER', '/teacher/dashboard'],
     [{ role: 'TEACHER', email_verified: false }, 'TEACHER', '/onboarding'],
     [{ ...profile, enrollment_status: 'PENDING' }, 'TEACHER', '/onboarding'],
+    [{ ...profile, enrollment_status: 'REJECTED' }, 'TEACHER', '/onboarding'],
+    [{ ...profile, enrollment_status: 'REJECTED', instructor_application: { status: 'PENDING' } }, 'TEACHER', '/instructor/apply'],
     [{ ...profile, enrollment_status: 'APPROVED' }, 'TEACHER', '/student/dashboard'],
     [{ ...profile, instructor_application: { status: 'REJECTED' } }, 'STUDENT', '/onboarding'],
     [profile, 'STUDENT', '/onboarding']

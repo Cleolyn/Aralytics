@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../../services/api';
 import useRemoteData from '../../hooks/useRemoteData';
 import useQueryParams from '../../hooks/useQueryParams';
@@ -24,6 +25,7 @@ const TABS = [
 
 /** Admin workspace: verify instructor applications and see who has instructor access. */
 export default function AdminDashboard() {
+  const location = useLocation();
   const [params, updateParams] = useQueryParams();
   const tab = TABS.some(([key]) => key === params.get('tab')) ? params.get('tab') : 'pending';
   const [reviewing, setReviewing] = useState(null);
@@ -68,7 +70,7 @@ export default function AdminDashboard() {
           <p>Verify instructor applications and keep an eye on file storage. Only approved instructors can create classes and see student records.</p>
         </div>
       </div>
-      <Notice error>{summary.error || list.error || (!reviewing && tab !== 'storage' && tab !== 'people' && action.error)}</Notice>
+      <Notice error>{location.state?.unauthorizedNotice || summary.error || list.error || (!reviewing && tab !== 'storage' && tab !== 'people' && action.error)}</Notice>
       <Notice success>{action.message}</Notice>
       {(summary.error || list.error) && (
         <button className="text-action" onClick={() => { summary.refresh(); list.refresh(); }}>Try again</button>
