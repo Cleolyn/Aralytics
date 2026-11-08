@@ -27,6 +27,7 @@ Thumbs.db
 # Local agent tooling and QA screenshots
 .claude/
 .taste-skill/
+output/
 
 # Cloudflare local runtime and generated dependency bundle
 .wrangler/

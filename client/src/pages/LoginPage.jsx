@@ -5,6 +5,7 @@ import PublicLayout from '../components/PublicLayout';
 import { Notice } from '../components/ui/Feedback';
 import { useAuth } from '../context/AuthContext';
 import GoogleAuthButton from '../components/GoogleAuthButton';
+import DemoQuickLogin from '../components/DemoQuickLogin';
 import { afterAuthPath, authErrorMessage, intentFromSearch, isAuthStart, readAuthIntent, rememberAuthIntent, withIntent } from '../utils/authFlow';
 
 export const authAppearance = { elements: {
@@ -54,6 +55,6 @@ export default function LoginPage() {
   const teacher = intent === 'TEACHER';
   return <AuthFrame intent={intent}><h2>{teacher ? 'Instructor sign in' : 'Sign in to Aralytics'}</h2><p>{teacher ? 'Existing instructors go to their workspace. New instructors continue to verification.' : 'Use Google or your verified email address.'}</p><Notice error>{authError || (errors?.global ? authErrorMessage(errors.global) : '')}</Notice>
     {isSignedIn ? <div className="account-recovery"><p>Your account is signed in. Retry to connect to your {teacher ? 'workspace' : 'class'}.</p><button className="btn btn-primary" disabled={refreshing} onClick={refreshUser}>{refreshing ? 'Checking account…' : 'Try again'}</button><button className="text-action" onClick={logout}>Sign out</button></div> :
-      <>{isAuthStart(location.pathname) && <GoogleAuthButton intent={intent} />}<SignIn routing="path" path="/login" signUpUrl={withIntent('/register', intent)} forceRedirectUrl={afterAuthPath(intent)} appearance={authAppearance} /></>}
+      <>{isAuthStart(location.pathname) && <GoogleAuthButton intent={intent} />}<SignIn routing="path" path="/login" signUpUrl={withIntent('/register', intent)} forceRedirectUrl={afterAuthPath(intent)} appearance={authAppearance} /><DemoQuickLogin intent={intent} /></>}
   </AuthFrame>;
 }

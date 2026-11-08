@@ -1,6 +1,8 @@
 # Aralytics Demo & Test Accounts Directory (157 Accounts)
 
 - **Universal Password (all 157 accounts):** `AralyticsDemo2026!`
+- **Instant Demo Sign-In (No OTP code):** On `/login`, pick any account in the "Demo Account 1-Click Sign In" dropdown to authenticate immediately with zero email verification codes!
+- **Manual Sign-In Mock OTP Code:** If you manually type a demo email into Clerk's sign-in form and it asks for a verification code, enter **`424242`** (Clerk's universal development test code).
 - **School / Year:** Ponce National High School · SY 2026-2027
 - **Spreadsheet:** `docs/demo-accounts/Aralytics_Demo_Accounts.xlsx` (7 organized tabs)
 - **Printable PDF:** `docs/demo-accounts/Aralytics_Demo_Accounts.pdf`

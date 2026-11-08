@@ -3,6 +3,7 @@ const db = require('../config/database');
 const { verifyIdentity } = require('../middleware/auth');
 const { getEnrollment } = require('../services/enrollmentService');
 const { getApplication } = require('../services/instructorApplicationService');
+const { listDemoAccountsForDirectory, issueDemoSignInTicket } = require('../services/demoTicketService');
 
 // Students see their class enrollment and any instructor application (for onboarding routing).
 async function accountStatus(user) {
@@ -40,6 +41,23 @@ router.post('/sync', allowSuspended, verifyIdentity, async (req, res, next) => {
   } catch (err) {
     if (accountConflict(err)) return res.status(409).json({ success: false, code: 'ACCOUNT_LINK_REQUIRED',
       message: 'This email is already connected to another Aralytics profile. Contact your adviser to link the existing account.' });
+    next(err);
+  }
+});
+
+router.get('/demo-accounts', (_req, res) => {
+  res.json({ success: true, accounts: listDemoAccountsForDirectory() });
+});
+
+router.post('/demo-ticket', async (req, res, next) => {
+  try {
+    const { email, password, autoBypass } = req.body || {};
+    const data = await issueDemoSignInTicket({ email, password, autoBypass: Boolean(autoBypass) });
+    return res.json({ success: true, ...data });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
     next(err);
   }
 });

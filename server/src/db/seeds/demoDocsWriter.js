@@ -216,6 +216,8 @@ function writeMarkdownGuide(allAccounts, outPath) {
     `# Aralytics Demo & Test Accounts Directory (${allAccounts.length} Accounts)`,
     '',
     `- **Universal Password (all ${allAccounts.length} accounts):** \`${DEMO_PASSWORD}\``,
+    '- **Instant Demo Sign-In (No OTP code):** On `/login`, select any demo account from the "Demo Account 1-Click Sign In" dropdown to authenticate immediately with zero email verification codes.',
+    '- **Manual Sign-In Mock OTP Code:** If you manually type a demo email into Clerk\'s sign-in form and it asks for a verification code, enter **`424242`** (Clerk\'s universal development test code).',
     `- **School / Year:** ${SCHOOL_NAME} · SY ${SCHOOL_YEAR}`,
     '- **Spreadsheet:** `docs/demo-accounts/Aralytics_Demo_Accounts.xlsx` (7 organized tabs)',
     '- **Printable PDF:** `docs/demo-accounts/Aralytics_Demo_Accounts.pdf`',
