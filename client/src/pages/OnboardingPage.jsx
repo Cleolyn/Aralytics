@@ -5,7 +5,7 @@ import PublicLayout from '../components/PublicLayout';
 import { useAuth } from '../context/AuthContext';
 import { request } from '../services/api';
 import { Notice } from '../components/ui/Feedback';
-import { INSTRUCTOR_APPLICATION_PATH, ROLE_HOMES, readAuthIntent, rememberAuthIntent } from '../utils/authFlow';
+import { INSTRUCTOR_APPLICATION_PATH, ROLE_HOMES, accountHome, rememberAuthIntent } from '../utils/authFlow';
 
 export default function OnboardingPage() {
   const { user, loading, logout, refreshUser, refreshing } = useAuth();
@@ -22,8 +22,9 @@ export default function OnboardingPage() {
   if (user.email_verified && user.role !== 'STUDENT') return <Navigate to={ROLE_HOMES[user.role] || '/login'} replace />;
   if (user.email_verified && user.enrollment_status === 'APPROVED') return <Navigate to="/student/dashboard" replace />;
   const enrollment = user.enrollment;
-  // Came in through "I am a Teacher": instructors verify with the admin, not a class code.
-  if (user.email_verified && !enrollment && readAuthIntent() === 'TEACHER') return <Navigate to={INSTRUCTOR_APPLICATION_PATH} replace />;
+  // Came in through "I am a Teacher", or already applied (and didn't choose the student path):
+  // instructors verify with the admin, not a class code.
+  if (user.email_verified && !enrollment && accountHome(user) === INSTRUCTOR_APPLICATION_PATH) return <Navigate to={INSTRUCTOR_APPLICATION_PATH} replace />;
   const update = event => setProfile(prev => ({ ...prev, [event.target.name]: event.target.value }));
   const validateCode = async event => {
     event.preventDefault(); setBusy(true); setError('');

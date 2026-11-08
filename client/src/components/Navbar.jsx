@@ -15,7 +15,7 @@ const teacherLinks = [
   ['/teacher/announcements', 'Announcements', Megaphone], ['/teacher/files', 'My files', Folder]
 ];
 const adminLinks = [
-  ['/admin', 'Instructor access', Users]
+  ['/admin', 'Administration', Users]
 ];
 const learnerLinks = [
   ['/student/dashboard', 'Overview', LayoutDashboard], ['/student/materials', 'Lessons', BookOpen],

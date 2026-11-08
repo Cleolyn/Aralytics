@@ -81,7 +81,7 @@ export default function AppRoutes() {
   const splash = useSplash(loading);
   const location = useLocation();
   useEffect(() => {
-    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', files: 'My files', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Instructor access', instructor: 'Instructor application', announcements: 'Announcements', suspended: 'Account suspended' };
+    const labels = { dashboard: 'Overview', materials: 'Lessons', activities: 'Activities', progress: 'My progress', files: 'My files', classes: 'Classes', assessments: 'Quizzes and tasks', gradebook: 'Gradebook', reports: 'Reports', remediation: 'Student support', interventions: 'Practice', login: 'Log in', register: 'Create account', help: 'Help', onboarding: 'Join your class', admin: 'Administration', instructor: 'Instructor application', announcements: 'Announcements', suspended: 'Account suspended' };
     const segments = location.pathname.split('/');
     document.title = `${labels[segments[2]] || labels[segments[1]] || (segments.includes('quizzes') ? 'Quiz' : 'Araling Panlipunan')} · Aralytics`;
     window.scrollTo(0, 0);

@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const { isAdvisee } = require('../services/teacherScope');
 
 // In-memory debounce cache to reject rapid-fire duplicate blur events within 1.5 seconds
 const eventDebounceCache = new Map();
@@ -102,6 +103,13 @@ async function logProctoringEvent(req, res, next) {
 async function getProctoringAuditTrail(req, res, next) {
   try {
     const { submissionId } = req.params;
+    if (req.user?.role === 'TEACHER') {
+      const { rows: owner } = await db.query(`SELECT s.student_id, q.created_by FROM quiz_submissions s
+        JOIN quizzes q ON q.id = s.quiz_id WHERE s.id = ?`, [submissionId]);
+      if (owner[0] && owner[0].created_by !== req.user.id && !(await isAdvisee(req.user.id, owner[0].student_id))) {
+        return res.status(404).json({ success: false, message: 'Submission not found.' });
+      }
+    }
 
     const { rows: logs } = await db.query(
       `SELECT * FROM quiz_proctoring_logs 

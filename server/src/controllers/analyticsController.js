@@ -1,4 +1,5 @@
 const AnalyticsService = require('../services/AnalyticsService');
+const { scopeOf } = require('../services/teacherScope');
 
 /**
  * GET /api/analytics/proficiency
@@ -11,7 +12,7 @@ async function getProficiencyAnalytics(req, res, next) {
   try {
     const section_id = req.query.section_id || req.query.section;
     const { quarter } = req.query;
-    const profiling = await AnalyticsService.getProficiencyProfiling({ section_id, quarter });
+    const profiling = await AnalyticsService.getProficiencyProfiling({ section_id, quarter, teacher_id: scopeOf(req.user) });
 
     res.json({
       success: true,
@@ -31,7 +32,7 @@ async function getRemediationQueue(req, res, next) {
   try {
     const section_id = req.query.section_id || req.query.section;
     const { status } = req.query;
-    const queue = await AnalyticsService.getRemediationRoutingQueue({ section_id, status });
+    const queue = await AnalyticsService.getRemediationRoutingQueue({ section_id, status, teacher_id: scopeOf(req.user) });
 
     res.json({
       success: true,
@@ -62,7 +63,8 @@ async function handleInterventionAction(req, res, next) {
 
     const result = await AnalyticsService.updateInterventionDecision(id, action, {
       material_id,
-      override_status
+      override_status,
+      teacher_id: scopeOf(req.user)
     });
 
     res.json({
@@ -82,7 +84,7 @@ async function handleInterventionAction(req, res, next) {
 async function exportGradebookXLSX(req, res, next) {
   try {
     const section_id = req.query.section_id || req.query.section;
-    const records = await AnalyticsService.getComprehensiveGradebookDataset({ section_id });
+    const records = await AnalyticsService.getComprehensiveGradebookDataset({ section_id, teacher_id: scopeOf(req.user) });
     const buffer = AnalyticsService.generateSheetJSWorkbook(records);
 
     const filename = `Aralytics_Master_Gradebook_${section_id || 'All'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
@@ -102,7 +104,7 @@ async function exportGradebookXLSX(req, res, next) {
 async function exportReportPDF(req, res, next) {
   try {
     const section_id = req.query.section_id || req.query.section;
-    const records = await AnalyticsService.getComprehensiveGradebookDataset({ section_id });
+    const records = await AnalyticsService.getComprehensiveGradebookDataset({ section_id, teacher_id: scopeOf(req.user) });
     AnalyticsService.renderPDFReport(records, res, { section_id });
   } catch (err) {
     next(err);
@@ -137,7 +139,8 @@ async function createIntervention(req, res, next) {
       student_id,
       competency_id,
       recommended_material_id: material_id,
-      status: status || 'ASSIGNED'
+      status: status || 'ASSIGNED',
+      teacher_id: scopeOf(req.user)
     });
     res.status(201).json({ success: true, message: 'Intervention plan created and assigned.', result });
   } catch (err) {
@@ -148,7 +151,7 @@ async function createIntervention(req, res, next) {
 async function deleteIntervention(req, res, next) {
   try {
     const { id } = req.params;
-    const result = await AnalyticsService.deleteIntervention(id);
+    const result = await AnalyticsService.deleteIntervention(id, { teacher_id: scopeOf(req.user) });
     res.json({ success: true, message: 'Intervention plan deleted.', result });
   } catch (err) {
     next(err);

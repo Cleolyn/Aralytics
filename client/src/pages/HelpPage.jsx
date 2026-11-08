@@ -6,7 +6,7 @@ import { accountHome } from '../utils/authFlow';
 export default function HelpPage() {
   const { user } = useAuth();
   return (
-    <PublicLayout simple homeTo={user ? accountHome(user) : '/'}>
+    <PublicLayout account homeTo={user ? accountHome(user) : '/'}>
       <article className="container" style={{ maxWidth: 880, paddingInline: 0 }}>
         <div className="page-heading">
           <div>

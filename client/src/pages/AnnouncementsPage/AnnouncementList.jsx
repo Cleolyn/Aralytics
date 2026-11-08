@@ -41,6 +41,7 @@ export default function AnnouncementList({ items, teacher = false, busyId, onEdi
               </h3>
               <span style={{ display: 'flex', gap: 12 }}>
                 {item.pinned && <Status tone="pending">Pinned</Status>}
+                {item.attachment && !expanded && <Status>Attachment</Status>}
                 {!teacher && !item.read && <Status tone="good">New</Status>}
               </span>
             </div>

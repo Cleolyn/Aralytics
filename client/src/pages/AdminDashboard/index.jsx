@@ -66,8 +66,8 @@ export default function AdminDashboard() {
     <div className="container">
       <div className="page-heading">
         <div>
-          <h1>Instructor access</h1>
-          <p>Verify instructor applications and keep an eye on file storage. Only approved instructors can create classes and see student records.</p>
+          <h1>Administration</h1>
+          <p>Verify instructor applications, manage people, review the activity log and watch file storage. Only approved instructors can create classes and see student records.</p>
         </div>
       </div>
       <Notice error>{location.state?.unauthorizedNotice || summary.error || list.error || (!reviewing && tab !== 'storage' && tab !== 'people' && action.error)}</Notice>

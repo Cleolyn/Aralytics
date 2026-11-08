@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const AnalyticsService = require('../services/AnalyticsService');
+const { scopeOf } = require('../services/teacherScope');
 const materialsController = require('./materialsController');
 const quizController = require('./quizController');
 const performanceTaskController = require('./performanceTaskController');
@@ -14,9 +15,9 @@ async function getDashboardOverview(req, res, next) {
     const { section, quarter } = req.query;
 
     const [profiling, remediationQueue, gradebook] = await Promise.all([
-      AnalyticsService.getProficiencyProfiling({ section, quarter }),
-      AnalyticsService.getRemediationRoutingQueue({ section }),
-      AnalyticsService.getComprehensiveGradebookDataset({ section })
+      AnalyticsService.getProficiencyProfiling({ section, quarter, teacher_id: scopeOf(req.user) }),
+      AnalyticsService.getRemediationRoutingQueue({ section, teacher_id: scopeOf(req.user) }),
+      AnalyticsService.getComprehensiveGradebookDataset({ section, teacher_id: scopeOf(req.user) })
     ]);
 
     // Compute key teacher KPI indicators
@@ -72,13 +73,13 @@ module.exports = {
   getGradebook: submissionController.getGradebookData,
   getProficiencyProfiling: async (req, res, next) => {
     try {
-      const data = await AnalyticsService.getProficiencyProfiling(req.query);
+      const data = await AnalyticsService.getProficiencyProfiling({ ...req.query, teacher_id: scopeOf(req.user) });
       res.json({ success: true, profiling: data });
     } catch (e) { next(e); }
   },
   getRemediationQueue: async (req, res, next) => {
     try {
-      const queue = await AnalyticsService.getRemediationRoutingQueue(req.query);
+      const queue = await AnalyticsService.getRemediationRoutingQueue({ ...req.query, teacher_id: scopeOf(req.user) });
       res.json({ success: true, count: queue.length, queue });
     } catch (e) { next(e); }
   },
@@ -88,7 +89,8 @@ module.exports = {
       const { action, material_id, override_status } = req.body;
       const result = await AnalyticsService.updateInterventionDecision(id, action, {
         material_id,
-        override_status
+        override_status,
+        teacher_id: scopeOf(req.user)
       });
       res.json({ success: true, result });
     } catch (e) { next(e); }
@@ -108,7 +110,7 @@ module.exports = {
   getProctoringTrail: proctoringController.getProctoringAuditTrail,
   exportGradebookXLSX: async (req, res, next) => {
     try {
-      const data = await AnalyticsService.getComprehensiveGradebookDataset(req.query);
+      const data = await AnalyticsService.getComprehensiveGradebookDataset({ ...req.query, teacher_id: scopeOf(req.user) });
       const buffer = AnalyticsService.generateSheetJSWorkbook(data);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="Aralytics_Master_Gradebook.xlsx"');
@@ -117,7 +119,7 @@ module.exports = {
   },
   exportReportPDF: async (req, res, next) => {
     try {
-      const data = await AnalyticsService.getComprehensiveGradebookDataset(req.query);
+      const data = await AnalyticsService.getComprehensiveGradebookDataset({ ...req.query, teacher_id: scopeOf(req.user) });
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename="Aralytics_DepEd_Monitoring_Report.pdf"');
       AnalyticsService.renderPDFReport(data, res, req.query);

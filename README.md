@@ -291,7 +291,7 @@ The enrollment code-attempt limiter is in-memory and per process; use a shared l
 ### Access boundaries
 
 - **Admin** (`/admin`): reviews instructor applications; the **People** tab suspends and unsuspends accounts, revokes instructor access and deletes accounts (typed-email confirmation; accounts that still own lessons, quizzes or tasks cannot be deleted); the **Activity** tab is a read-only audit log of every admin action; the **Storage** tab shows file usage. See [docs/admin-and-accounts.md](docs/admin-and-accounts.md).
-- **Teacher:** curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals, and class announcements. Only the creator (or an admin) can edit, archive or delete a quiz or task. Graded work is never destroyed: quizzes that students have taken can only be archived. See [docs/teaching-content.md](docs/teaching-content.md).
+- **Teacher:** sees only learners with an approved enrollment in one of their own classes (gradebook, profiling, remediation, exports, single submissions and interventions are all scoped this way). Curriculum, quizzes, gradebook, proctoring audit trail, proficiency profiling, remediation decisions, XLSX/PDF exports, class codes and enrollment approvals, and class announcements. Only the creator (or an admin) can edit, archive or delete a quiz or task. Graded work is never destroyed: quizzes that students have taken can only be archived. See [docs/teaching-content.md](docs/teaching-content.md).
 - **Student:** sees only the lessons, quizzes, tasks and announcements of their approved adviser. Students can read only their own records; every learning API requires an approved enrollment.
 - **Suspended accounts** get `403 ACCOUNT_SUSPENDED` from every private API and see an "Account suspended" page with the admin's reason.
 - Every private API verifies the Clerk session and requires a verified primary email.
@@ -352,6 +352,7 @@ The full feature list, a done/missing checklist, and prioritized recommendations
 ## Further documentation
 
 - [docs/project-status.pdf](docs/project-status.pdf) — feature list, checklist, gaps and recommendations
+- [docs/demo-accounts/README.md](docs/demo-accounts/README.md) and [docs/demo-files/README.md](docs/demo-files/README.md) — demo logins and the files to upload when testing them
 - [docs/teaching-content.md](docs/teaching-content.md) — editing, archiving and deleting quizzes and tasks; adviser-scoped student content
 - [docs/admin-and-accounts.md](docs/admin-and-accounts.md) — People and Activity tabs, suspension, revoking access, account deletion, email notifications
 - [docs/announcements.md](docs/announcements.md) — class announcements, attachments, read markers

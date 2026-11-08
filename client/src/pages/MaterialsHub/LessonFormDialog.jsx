@@ -14,20 +14,28 @@ import { EMPTY_LESSON, FILE_TYPES, describeUpload, lessonFormFrom } from './less
 export default function LessonFormDialog({ lesson, competencies, error, saving, progress = 0, onSubmit, onClose }) {
   const [form, setForm] = useState(() => (lesson ? lessonFormFrom(lesson, cleanText) : EMPTY_LESSON));
   const [file, setFile] = useState(null);
+  const [fileError, setFileError] = useState('');
   const change = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const chooseFile = selected => {
+  const chooseFile = (selected, event) => {
     if (!selected) return;
-    setFile(selected);
     const suggestion = describeUpload(selected);
-    if (suggestion) setForm(f => ({ ...f, file_type: suggestion.file_type, title: f.title || suggestion.title }));
+    if (suggestion.error) {
+      // Say so now instead of after the upload is refused.
+      setFile(null); setFileError(suggestion.error);
+      if (event?.target) event.target.value = '';
+      return;
+    }
+    setFileError('');
+    setFile(selected);
+    setForm(f => ({ ...f, file_type: suggestion.file_type, title: f.title || suggestion.title }));
   };
 
   return (
     <Dialog title={lesson ? 'Edit lesson' : 'Add a lesson'} onClose={onClose}>
       <Notice error>{error}</Notice>
       <p className="muted" style={{ marginBottom: 20 }}>
-        Upload a file (PDF, PPTX, MP4, DOCX, up to 15 MB) or paste a link for your students.
+        Upload a file (PDF, PowerPoint, Word, MP4 or ZIP, up to 15 MB) or paste a link for your students.
       </p>
       <form
         onSubmit={e => {
@@ -66,6 +74,7 @@ export default function LessonFormDialog({ lesson, competencies, error, saving, 
           accept=".pdf,.pptx,.ppt,.mp4,.docx,.doc,.zip"
           onFile={chooseFile}
         >
+          {fileError && <small role="alert" style={{ color: 'var(--status-critical)' }}>{fileError}</small>}
           {file && (
             <small>
               Selected file: <strong>{cleanText(file.name)}</strong> ({fileSizeLabel(file)})

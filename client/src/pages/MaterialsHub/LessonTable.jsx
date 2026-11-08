@@ -28,8 +28,9 @@ export default function LessonTable({ lessons, cached, readIds, competencyById, 
           <tr>
             <th>Lesson</th>
             <th>Step</th>
-            <th>Status</th>
-            <th>Offline</th>
+            {/* Reading and offline state are about the learner; teachers manage the lesson instead. */}
+            {!isTeacher && <th>Status</th>}
+            {!isTeacher && <th>Offline</th>}
             <th>Action</th>
           </tr>
         </thead>
@@ -46,16 +47,20 @@ export default function LessonTable({ lessons, cached, readIds, competencyById, 
                   </small>
                 </td>
                 <td>{ilawLabels[m.ilaw_tag] || 'Lessons'}</td>
-                <td>
-                  <Status tone={read ? 'good' : ''}>{read ? 'Read' : 'Not read'}</Status>
-                </td>
-                <td>
-                  {saved ? (
-                    <Status tone="good">Saved offline</Status>
-                  ) : (
-                    <span className="muted">{m.resource_available === false ? 'File missing' : 'Online only'}</span>
-                  )}
-                </td>
+                {!isTeacher && (
+                  <td>
+                    <Status tone={read ? 'good' : ''}>{read ? 'Read' : 'Not read'}</Status>
+                  </td>
+                )}
+                {!isTeacher && (
+                  <td>
+                    {saved ? (
+                      <Status tone="good">Saved offline</Status>
+                    ) : (
+                      <span className="muted">{m.resource_available === false ? 'File missing' : 'Online only'}</span>
+                    )}
+                  </td>
+                )}
                 <td>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
                     <Link className="text-action" to={`${basePath}/${m.id}`}>

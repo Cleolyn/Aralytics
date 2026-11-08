@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
+const { scopeOf, restrict, isAdvisee } = require('../services/teacherScope');
 const teaching = require('../services/teachingContentService');
 
 async function startQuiz(req, res, next) {
@@ -295,7 +296,7 @@ async function getSubmissionById(req, res, next) {
     const { id } = req.params;
 
     const { rows: subRows } = await db.query(
-      `SELECT s.*, q.title as quiz_title, q.total_points, q.passing_score,
+      `SELECT s.*, q.title as quiz_title, q.total_points, q.passing_score, q.created_by AS quiz_owner_id,
               lc.melc_code, lc.description as competency_desc,
               u.first_name, u.last_name, u.lrn_or_id, u.section
        FROM quiz_submissions s
@@ -315,6 +316,10 @@ async function getSubmissionById(req, res, next) {
     // Check authorization: Student can only view their own
     if (req.user.role === 'STUDENT' && submission.student_id !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Unauthorized access to submission.' });
+    }
+    // Teachers see their own advisees' work, or attempts on quizzes they wrote.
+    if (req.user.role === 'TEACHER' && submission.quiz_owner_id !== req.user.id && !(await isAdvisee(req.user.id, submission.student_id))) {
+      return res.status(404).json({ success: false, message: 'Submission not found.' });
     }
 
     const { rows: answers } = await db.query(
@@ -375,6 +380,7 @@ async function getGradebookData(req, res, next) {
       query += ` AND q.id = ?`;
       params.push(quiz_id);
     }
+    query = restrict(query, params, 'u.id', scopeOf(req.user));
 
     query += ` ORDER BY u.section ASC, u.last_name ASC, s.submitted_at DESC`;
 

@@ -1,7 +1,9 @@
 import { materialUrl } from '../../utils/learning';
 import { uploadFile } from '../../utils/upload';
 
-export const FILE_TYPES = ['PDF', 'PPTX', 'MP4', 'DOCX'];
+export const FILE_TYPES = ['PDF', 'PPTX', 'MP4', 'DOCX', 'ZIP'];
+// What the server accepts for lessons (server/src/config/fileLimits.js), and the type each one is listed as.
+const LESSON_EXTENSIONS = { PDF: 'PDF', PPTX: 'PPTX', PPT: 'PPTX', MP4: 'MP4', DOCX: 'DOCX', DOC: 'DOCX', ZIP: 'ZIP' };
 export const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
 export const EMPTY_LESSON = { competency_id: '', title: '', description: '', file_type: 'PDF', storage_url: '' };
 
@@ -17,11 +19,15 @@ export function filterLessons(materials, { search, quarter, phase, type, savedOn
   );
 }
 
-/** Suggested title and type for an uploaded file ("flood_guide.pdf" -> "flood guide", PDF). */
+/**
+ * Suggested title and type for an uploaded file ("flood_guide.pdf" -> "flood guide", PDF),
+ * or `{ error }` when lessons can't use that kind of file.
+ */
 export function describeUpload(file) {
-  const ext = file.name.split('.').pop()?.toUpperCase();
-  if (!FILE_TYPES.includes(ext)) return null;
-  return { file_type: ext, title: file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() };
+  const ext = file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : '';
+  const fileType = LESSON_EXTENSIONS[ext];
+  if (!fileType) return { error: `${ext ? `.${ext.toLowerCase()} files` : 'This file'} can't be used as a lesson. Choose a PDF, PowerPoint, Word, MP4 or ZIP file.` };
+  return { file_type: fileType, title: file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim() };
 }
 
 /**

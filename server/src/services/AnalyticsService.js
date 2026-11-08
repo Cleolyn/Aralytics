@@ -1,6 +1,7 @@
 const db = require('../config/database');
 const XLSX = require('xlsx');
 const PDFDocument = require('pdfkit');
+const { restrict, requireAdvisee } = require('./teacherScope');
 
 /**
  * ARALYTICS ANALYTICS SERVICE
@@ -87,6 +88,7 @@ class AnalyticsService {
       query += ` AND c.quarter = ?`;
       params.push(quarter);
     }
+    query = restrict(query, params, 'u.id', options.teacher_id);
 
     query += ` ORDER BY c.id ASC, qa.submitted_at DESC`;
 
@@ -220,6 +222,7 @@ class AnalyticsService {
       query += ` AND i.status = ?`;
       params.push(status.toUpperCase());
     }
+    query = restrict(query, params, 'u.id', options.teacher_id);
 
     query += ` ORDER BY i.updated_at DESC`;
 
@@ -304,8 +307,9 @@ class AnalyticsService {
     );
 
     if (existing.length === 0) {
-      throw new Error(`Intervention with ID '${interventionId}' not found.`);
+      throw Object.assign(new Error(`Intervention with ID '${interventionId}' not found.`), { status: 404 });
     }
+    await requireAdvisee(options.teacher_id, existing[0].student_id);
 
     let newStatus = 'ASSIGNED';
     let newMaterialId = existing[0].recommended_material_id;
@@ -338,7 +342,8 @@ class AnalyticsService {
     };
   }
 
-  static async createCustomIntervention({ student_id, competency_id, recommended_material_id, status = 'ASSIGNED' }) {
+  static async createCustomIntervention({ student_id, competency_id, recommended_material_id, status = 'ASSIGNED', teacher_id }) {
+    await requireAdvisee(teacher_id, student_id);
     const { v4: uuidv4 } = require('uuid');
     const id = `intv-${uuidv4().slice(0, 8)}`;
     await db.query(
@@ -349,7 +354,11 @@ class AnalyticsService {
     return { intervention_id: id, student_id, competency_id, recommended_material_id, status };
   }
 
-  static async deleteIntervention(interventionId) {
+  static async deleteIntervention(interventionId, { teacher_id } = {}) {
+    if (teacher_id) {
+      const { rows } = await db.query('SELECT student_id FROM interventions WHERE id = ?', [interventionId]);
+      if (rows[0]) await requireAdvisee(teacher_id, rows[0].student_id);
+    }
     await db.query(`DELETE FROM interventions WHERE id = ?`, [interventionId]);
     return { deleted: true, intervention_id: interventionId };
   }
@@ -398,6 +407,8 @@ class AnalyticsService {
       query += ` AND (u.section_id = ? OR u.section = ?)`;
       params.push(section, section);
     }
+
+    query = restrict(query, params, 'u.id', options.teacher_id);
 
     query += ` ORDER BY COALESCE(u.section_id, u.section) ASC, COALESCE(u.full_name, u.first_name || ' ' || u.last_name) ASC, qa.submitted_at DESC`;
 
