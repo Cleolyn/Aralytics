@@ -59,7 +59,7 @@ const INSTRUCTORS = [
     mobile: '09171001001',
     application_status: 'APPROVED',
     sections: ['10-Rizal', '10-Bonifacio'],
-    class_code: 'RIZAL2026A',
+    class_code: 'RIZALAP26A',
     invitation_id: 'inv-demo-ponce-2026',
     notes: 'Adviser for 10-Rizal (35) & 10-Bonifacio (35). Owns 4 Q1 quizzes + 1 archived quiz, 3 tasks, 6 lessons.'
   },
@@ -95,7 +95,7 @@ const INSTRUCTORS = [
     mobile: '09171001003',
     application_status: 'APPROVED',
     sections: ['10-Mabini'],
-    class_code: 'MABINI2026',
+    class_code: 'MABINIAP26',
     invitation_id: 'inv-demo-tecson-2026',
     notes: 'Adviser for 10-Mabini (35). Owns 2 Q1 quizzes, 3 deadline-varied tasks, 3 lessons.'
   },
@@ -135,10 +135,10 @@ const ADMIN_ACCOUNT = {
 };
 
 const SECTION_CONFIGS = [
-  { section: '10-Rizal', slug: 'rizal', lrnPrefix: '10202601', teacherKey: 'teacher-ponce', adviserName: 'Cleo Ponce', classCode: 'RIZAL2026A', invitationId: 'inv-demo-ponce-2026' },
-  { section: '10-Bonifacio', slug: 'bonifacio', lrnPrefix: '10202602', teacherKey: 'teacher-ponce', adviserName: 'Cleo Ponce', classCode: 'RIZAL2026A', invitationId: 'inv-demo-ponce-2026' },
+  { section: '10-Rizal', slug: 'rizal', lrnPrefix: '10202601', teacherKey: 'teacher-ponce', adviserName: 'Cleo Ponce', classCode: 'RIZALAP26A', invitationId: 'inv-demo-ponce-2026' },
+  { section: '10-Bonifacio', slug: 'bonifacio', lrnPrefix: '10202602', teacherKey: 'teacher-ponce', adviserName: 'Cleo Ponce', classCode: 'RIZALAP26A', invitationId: 'inv-demo-ponce-2026' },
   { section: '10-Luna', slug: 'luna', lrnPrefix: '10202603', teacherKey: 'teacher-magsaysay', adviserName: 'Ramon Magsaysay', classCode: 'LUNAMAB26B', invitationId: 'inv-demo-magsaysay-2026' },
-  { section: '10-Mabini', slug: 'mabini', lrnPrefix: '10202604', teacherKey: 'teacher-tecson', adviserName: 'Trinidad Tecson', classCode: 'MABINI2026', invitationId: 'inv-demo-tecson-2026' }
+  { section: '10-Mabini', slug: 'mabini', lrnPrefix: '10202604', teacherKey: 'teacher-tecson', adviserName: 'Trinidad Tecson', classCode: 'MABINIAP26', invitationId: 'inv-demo-tecson-2026' }
 ];
 
 function classifyStudentSlot(slot) {
@@ -274,18 +274,18 @@ const UNASSIGNED_STUDENTS = [
   {
     key: 'pending-01', fallback_id: 'usr-pending-01', first_name: 'Diego', last_name: 'Silang',
     email: `pending.01+clerk_test@${EMAIL_DOMAIN}`, role: 'STUDENT', lrn_or_id: '102026990001', mobile: '09179990001',
-    section: '10-Rizal', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZAL2026A',
+    section: '10-Rizal', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZALAP26A',
     invitation_id: 'inv-demo-ponce-2026', enrollment_status: 'PENDING', cohort_group: 'Unassigned / Onboarding',
     profile_type: 'Waiting for Adviser Approval (PENDING)', quick_pick: true,
-    notes: 'Submitted class code RIZAL2026A for 10-Rizal. Waiting in Teacher Cleo Ponce’s approval list.'
+    notes: 'Submitted class code RIZALAP26A for 10-Rizal. Waiting in Teacher Cleo Ponce’s approval list.'
   },
   {
     key: 'pending-02', fallback_id: 'usr-pending-02', first_name: 'Teresa', last_name: 'Magbanua',
     email: `pending.02+clerk_test@${EMAIL_DOMAIN}`, role: 'STUDENT', lrn_or_id: '102026990002', mobile: '09179990002',
-    section: '10-Bonifacio', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZAL2026A',
+    section: '10-Bonifacio', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZALAP26A',
     invitation_id: 'inv-demo-ponce-2026', enrollment_status: 'PENDING', cohort_group: 'Unassigned / Onboarding',
     profile_type: 'Waiting for Adviser Approval (PENDING)', quick_pick: false,
-    notes: 'Submitted class code RIZAL2026A for 10-Bonifacio. Waiting in Teacher Cleo Ponce’s approval list.'
+    notes: 'Submitted class code RIZALAP26A for 10-Bonifacio. Waiting in Teacher Cleo Ponce’s approval list.'
   },
   {
     key: 'pending-03', fallback_id: 'usr-pending-03', first_name: 'Artemio', last_name: 'Ricarte',
@@ -298,15 +298,15 @@ const UNASSIGNED_STUDENTS = [
   {
     key: 'pending-04', fallback_id: 'usr-pending-04', first_name: 'Agueda', last_name: 'Kahabagan',
     email: `pending.04+clerk_test@${EMAIL_DOMAIN}`, role: 'STUDENT', lrn_or_id: '102026990004', mobile: '09179990004',
-    section: '10-Mabini', teacher_key: 'teacher-tecson', adviser_name: 'Trinidad Tecson', class_code: 'MABINI2026',
+    section: '10-Mabini', teacher_key: 'teacher-tecson', adviser_name: 'Trinidad Tecson', class_code: 'MABINIAP26',
     invitation_id: 'inv-demo-tecson-2026', enrollment_status: 'PENDING', cohort_group: 'Unassigned / Onboarding',
     profile_type: 'Waiting for Adviser Approval (PENDING)', quick_pick: false,
-    notes: 'Submitted class code MABINI2026 for 10-Mabini. Waiting in Teacher Trinidad Tecson’s approval list.'
+    notes: 'Submitted class code MABINIAP26 for 10-Mabini. Waiting in Teacher Trinidad Tecson’s approval list.'
   },
   {
     key: 'returned-01', fallback_id: 'usr-returned-01', first_name: 'Marcelo', last_name: 'Del Pilar',
     email: `returned.01+clerk_test@${EMAIL_DOMAIN}`, role: 'STUDENT', lrn_or_id: '102026990005', mobile: '09179990005',
-    section: '10-Rizal', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZAL2026A',
+    section: '10-Rizal', teacher_key: 'teacher-ponce', adviser_name: 'Cleo Ponce', class_code: 'RIZALAP26A',
     invitation_id: 'inv-demo-ponce-2026', enrollment_status: 'REJECTED',
     rejection_reason: 'Please verify your 12-digit LRN on your school ID card and select your assigned section.',
     cohort_group: 'Unassigned / Onboarding', profile_type: 'Returned Enrollment (REJECTED)', quick_pick: true,
@@ -341,13 +341,13 @@ const UNASSIGNED_STUDENTS = [
     section: null,
     teacher_key: null,
     adviser_name: null,
-    class_code: 'RIZAL2026A / LUNAMAB26B / MABINI2026',
+    class_code: 'RIZALAP26A / LUNAMAB26B / MABINIAP26',
     invitation_id: null,
     enrollment_status: 'NOT_ENROLLED',
     cohort_group: 'Unassigned / Onboarding',
     profile_type: 'Brand-New Unassigned Account (NOT_ENROLLED)',
     quick_pick: quickPick,
-    notes: `Fresh account with no class or application yet. Lands on /onboarding — use LRN ${suggestedLrn} with code RIZAL2026A, LUNAMAB26B, or MABINI2026, or click "Apply for instructor access".`
+    notes: `Fresh account with no class or application yet. Lands on /onboarding — use LRN ${suggestedLrn} with code RIZALAP26A, LUNAMAB26B, or MABINIAP26, or click "Apply for instructor access".`
   }))
 ];
 

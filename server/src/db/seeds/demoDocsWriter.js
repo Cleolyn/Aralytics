@@ -158,7 +158,7 @@ function writePdfDirectory(allAccounts, outPath) {
     );
 
     doc.font('Helvetica-Bold').fontSize(10).fillColor('#111827').text(
-      'Active Class Codes:   RIZAL2026A (Cleo Ponce: 10-Rizal & 10-Bonifacio)   |   LUNAMAB26B (Ramon Magsaysay: 10-Luna)   |   MABINI2026 (Trinidad Tecson: 10-Mabini)'
+      'Active Class Codes:   RIZALAP26A (Cleo Ponce: 10-Rizal & 10-Bonifacio)   |   LUNAMAB26B (Ramon Magsaysay: 10-Luna)   |   MABINIAP26 (Trinidad Tecson: 10-Mabini)'
     );
     doc.moveDown(0.5);
 
@@ -224,9 +224,9 @@ function writeMarkdownGuide(allAccounts, outPath) {
     '',
     '| Class Code | Adviser | Email | Sections Covered | Enrolled Students |',
     '| :--- | :--- | :--- | :--- | :---: |',
-    '| **`RIZAL2026A`** | Cleo Ponce | `teacher.ponce+clerk_test@aralytics.edu.ph` | `10-Rizal`, `10-Bonifacio` | 70 (35 + 35) |',
+    '| **`RIZALAP26A`** | Cleo Ponce | `teacher.ponce+clerk_test@aralytics.edu.ph` | `10-Rizal`, `10-Bonifacio` | 70 (35 + 35) |',
     '| **`LUNAMAB26B`** | Ramon Magsaysay | `teacher.magsaysay+clerk_test@aralytics.edu.ph` | `10-Luna` | 35 |',
-    '| **`MABINI2026`** | Trinidad Tecson | `teacher.tecson+clerk_test@aralytics.edu.ph` | `10-Mabini` | 35 |',
+    '| **`MABINIAP26`** | Trinidad Tecson | `teacher.tecson+clerk_test@aralytics.edu.ph` | `10-Mabini` | 35 |',
     '',
     '## Quick-Start Accounts (Top Picks for Live Demos)',
     '',

@@ -566,7 +566,7 @@ async function provisionDemoAccounts({ useClerk = true, docsDir = process.env.DE
     );
   }
 
-  // 2. Class Invitations (RIZAL2026A, LUNAMAB26B, MABINI2026)
+  // 2. Class Invitations (RIZALAP26A, LUNAMAB26B, MABINIAP26)
   for (const instDef of INSTRUCTORS.filter(i => i.class_code)) {
     const inst = byKey.get(instDef.key);
     const codeHash = hashCode(instDef.class_code);

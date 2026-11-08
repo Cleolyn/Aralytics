@@ -9,9 +9,9 @@
 
 | Class Code | Adviser | Email | Sections Covered | Enrolled Students |
 | :--- | :--- | :--- | :--- | :---: |
-| **`RIZAL2026A`** | Cleo Ponce | `teacher.ponce+clerk_test@aralytics.edu.ph` | `10-Rizal`, `10-Bonifacio` | 70 (35 + 35) |
+| **`RIZALAP26A`** | Cleo Ponce | `teacher.ponce+clerk_test@aralytics.edu.ph` | `10-Rizal`, `10-Bonifacio` | 70 (35 + 35) |
 | **`LUNAMAB26B`** | Ramon Magsaysay | `teacher.magsaysay+clerk_test@aralytics.edu.ph` | `10-Luna` | 35 |
-| **`MABINI2026`** | Trinidad Tecson | `teacher.tecson+clerk_test@aralytics.edu.ph` | `10-Mabini` | 35 |
+| **`MABINIAP26`** | Trinidad Tecson | `teacher.tecson+clerk_test@aralytics.edu.ph` | `10-Mabini` | 35 |
 
 ## Quick-Start Accounts (Top Picks for Live Demos)
 
@@ -40,8 +40,8 @@
 | **Clean Slate (Enrolled, 0 Submissions)** | Epifanio Ongpin | `mabini.31+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Mabini | `102026040031` |
 | **Waiting for Adviser Approval (PENDING)** | Diego Silang | `pending.01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Rizal | `102026990001` |
 | **Returned Enrollment (REJECTED)** | Marcelo Del Pilar | `returned.01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Rizal | `102026990005` |
-| **Brand-New Unassigned Account (NOT_ENROLLED)** | Lapu Lapu | `new.student01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990007` |
-| **Brand-New Unassigned Account (NOT_ENROLLED)** | Sultan Kudarat | `new.student02+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990008` |
+| **Brand-New Unassigned Account (NOT_ENROLLED)** | Lapu Lapu | `new.student01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990007` |
+| **Brand-New Unassigned Account (NOT_ENROLLED)** | Sultan Kudarat | `new.student02+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990008` |
 
 ## Unassigned & Onboarding Accounts (12)
 
@@ -53,14 +53,14 @@
 | Waiting for Adviser Approval (PENDING) | Agueda Kahabagan | `pending.04+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Mabini | `102026990004` |
 | Returned Enrollment (REJECTED) | Marcelo Del Pilar | `returned.01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Rizal | `102026990005` |
 | Returned Enrollment (REJECTED) | Graciano Lopez Jaena | `returned.02+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | 10-Luna | `102026990006` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Lapu Lapu | `new.student01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990007` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Sultan Kudarat | `new.student02+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990008` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Rajah Sulayman | `new.student03+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990009` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Francisco Dagohoy | `new.student04+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990010` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Panday Pira | `new.student05+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990011` |
-| Brand-New Unassigned Account (NOT_ENROLLED) | Prinsesa Urduja | `new.student06+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZAL2026A / LUNAMAB26B / MABINI2026 | `102026990012` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Lapu Lapu | `new.student01+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990007` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Sultan Kudarat | `new.student02+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990008` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Rajah Sulayman | `new.student03+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990009` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Francisco Dagohoy | `new.student04+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990010` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Panday Pira | `new.student05+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990011` |
+| Brand-New Unassigned Account (NOT_ENROLLED) | Prinsesa Urduja | `new.student06+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | RIZALAP26A / LUNAMAB26B / MABINIAP26 | `102026990012` |
 
-## Section 10-Rizal — 35 Students (Adviser: Cleo Ponce · Code: `RIZAL2026A`)
+## Section 10-Rizal — 35 Students (Adviser: Cleo Ponce · Code: `RIZALAP26A`)
 
 | # | Full Name | Email | Password | LRN | Login Mode | Pre-Seeded State |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -100,7 +100,7 @@
 | 34 | Gliceria De Guzman | `rizal.34+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | `102026010034` | Live Sign-In | Clean Slate (Enrolled, 0 Submissions) |
 | 35 | Isabelo Velasco | `rizal.35+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | `102026010035` | Live Sign-In | Clean Slate (Enrolled, 0 Submissions) |
 
-## Section 10-Bonifacio — 35 Students (Adviser: Cleo Ponce · Code: `RIZAL2026A`)
+## Section 10-Bonifacio — 35 Students (Adviser: Cleo Ponce · Code: `RIZALAP26A`)
 
 | # | Full Name | Email | Password | LRN | Login Mode | Pre-Seeded State |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -180,7 +180,7 @@
 | 34 | Gliceria Nolasco | `luna.34+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | `102026030034` | Live Sign-In | Clean Slate (Enrolled, 0 Submissions) |
 | 35 | Isabelo Orosa | `luna.35+clerk_test@aralytics.edu.ph` | `AralyticsDemo2026!` | `102026030035` | Live Sign-In | Clean Slate (Enrolled, 0 Submissions) |
 
-## Section 10-Mabini — 35 Students (Adviser: Trinidad Tecson · Code: `MABINI2026`)
+## Section 10-Mabini — 35 Students (Adviser: Trinidad Tecson · Code: `MABINIAP26`)
 
 | # | Full Name | Email | Password | LRN | Login Mode | Pre-Seeded State |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |
